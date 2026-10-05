@@ -4,6 +4,7 @@ import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
 import { DemoStage } from "@/components/Demo";
 import { VideoScene } from "@/components/VideoScene";
+import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
 import { ResultBars } from "@/components/ResultBars";
@@ -213,8 +214,11 @@ function ScreenView() {
 // useSearchParams needs a Suspense boundary to build as a static page.
 export default function ScreenPage() {
   return (
-    <Suspense>
-      <ScreenView />
-    </Suspense>
+    <>
+      <Suspense>
+        <ScreenView />
+      </Suspense>
+      <SoundHint />
+    </>
   );
 }
