@@ -2,7 +2,6 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { AnswerPanel } from "@/components/AnswerPanel";
-import { DemoPhone } from "@/components/Demo";
 import { LeaderList, MyScore, usePolled } from "@/components/Leaderboard";
 import { scoreAnswer } from "@/lib/scoring";
 import { StatusPill } from "@/components/StatusPill";
@@ -100,7 +99,6 @@ function JoinView() {
         <StatusPill status={status} mode={mode} />
       </header>
 
-      {state?.sim?.show && <DemoPhone sim={state.sim} />}
       <section aria-live="polite" className="flex flex-1 flex-col justify-center gap-4">
         {waiting ? (
           <>

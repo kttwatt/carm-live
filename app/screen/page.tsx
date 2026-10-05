@@ -2,8 +2,7 @@
 
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
-import { DemoStage } from "@/components/Demo";
-import { MODEL3D_SCENES, Model3DStage } from "@/components/Model3D";
+import { Model3DStage } from "@/components/Model3D";
 import { VideoScene } from "@/components/VideoScene";
 import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
@@ -81,20 +80,8 @@ function ScreenView() {
     );
   }
 
-  // The 3D C-arm model takes over the projector while the presenter shows it (slide 4).
-  if (state?.sim?.m3?.on && MODEL3D_SCENES.includes(scene.id)) return <Model3DStage m3={state.sim.m3} />;
-
-  // The presenter's radiation demo takes over the projector while it is shown.
-  if (state?.sim?.show) {
-    return (
-      <main className="relative flex flex-1 flex-col gap-[2.5vh] px-[5vw] py-[5vh]">
-        <p className="text-[1.3vw] font-semibold tracking-wide text-amber">
-          สาธิตรังสีกระเจิง{scene.speaker ? ` · วิทยากรคนที่ ${scene.speaker}` : ""}
-        </p>
-        <DemoStage sim={state.sim} />
-      </main>
-    );
-  }
+  // The 3D C-arm model takes over the projector while the presenter shows it.
+  if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} />;
 
   if (scene.kind === "cover") {
     return (

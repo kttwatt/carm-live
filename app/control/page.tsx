@@ -4,8 +4,7 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
-import { DemoControls } from "@/components/Demo";
-import { MODEL3D_SCENES, Model3DControls } from "@/components/Model3D";
+import { Model3DControls } from "@/components/Model3D";
 import { ORMap } from "@/components/ORMap";
 import { ResultBars } from "@/components/ResultBars";
 import { StatusPill } from "@/components/StatusPill";
@@ -282,9 +281,7 @@ function PresentView() {
         )}
 
 
-        {MODEL3D_SCENES.includes(scene.id) && <Model3DControls sim={sim} onChange={changeSim} busy={busy} />}
-
-        <DemoControls sim={state?.sim ?? DEFAULT_SIM} onChange={changeSim} busy={busy} />
+        <Model3DControls sim={sim} onChange={changeSim} busy={busy} />
 
         <p className="text-xs text-mist">ใช้ปุ่มลูกศรซ้ายขวาหรือรีโมตเปลี่ยนสไลด์ได้</p>
 

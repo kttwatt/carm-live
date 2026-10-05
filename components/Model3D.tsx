@@ -4,9 +4,6 @@ import { useCallback, useEffect, useRef } from "react";
 import { asset } from "@/lib/room";
 import type { Sim } from "@/lib/state";
 
-/** Scenes where the presenter can put the 3D C-arm model on the main screen. */
-export const MODEL3D_SCENES = ["s04"];
-
 export type M3 = NonNullable<Sim["m3"]>;
 export const DEFAULT_M3: M3 = { on: false, part: null, fire: false, flip: false };
 
@@ -89,7 +86,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           </button>
         ))}
       </div>
-      <p className="text-xs text-mist">เฉลยแล้วกดแสดงบนจอหลัก ฉายรังสีให้เห็นว่ารังสีกระเจิงออกจากตัวผู้ป่วย แล้วกลับด้านหลอดให้เห็นรังสีพุ่งไปที่ศีรษะของทีม</p>
+      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลักจนกว่าจะกดซ่อน ฉายรังสีให้เห็นว่ารังสีกระเจิงออกจากตัวผู้ป่วย แล้วกลับด้านหลอดให้เห็นรังสีพุ่งไปที่ศีรษะของทีม</p>
     </section>
   );
 }
