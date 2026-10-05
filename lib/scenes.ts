@@ -1,7 +1,8 @@
-// Scene list mirrors the slide deck: join (scan), cover, 12 content slides (2 per speaker), references.
+// Scene list mirrors the slide deck: join (scan), cover, opening video, 12 content slides (2 per speaker), references.
 export type SceneKind =
   | "cover"
   | "join"
+  | "video"
   | "lecture"
   | "poll"
   | "predict"
@@ -16,6 +17,8 @@ export type Scene = {
   id: string;
   title: string;
   kind: SceneKind;
+  /** video scenes: file in public/ */
+  video?: string;
   slide?: number;
   speaker?: number;
   activity?: string;
@@ -24,6 +27,7 @@ export type Scene = {
 export const SCENES: Scene[] = [
   { id: "join", title: "ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด", kind: "join" },
   { id: "cover", title: "ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด", kind: "cover" },
+  { id: "opening", title: "วิดีโอเปิดงาน", kind: "video", video: "/video/opening-60s.mp4" },
   { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
   { id: "s02", slide: 2, speaker: 1, title: "ใครบ้างในห้องผ่าตัดที่ได้รับรังสี", kind: "poll", activity: "เลือกบุคลากรที่คิดว่าได้รับรังสี แล้วเฉลยภาพรังสีกระเจิงรอบผู้ป่วย" },
   { id: "s03", slide: 3, speaker: 2, title: "เครื่อง C-arm ทำงานอย่างไร", kind: "lecture" },
@@ -43,6 +47,7 @@ export const SCENES: Scene[] = [
 export const KIND_LABEL: Record<SceneKind, string> = {
   cover: "ปก",
   join: "สแกนเข้าห้อง",
+  video: "วิดีโอ",
   lecture: "บรรยาย",
   poll: "โพล",
   predict: "ทายแล้วเฉลย",

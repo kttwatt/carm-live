@@ -3,6 +3,8 @@
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
 import { DemoStage } from "@/components/Demo";
+import { VideoScene } from "@/components/VideoScene";
+import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
@@ -20,6 +22,8 @@ function ScreenView() {
   const room = useRoom();
   const { state, status, participants, summary, leaderboard } = useLive(room, PRESENCE);
   const base = usePublicBase();
+  // The miniature on the control page loads this page with ?preview=1: same picture, no sound.
+  const preview = useSearchParams().get("preview") === "1";
   const sceneIndex = state?.sceneIndex ?? 0;
   const question = questionFor(sceneAt(sceneIndex).id);
   const results = useSummary(summary, sceneIndex, state?.phase ?? "idle", !!question && state?.phase !== "idle");
@@ -44,6 +48,18 @@ function ScreenView() {
           {" · "}เข้าร่วมแล้ว <b className="tabular-nums text-amber">{participants}</b> คน
         </p>
       </main>
+    );
+  }
+
+  if (scene.kind === "video" && scene.video) {
+    return (
+      <VideoScene
+        key={scene.id}
+        src={scene.video}
+        playing={state?.sim?.vidPlay !== false}
+        seq={state?.sim?.vidSeq ?? 0}
+        muted={preview}
+      />
     );
   }
 

@@ -16,6 +16,9 @@ export const SimSchema = z.object({
   shield: PointSchema.nullable(),
   /** the join QR is shown full-size on the main screen (presenter pressed "QR เข้าห้อง") */
   qr: z.boolean().optional(),
+  /** video scenes: false while the presenter has paused it; vidSeq goes up for "play from the start" */
+  vidPlay: z.boolean().optional(),
+  vidSeq: z.number().int().optional(),
 });
 export type Sim = z.infer<typeof SimSchema>;
 export const DEFAULT_SIM: Sim = { show: false, fluoro: false, proj: "LAT", apTube: "under", latTube: "far", shield: null };

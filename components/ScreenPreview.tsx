@@ -22,7 +22,7 @@ export function ScreenPreview({ room }: { room: string }) {
     <div ref={box} className="relative aspect-video w-full overflow-hidden rounded-xl border border-line bg-night">
       {scale > 0 && (
         <iframe
-          src={`${BASE_PATH}${roomHref("screen", room)}`}
+          src={`${BASE_PATH}${roomHref("screen", room)}&preview=1`}
           title="ภาพบนจอหลัก"
           tabIndex={-1}
           className="pointer-events-none absolute left-0 top-0 origin-top-left border-0"

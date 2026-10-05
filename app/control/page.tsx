@@ -85,6 +85,8 @@ function PresentView() {
   );
 
   const index = state?.sceneIndex ?? 0;
+  const sim = state?.sim ?? DEFAULT_SIM;
+  const vidPlaying = sim.vidPlay !== false;
   const phase = state?.phase ?? "idle";
   const scene = sceneAt(index);
   const next = index + 1 < SCENES.length ? SCENES[index + 1] : null;
@@ -105,8 +107,11 @@ function PresentView() {
       // Landing on a question (forward or back) opens it fresh; the server clears its earlier answers.
       const opensQuestion = target !== index && !!questionFor(sceneAt(target).id);
       go(target, opensQuestion ? "open" : "idle");
+      // A video always opens playing, even if it was paused when the presenter left it.
+      if (target !== index && sceneAt(target).kind === "video" && state?.sim?.vidPlay === false && key)
+        setSim({ ...state.sim, vidPlay: true }, key).catch(() => {});
     },
-    [index, mustReveal, scoresNext, go],
+    [index, mustReveal, scoresNext, go, state?.sim, key, setSim],
   );
 
   // Entering question 1 wipes every answer in the room, so ask first when there is anything to lose.
@@ -210,6 +215,25 @@ function PresentView() {
             </p>
           )}
         </section>
+
+        {scene.kind === "video" && (
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => changeSim({ ...sim, vidPlay: !vidPlaying })}
+              disabled={busy}
+              className="rounded-xl border-2 border-sky py-4 font-display text-lg font-bold text-sky disabled:opacity-40"
+            >
+              {vidPlaying ? "⏸ หยุดชั่วคราว" : "▶ เล่นต่อ"}
+            </button>
+            <button
+              onClick={() => changeSim({ ...sim, vidPlay: true, vidSeq: (sim.vidSeq ?? 0) + 1 })}
+              disabled={busy}
+              className="rounded-xl border-2 border-line py-4 font-display text-lg font-bold disabled:opacity-40"
+            >
+              ⟲ เล่นตั้งแต่ต้น
+            </button>
+          </div>
+        )}
 
         {interactive && (
           <div className="flex flex-col gap-2">

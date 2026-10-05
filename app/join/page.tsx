@@ -87,7 +87,7 @@ function JoinView() {
 
   const scene = sceneAt(state?.sceneIndex ?? 0);
   const phase = state?.phase ?? "idle";
-  const waiting = scene.kind === "cover" || scene.kind === "join";
+  const waiting = scene.kind === "cover" || scene.kind === "join" || scene.kind === "video";
   const question = questionFor(scene.id);
   const sceneIndex = state?.sceneIndex ?? 0;
 
