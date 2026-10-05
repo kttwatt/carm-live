@@ -83,14 +83,14 @@ function ScreenView() {
 
   if (scene.kind === "join") {
     return (
-      <main className="flex flex-1 items-center gap-[6vw] px-[7vw] py-[6vh]">
+      <main className="flex flex-1 items-center gap-[3vw] px-[5vw] py-[5vh]">
         <div className="flex min-w-0 flex-1 flex-col gap-[2.5vh]">
           <img
             src={asset("/cover.webp")}
             alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด"
-            className="max-h-[42vh] w-full rounded-2xl object-contain object-left"
+            className="max-h-[58vh] w-full rounded-2xl object-cover"
           />
-          <h1 className="font-display text-[3.2vw] font-bold leading-tight">ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด</h1>
+          <h1 className="whitespace-nowrap font-display text-[2.6vw] font-bold leading-tight">ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด</h1>
           <ol className="list-decimal pl-[2vw] text-[1.5vw] leading-relaxed text-mist">
             <li>สแกน QR ด้วยกล้องมือถือ</li>
             <li>ตั้งเลขที่ ชื่อจริง</li>
