@@ -116,7 +116,7 @@ function SummaryView() {
           </p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
-          <Link href={roomHref("present", room)} className="rounded-lg border border-line px-4 py-2 text-sm">
+          <Link href={roomHref("control", room)} className="rounded-lg border border-line px-4 py-2 text-sm">
             ← หน้าผู้บรรยาย
           </Link>
           <button onClick={load} className="rounded-lg border border-sky px-4 py-2 text-sm text-sky">

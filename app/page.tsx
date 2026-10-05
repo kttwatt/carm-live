@@ -18,7 +18,7 @@ export default function Home() {
     try {
       const { room, key } = await createSession("ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด");
       localStorage.setItem(`carm-presenter-${room}`, key);
-      router.push(roomHref("present", room));
+      router.push(roomHref("control", room));
     } catch (e) {
       setError(`สร้างห้องไม่สำเร็จ: ${(e as Error).message}`);
       setBusy(false);

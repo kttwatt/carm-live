@@ -10,6 +10,6 @@ export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 export const asset = (path: string) => `${BASE_PATH}${path}`;
 
 /** Room pages are plain files (static hosting), so the room code travels as ?r=. */
-export const roomHref = (page: "join" | "present" | "screen" | "summary", room: string) => `/${page}?r=${room}`;
+export const roomHref = (page: "join" | "control" | "screen" | "summary", room: string) => `/${page}?r=${room}`;
 
 export const useRoom = () => normalizeRoom(useSearchParams().get("r") ?? "");
