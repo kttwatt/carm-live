@@ -10,6 +10,7 @@ import { ResultBars } from "@/components/ResultBars";
 import { StatusPill } from "@/components/StatusPill";
 import { ScreenPreview } from "@/components/ScreenPreview";
 import { questionFor } from "@/lib/questions";
+import { pagesFor } from "@/lib/pages";
 import { useSummary } from "@/lib/useSummary";
 import { KIND_LABEL, SCENES, isInteractive, sceneAt } from "@/lib/scenes";
 import { DEFAULT_SIM, PHASE_LABEL, type Phase, type Sim } from "@/lib/state";
@@ -106,10 +107,11 @@ function PresentView() {
       if (target > index && scoresNext) return go(index, "scores");
       // Landing on a question (forward or back) opens it fresh; the server clears its earlier answers.
       const opensQuestion = target !== index && !!questionFor(sceneAt(target).id);
-      go(target, opensQuestion ? "open" : "idle");
+      const moved = go(target, opensQuestion ? "open" : "idle");
       // A video always opens playing, even if it was paused when the presenter left it.
       if (target !== index && sceneAt(target).kind === "video" && state?.sim?.vidPlay === false && key)
         setSim({ ...state.sim, vidPlay: true }, key).catch(() => {});
+      return moved;
     },
     [index, mustReveal, scoresNext, go, state?.sim, key, setSim],
   );
@@ -123,7 +125,7 @@ function PresentView() {
         SCENES.map((s, i) => (questionFor(s.id) ? summary(i, key).then((r) => r?.respondents ?? 0).catch(() => 0) : 0)),
       );
       if (counts.some((n) => n > 0)) setConfirmRestart(target);
-      else move(target);
+      else return move(target);
     },
     [FIRST_QUESTION, index, key, move, summary],
   );
@@ -146,16 +148,40 @@ function PresentView() {
     }
   }, [key, index, FIRST_QUESTION, update, setSim]);
 
+  // Lecture pages: next/previous walk through the slide's pages before leaving it.
+  const pageCount = pagesFor(scene.id).length;
+  const pg = state?.sim?.pg;
+  const pageN = pg && pg.s === index ? Math.min(pg.n, Math.max(pageCount - 1, 0)) : 0;
+  const morePages = pageN < pageCount - 1;
+  const showPage = useCallback(
+    (s: number, n: number) => {
+      if (key) setSim({ ...(state?.sim ?? DEFAULT_SIM), pg: { s, n } }, key).catch(() => {});
+    },
+    [key, setSim, state?.sim],
+  );
+  const step = useCallback(
+    async (dir: 1 | -1) => {
+      if (dir === 1 && morePages) return showPage(index, pageN + 1);
+      if (dir === -1 && pageN > 0) return showPage(index, pageN - 1);
+      const target = index + dir;
+      // Stepping back into a slide with pages lands on its last page, once the slide change has gone through.
+      await requestMove(target);
+      const back = pagesFor(sceneAt(target).id).length;
+      if (dir === -1 && back > 1) showPage(target, back - 1);
+    },
+    [morePages, pageN, index, showPage, requestMove],
+  );
+
   // Clickers send arrow keys or Page Up/Down.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || confirmRestart !== null || showQr) return;
-      if (["ArrowRight", "PageDown"].includes(e.key)) requestMove(index + 1);
-      if (["ArrowLeft", "PageUp"].includes(e.key)) requestMove(index - 1);
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || confirmRestart !== null || showQr) return;
+      if (["ArrowRight", "PageDown"].includes(e.key)) step(1);
+      if (["ArrowLeft", "PageUp"].includes(e.key)) step(-1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [requestMove, index, confirmRestart, showQr]);
+  }, [step, confirmRestart, showQr]);
 
   if (status === "missing") return <Center>ไม่พบห้อง {room}</Center>;
   if (key === null) return <Center>ไม่มีสิทธิ์ควบคุมห้องนี้ เปิดจากลิงก์ผู้บรรยายที่ได้ตอนสร้างห้อง</Center>;
@@ -291,14 +317,17 @@ function PresentView() {
           {mustReveal ? (
             <p className="text-sm text-amber">ต้องกดเฉลยก่อน จึงไปฉากถัดไปได้</p>
           ) : (
-            next && <p className="truncate text-sm text-mist">ถัดไป: {next.title}</p>
+            <p className="truncate text-sm text-mist">
+              {pageCount > 1 && <b className="mr-2 text-paper">หน้า {pageN + 1}/{pageCount}</b>}
+              {morePages ? `ถัดไป: ${pagesFor(scene.id)[pageN + 1].heading}` : next && `ถัดไป: ${next.title}`}
+            </p>
           )}
           <div className="grid grid-cols-[1fr_1.4fr] gap-3">
-            <button onClick={() => requestMove(index - 1)} disabled={busy || index === 0} className="rounded-xl border border-line py-4 font-display text-xl font-bold disabled:opacity-40">
+            <button onClick={() => step(-1)} disabled={busy || (index === 0 && pageN === 0)} className="rounded-xl border border-line py-4 font-display text-xl font-bold disabled:opacity-40">
               ← ก่อนหน้า
             </button>
-            <button onClick={() => requestMove(index + 1)} disabled={busy || !next || mustReveal} className="rounded-xl bg-amber py-4 font-display text-xl font-bold text-ink disabled:opacity-40">
-              {scoresNext ? "แสดงคะแนน →" : "ถัดไป →"}
+            <button onClick={() => step(1)} disabled={busy || (!next && !morePages) || mustReveal} className="rounded-xl bg-amber py-4 font-display text-xl font-bold text-ink disabled:opacity-40">
+              {scoresNext ? "แสดงคะแนน →" : morePages ? "หน้าถัดไป →" : "ถัดไป →"}
             </button>
           </div>
           {/* Portrait iPad: the scene list sits far below, so jump from here instead. */}

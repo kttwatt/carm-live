@@ -19,6 +19,8 @@ export const SimSchema = z.object({
   /** video scenes: false while the presenter has paused it; vidSeq goes up for "play from the start" */
   vidPlay: z.boolean().optional(),
   vidSeq: z.number().int().optional(),
+  /** lecture page shown on the main screen: page n of scene s (ignored on any other scene) */
+  pg: z.object({ s: z.number().int().min(0), n: z.number().int().min(0) }).optional(),
   /** 3D C-arm model (public/carm-3d.html) on the main screen: selected part, beam on, tube flipped above the table */
   m3: z
     .object({

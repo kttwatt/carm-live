@@ -7,6 +7,8 @@ import { VideoScene } from "@/components/VideoScene";
 import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
+import { LecturePage } from "@/components/LecturePage";
+import { pagesFor } from "@/lib/pages";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
 import { questionFor } from "@/lib/questions";
@@ -141,11 +143,16 @@ function ScreenView() {
     );
   }
 
+  // Lecture pages: the presenter's "next" moves pg.n; it only counts while pg.s is this scene.
+  const pages = pagesFor(scene.id);
+  const pg = state?.sim?.pg;
+  const pageN = pg && pg.s === sceneIndex ? Math.min(pg.n, Math.max(pages.length - 1, 0)) : 0;
+
   return (
     <main className="relative flex flex-1 flex-col justify-center gap-[3vh] px-[7vw] py-[8vh]">
       {
         <>
-          <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
+          <h1 className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}>{scene.title}</h1>
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
               <p className="text-[2.2vw] leading-snug">{question.prompt}</p>
@@ -189,22 +196,8 @@ function ScreenView() {
               <p className="text-[2vw] leading-snug">{scene.activity}</p>
               <p className="text-[1.4vw] font-semibold">{PHASE_LABEL[phase]}</p>
             </div>
-          ) : scene.content ? (
-            <div className="flex max-w-[84vw] flex-col gap-[2.6vh]">
-              {scene.content.heading && <p className="font-display text-[2.4vw] font-bold text-amber">{scene.content.heading}</p>}
-              <p className="text-[1.75vw] leading-relaxed">{scene.content.lead}</p>
-              {scene.content.points && (
-                <ol className="grid gap-[1.6vw]" style={{ gridTemplateColumns: `repeat(${scene.content.points.length}, minmax(0, 1fr))` }}>
-                  {scene.content.points.map((pt, i) => (
-                    <li key={pt.th} className="flex flex-col gap-[0.6vh] rounded-2xl border border-line bg-night-2 px-[1.6vw] py-[2vh]">
-                      <span className="font-display text-[1.6vw] font-bold tabular-nums text-amber">{i + 1}</span>
-                      <span className="font-display text-[2.1vw] font-bold leading-tight">{pt.th}</span>
-                      {pt.en && <span className="text-[1.3vw] text-mist">{pt.en}</span>}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
+          ) : pages.length > 0 ? (
+            <LecturePage page={pages[pageN]} index={pageN} total={pages.length} />
           ) : null}
         </>
       }

@@ -22,12 +22,6 @@ export type Scene = {
   video?: string;
   /** outline scenes: the talk's topics, in order */
   items?: string[];
-  /** lecture scenes: what the main screen shows under the title */
-  content?: {
-    heading?: string;
-    lead: string;
-    points?: { th: string; en?: string }[];
-  };
   slide?: number;
   speaker?: number;
   activity?: string;
@@ -51,23 +45,7 @@ export const SCENES: Scene[] = [
       "การดูแลรักษา และ Fluoroscopy time",
     ],
   },
-  {
-    id: "s01",
-    slide: 1,
-    speaker: 1,
-    title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี",
-    kind: "lecture",
-    content: {
-      heading: "รังสีทางการแพทย์",
-      lead:
-        "ปัจจุบันมีการนำรังสีหรือสารกัมมันตรังสีมาใช้ประโยชน์ในหลาย ๆ ด้าน โดยเฉพาะในด้านการแพทย์ รังสีนั้นมีทั้งคุณและโทษ จึงต้องนำมาใช้ประโยชน์โดยผู้ที่มีความรู้ เช่น รังสีแพทย์ นักรังสีเทคนิค นักฟิสิกส์การแพทย์ เป็นต้น ก็จะสามารถนำรังสีมาใช้ เพื่อช่วยให้แพทย์สามารถดำเนินการตรวจวินิจฉัยและรักษาโรคได้อย่างถูกต้อง รวดเร็ว และแม่นยำมากยิ่งขึ้น รังสีถูกนำมาใช้ประโยชน์ในทางการแพทย์อย่างแพร่หลาย โดยสามารถแบ่งออกได้เป็น 3 กลุ่มใหญ่ ๆ คือ",
-      points: [
-        { th: "รังสีวินิจฉัย", en: "Diagnostic radiology" },
-        { th: "รังสีรักษา", en: "Radiotherapy" },
-        { th: "เวชศาสตร์นิวเคลียร์", en: "Nuclear medicine" },
-      ],
-    },
-  },
+  { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
   { id: "s02", slide: 2, speaker: 1, title: "ใครบ้างในห้องผ่าตัดที่ได้รับรังสี", kind: "poll", activity: "เลือกบุคลากรที่คิดว่าได้รับรังสี แล้วเฉลยภาพรังสีกระเจิงรอบผู้ป่วย" },
   { id: "s03", slide: 3, speaker: 2, title: "เครื่อง C-arm ทำงานอย่างไร", kind: "lecture" },
   { id: "s04", slide: 4, speaker: 2, title: "รังสีมาจากไหน: ลำรังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
