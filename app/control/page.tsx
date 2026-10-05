@@ -17,6 +17,8 @@ import { useLive } from "@/lib/useLive";
 import { roomHref, useRoom } from "@/lib/room";
 
 const PRESENCE = { role: "presenter" as const };
+/** confirmRestart value for the header "start over" button (scene indexes are 0 and up) */
+const RESTART_ALL = -1;
 
 function PresentView() {
   const room = useRoom();
@@ -26,7 +28,7 @@ function PresentView() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [showQr, setShowQr] = useState(false);
-  /** scene index waiting for "clear all scores?" confirmation */
+  /** scene index waiting for "clear all scores?" confirmation, or RESTART_ALL for the "start over" button */
   const [confirmRestart, setConfirmRestart] = useState<number | null>(null);
 
   // The presenter key arrives once as ?k= (shareable to a co-presenter), then lives in localStorage.
@@ -112,6 +114,24 @@ function PresentView() {
     [FIRST_QUESTION, index, key, move, summary],
   );
 
+  // "Start over": back to scene 1 with every answer and score cleared. The server clears the room when it
+  // enters question 1, so the room passes through it (unopened) on the way back to the first scene.
+  const restartAll = useCallback(async () => {
+    if (!key) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (index === FIRST_QUESTION) await update({ sceneIndex: 0, phase: "idle" }, key);
+      await update({ sceneIndex: FIRST_QUESTION, phase: "idle" }, key);
+      await update({ sceneIndex: 0, phase: "idle" }, key);
+      await setSim(DEFAULT_SIM, key);
+    } catch (e) {
+      setError(`เริ่มใหม่ไม่สำเร็จ: ${(e as Error).message}`);
+    } finally {
+      setBusy(false);
+    }
+  }, [key, index, FIRST_QUESTION, update, setSim]);
+
   // Clickers send arrow keys or Page Up/Down.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -140,8 +160,16 @@ function PresentView() {
             ผู้เข้าร่วมออนไลน์ <b className="tabular-nums">{participants}</b> คน
           </span>
           <button
+            onClick={() => setConfirmRestart(RESTART_ALL)}
+            disabled={busy}
+            className="ml-auto rounded-lg border border-warn px-3 py-1.5 text-sm font-semibold text-warn disabled:opacity-40"
+            aria-haspopup="dialog"
+          >
+            เริ่มใหม่
+          </button>
+          <button
             onClick={() => setShowQr(true)}
-            className="ml-auto rounded-lg bg-amber px-3 py-1.5 text-sm font-semibold text-ink"
+            className="rounded-lg bg-amber px-3 py-1.5 text-sm font-semibold text-ink"
             aria-haspopup="dialog"
           >
             QR เข้าห้อง
@@ -262,11 +290,13 @@ function PresentView() {
       {showQr && <QrPopup room={room} participants={participants} onClose={() => setShowQr(false)} />}
       {confirmRestart !== null && (
         <ConfirmRestart
+          full={confirmRestart === RESTART_ALL}
           onCancel={() => setConfirmRestart(null)}
           onConfirm={() => {
             const t = confirmRestart;
             setConfirmRestart(null);
-            move(t);
+            if (t === RESTART_ALL) restartAll();
+            else move(t);
           }}
         />
       )}
@@ -274,7 +304,7 @@ function PresentView() {
   );
 }
 
-function ConfirmRestart({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
+function ConfirmRestart({ full, onCancel, onConfirm }: { full: boolean; onCancel: () => void; onConfirm: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCancel();
     window.addEventListener("keydown", onKey);
@@ -291,10 +321,10 @@ function ConfirmRestart({ onCancel, onConfirm }: { onCancel: () => void; onConfi
         className="flex w-full max-w-md flex-col gap-4 rounded-3xl border-2 border-warn bg-night-2 p-6"
       >
         <h2 id="restart-title" className="font-display text-2xl font-bold">
-          เริ่มข้อ 1 ใหม่?
+          {full ? "เริ่มใหม่ทั้งหมด?" : "เริ่มข้อ 1 ใหม่?"}
         </h2>
         <p id="restart-desc" className="text-mist">
-          คำตอบและคะแนนของ<b className="text-paper">ทุกคนในห้อง</b>จะถูกลบ แล้วเริ่มนับใหม่จากศูนย์ ย้อนคืนไม่ได้
+          {full && "กลับไปฉากแรก "}คำตอบและคะแนนของ<b className="text-paper">ทุกคนในห้อง</b>จะถูกลบ แล้วเริ่มนับใหม่จากศูนย์ ย้อนคืนไม่ได้
           รายชื่อผู้เข้าร่วมยังอยู่ครบ
         </p>
         <div className="flex flex-wrap justify-end gap-2">
