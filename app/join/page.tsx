@@ -64,28 +64,20 @@ function JoinView() {
           className="flex flex-col gap-4"
         >
           <p className="text-sm font-semibold tracking-wide text-amber">ห้อง {room}</p>
-          <h1 className="font-display text-3xl font-bold">ตั้งชื่อเล่นเพื่อเข้าร่วม</h1>
-          <p className="text-sm text-mist">ไม่ต้องใช้ชื่อจริง ชื่อนี้จะแสดงในอันดับคะแนนตอนท้าย</p>
-          <label htmlFor="nick" className="sr-only">ชื่อเล่น</label>
+          <h1 className="font-display text-3xl font-bold">ใส่เลขที่และชื่อจริงเพื่อเข้าร่วม</h1>
+          <p className="text-sm text-mist">เช่น 12 สมหญิง ชื่อนี้จะแสดงในอันดับคะแนนตอนท้าย</p>
+          <label htmlFor="nick" className="sr-only">เลขที่และชื่อจริง</label>
           <input
             id="nick"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             maxLength={24}
-            autoComplete="nickname"
-            placeholder="ชื่อเล่น"
+            autoComplete="off"
+            placeholder="เลขที่ ชื่อจริง"
             className="rounded-xl border border-line bg-night-2 px-4 py-4 text-lg"
           />
           <button disabled={busy} className="rounded-xl bg-amber py-4 font-display text-lg font-bold text-ink disabled:opacity-50">
             {busy ? "กำลังเข้าร่วม…" : "เข้าร่วม"}
-          </button>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => submit(`ผู้เข้าร่วม ${Math.floor(1000 + Math.random() * 9000)}`)}
-            className="text-sm text-sky underline"
-          >
-            ใช้ชื่ออัตโนมัติ
           </button>
           {error && <p className="text-warn" role="alert">{error}</p>}
         </form>

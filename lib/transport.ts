@@ -35,8 +35,8 @@ export type Summary = { respondents: number; counts: Record<string, number> | nu
 
 const SERVER_ERRORS: Record<string, string> = {
   "answers closed": "ปิดรับคำตอบแล้ว",
-  "join the room first": "ต้องตั้งชื่อเล่นเข้าห้องก่อน",
-  "sign in required": "ต้องตั้งชื่อเล่นเข้าห้องก่อน",
+  "join the room first": "ต้องใส่เลขที่และชื่อเข้าห้องก่อน",
+  "sign in required": "ต้องใส่เลขที่และชื่อเข้าห้องก่อน",
   "invalid answer": "คำตอบไม่ถูกต้อง",
   "room not found": "ไม่พบห้องนี้",
   "presenter key invalid": "ลิงก์ผู้บรรยายไม่ถูกต้อง",

@@ -40,7 +40,7 @@ function build(rows: ReportRow[]) {
 }
 
 function toCsv(list: Person[]) {
-  const head = ["อันดับ", "ชื่อเล่น", ...QUESTION_SCENES.map(({ scene }) => `สไลด์ ${scene.slide}`), "รวม", "ตอบ (ข้อ)", "ได้เต็ม (ข้อ)"];
+  const head = ["อันดับ", "เลขที่ ชื่อ", ...QUESTION_SCENES.map(({ scene }) => `สไลด์ ${scene.slide}`), "รวม", "ตอบ (ข้อ)", "ได้เต็ม (ข้อ)"];
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = list.map((p) => [p.rank, p.nickname, ...QUESTION_SCENES.map(({ index }) => p.points.get(index) ?? ""), p.total, p.answered, p.full]);
   // BOM so Excel opens Thai text correctly
@@ -180,7 +180,7 @@ function SummaryView() {
             <thead className="bg-night-2 text-left text-mist">
               <tr>
                 <th className="px-3 py-2 font-semibold">อันดับ</th>
-                <th className="px-3 py-2 font-semibold">ชื่อเล่น</th>
+                <th className="px-3 py-2 font-semibold">เลขที่ ชื่อ</th>
                 {QUESTION_SCENES.map(({ index, scene }) => (
                   <th key={index} className="px-3 py-2 text-right font-semibold">
                     สไลด์ {scene.slide}

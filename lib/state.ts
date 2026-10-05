@@ -36,7 +36,7 @@ export const PHASE_LABEL: Record<Phase, string> = {
   scores: "แสดงคะแนน",
 };
 
-export const NicknameSchema = z.string().trim().min(1, "ใส่ชื่อเล่นอย่างน้อย 1 ตัวอักษร").max(24, "ชื่อเล่นยาวได้ไม่เกิน 24 ตัวอักษร");
+export const NicknameSchema = z.string().trim().min(1, "ใส่เลขที่และชื่อ").max(24, "เลขที่และชื่อยาวได้ไม่เกิน 24 ตัวอักษร");
 
 const ROOM_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 export const RoomSchema = z.string().regex(/^[A-Z0-9]{4,8}$/);

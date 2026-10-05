@@ -44,7 +44,7 @@ function ScreenView() {
         <div className="max-w-[70vw]">
           <LeaderList rows={board} size="xl" />
         </div>
-        <p className="text-[1.1vw] text-mist">แสดงเฉพาะชื่อเล่น · ดูคะแนนและอันดับของตัวเองบนมือถือ</p>
+        <p className="text-[1.1vw] text-mist">แสดงเลขที่และชื่อ · ดูคะแนนและอันดับของตัวเองบนมือถือ</p>
       </main>
     );
   }
@@ -93,8 +93,8 @@ function ScreenView() {
           <h1 className="font-display text-[3.2vw] font-bold leading-tight">ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด</h1>
           <ol className="list-decimal pl-[2vw] text-[1.5vw] leading-relaxed text-mist">
             <li>สแกน QR ด้วยกล้องมือถือ</li>
-            <li>ตั้งชื่อเล่น (ไม่ต้องใช้ชื่อจริง)</li>
-            <li>เปิดหน้าจอค้างไว้ หน้าจอจะเปลี่ยนตามวิทยากร</li>
+            <li>ตั้งเลขที่ ชื่อจริง</li>
+            <li>เปิดหน้าจอค้างไว้ หน้าจอจะเปลี่ยนตามผู้บรรยาย</li>
           </ol>
           <p className="text-[1.8vw]">
             เข้าร่วมแล้ว <b className="tabular-nums text-amber">{participants}</b> คน
