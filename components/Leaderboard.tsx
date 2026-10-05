@@ -82,11 +82,13 @@ export function LeaderList({
   }, [rows]);
 
   if (!rows) return <p className="text-mist">กำลังรวมคะแนน…</p>;
-  if (!rows.length) return <p className="text-mist">ยังไม่มีผู้เข้าร่วม</p>;
-  const top = Math.max(...rows.map((r) => r.score), 1);
+  // Only people with points: after "start over" everyone is back at 0 and the board starts empty.
+  const scored = rows.filter((r) => r.score > 0);
+  if (!scored.length) return <p className={`text-mist ${xl ? "text-[1.6vw]" : ""}`}>ยังไม่มีคะแนน</p>;
+  const top = Math.max(...scored.map((r) => r.score), 1);
   const isMe = (r: LeaderRow) => !!me && r.nickname === me.nickname && r.rank === me.rank;
-  const items = rows.map((r) => ({ r, gapBefore: false }));
-  if (me && !rows.some(isMe)) items.push({ r: me, gapBefore: true });
+  const items = scored.map((r) => ({ r, gapBefore: false }));
+  if (me && me.score > 0 && !scored.some(isMe)) items.push({ r: me, gapBefore: true });
 
   return (
     <ol className={`flex flex-col ${xl ? "gap-[1.2vh]" : "gap-1.5"}`}>
