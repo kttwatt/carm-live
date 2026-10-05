@@ -83,6 +83,22 @@ function ScreenView() {
   // The 3D C-arm model takes over the projector while the presenter shows it.
   if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} />;
 
+  if (scene.kind === "outline" && scene.items) {
+    return (
+      <main className="flex flex-1 flex-col justify-center gap-[4vh] px-[8vw] py-[7vh]">
+        <h1 className="font-display text-[4vw] font-bold leading-tight">{scene.title}</h1>
+        <ol className="flex flex-col gap-[2.2vh]">
+          {scene.items.map((item, i) => (
+            <li key={item} className="flex items-baseline gap-[1.4vw] text-[2.4vw] leading-snug">
+              <span className="w-[2.6vw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
+      </main>
+    );
+  }
+
   if (scene.kind === "cover") {
     return (
       <main className="relative flex-1 overflow-hidden bg-night">

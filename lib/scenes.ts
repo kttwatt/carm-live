@@ -1,8 +1,9 @@
-// Scene list mirrors the slide deck: join (scan), cover, opening video, 12 content slides (2 per speaker), references.
+// Scene list mirrors the slide deck: join (scan), cover, opening video, talk outline, 12 content slides (2 per speaker), references.
 export type SceneKind =
   | "cover"
   | "join"
   | "video"
+  | "outline"
   | "lecture"
   | "poll"
   | "predict"
@@ -19,6 +20,8 @@ export type Scene = {
   kind: SceneKind;
   /** video scenes: file in public/ */
   video?: string;
+  /** outline scenes: the talk's topics, in order */
+  items?: string[];
   slide?: number;
   speaker?: number;
   activity?: string;
@@ -28,6 +31,20 @@ export const SCENES: Scene[] = [
   { id: "join", title: "ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด", kind: "join" },
   { id: "cover", title: "ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด", kind: "cover" },
   { id: "opening", title: "วิดีโอเปิดงาน", kind: "video", video: "/video/opening-60s.mp4" },
+  {
+    id: "outline",
+    title: "หัวข้อการบรรยาย",
+    kind: "outline",
+    items: [
+      "รังสีที่ใช้ในห้องผ่าตัดคืออะไร",
+      "ใครคือผู้ใช้งาน Fluoroscopy",
+      "Fluoroscopy ในห้องผ่าตัดทำงานอย่างไร",
+      "อันตรายจากรังสีที่ใช้ในห้องผ่าตัด",
+      "อุปกรณ์ป้องกันรังสี และเครื่องตรวจวัดรังสี",
+      "เกณฑ์และตั้งครรภ์ ห้องเอ็กซ์เรย์",
+      "การดูแลรักษา Fluoro time",
+    ],
+  },
   { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
   { id: "s02", slide: 2, speaker: 1, title: "ใครบ้างในห้องผ่าตัดที่ได้รับรังสี", kind: "poll", activity: "เลือกบุคลากรที่คิดว่าได้รับรังสี แล้วเฉลยภาพรังสีกระเจิงรอบผู้ป่วย" },
   { id: "s03", slide: 3, speaker: 2, title: "เครื่อง C-arm ทำงานอย่างไร", kind: "lecture" },
@@ -48,6 +65,7 @@ export const KIND_LABEL: Record<SceneKind, string> = {
   cover: "ปก",
   join: "สแกนเข้าห้อง",
   video: "วิดีโอ",
+  outline: "หัวข้อการบรรยาย",
   lecture: "บรรยาย",
   poll: "โพล",
   predict: "ทายแล้วเฉลย",

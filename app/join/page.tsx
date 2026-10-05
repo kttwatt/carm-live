@@ -103,7 +103,19 @@ function JoinView() {
       {state?.sim?.m3?.on && <Model3DStage m3={state.sim.m3} lite />}
 
       <section aria-live="polite" className="flex flex-1 flex-col justify-center gap-4">
-        {waiting ? (
+        {scene.kind === "outline" && scene.items ? (
+          <>
+            <h1 className="font-display text-3xl font-bold leading-snug">{scene.title}</h1>
+            <ol className="flex flex-col gap-3">
+              {scene.items.map((item, i) => (
+                <li key={item} className="flex items-baseline gap-3 text-lg leading-snug">
+                  <span className="w-5 shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : waiting ? (
           <>
             <img src={asset("/cover.webp")} alt="ปกการสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด" className="w-full rounded-2xl" />
             <p className="text-mist">เปิดหน้านี้ค้างไว้ หน้าจอจะเปลี่ยนเองเมื่อถึงกิจกรรม</p>
