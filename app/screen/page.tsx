@@ -3,6 +3,7 @@
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
 import { DemoStage } from "@/components/Demo";
+import { MODEL3D_SCENES, Model3DStage } from "@/components/Model3D";
 import { VideoScene } from "@/components/VideoScene";
 import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
@@ -79,6 +80,9 @@ function ScreenView() {
       </main>
     );
   }
+
+  // The 3D C-arm model takes over the projector while the presenter shows it (slide 4).
+  if (state?.sim?.m3?.on && MODEL3D_SCENES.includes(scene.id)) return <Model3DStage m3={state.sim.m3} />;
 
   // The presenter's radiation demo takes over the projector while it is shown.
   if (state?.sim?.show) {

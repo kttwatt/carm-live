@@ -112,57 +112,62 @@ export function DemoControls({ sim, onChange, busy }: { sim: Sim; onChange: (nex
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Seg value={sim.proj} options={[["AP", "ท่าหน้า-หลัง"], ["LAT", "ท่าด้านข้าง"]]} onChange={(proj) => set({ proj })} disabled={busy} />
-        {sim.proj === "AP" ? (
-          <Seg value={sim.apTube} options={[["under", "หลอดใต้เตียง"], ["over", "หลอดเหนือเตียง"]]} onChange={(apTube) => set({ apTube })} disabled={busy} />
-        ) : (
-          <Seg value={sim.latTube} options={[["far", "หลอดฝั่งตรงข้าม"], ["near", "หลอดฝั่งศัลยแพทย์"]]} onChange={(latTube) => set({ latTube })} disabled={busy} />
-        )}
-      </div>
+      {/* map beside its controls from tablet width up */}
+      <div className="grid items-start gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="flex flex-col gap-3 sm:order-2">
+          <div className="flex flex-wrap gap-3">
+            <Seg value={sim.proj} options={[["AP", "ท่าหน้า-หลัง"], ["LAT", "ท่าด้านข้าง"]]} onChange={(proj) => set({ proj })} disabled={busy} />
+            {sim.proj === "AP" ? (
+              <Seg value={sim.apTube} options={[["under", "หลอดใต้เตียง"], ["over", "หลอดเหนือเตียง"]]} onChange={(apTube) => set({ apTube })} disabled={busy} />
+            ) : (
+              <Seg value={sim.latTube} options={[["far", "หลอดฝั่งตรงข้าม"], ["near", "หลอดฝั่งศัลยแพทย์"]]} onChange={(latTube) => set({ latTube })} disabled={busy} />
+            )}
+          </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => setPlacing((p) => !p)}
-          className={`rounded-lg border px-3 py-1.5 disabled:opacity-40 ${placing ? "border-amber bg-amber text-ink" : "border-line"}`}
-        >
-          {placing ? "แตะพื้นห้องในผังเพื่อวางฉาก" : "วางฉากกั้นตะกั่ว"}
-        </button>
-        {sim.shield && (
-          <button type="button" disabled={busy} onClick={() => set({ shield: null })} className="rounded-lg border border-line px-3 py-1.5 disabled:opacity-40">
-            เอาฉากออก
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setPlacing((p) => !p)}
+              className={`rounded-lg border px-3 py-2 disabled:opacity-40 ${placing ? "border-amber bg-amber text-ink" : "border-line"}`}
+            >
+              {placing ? "แตะพื้นห้องในผังเพื่อวางฉาก" : "วางฉากกั้นตะกั่ว"}
+            </button>
+            {sim.shield && (
+              <button type="button" disabled={busy} onClick={() => set({ shield: null })} className="rounded-lg border border-line px-3 py-2 disabled:opacity-40">
+                เอาฉากออก
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            disabled={busy || !sim.show}
+            onClick={() => set({ fluoro: !sim.fluoro })}
+            aria-pressed={sim.fluoro}
+            className={`rounded-xl border-2 py-4 font-display text-lg font-bold disabled:opacity-40 ${
+              sim.fluoro ? "border-warn bg-warn text-ink" : "border-warn text-warn"
+            }`}
+          >
+            {sim.fluoro ? "■ หยุดฉายรังสี" : "▶ เปิดฉายรังสี"}
           </button>
-        )}
+          {!sim.show && <p className="-mt-1 text-xs text-mist">กด "แสดงบนจอหลักและมือถือ" ก่อน จึงเปิดฉายรังสีได้</p>}
+        </div>
+
+        <ORMap
+          geometry={simGeometry(sim)}
+          fluoro={sim.fluoro}
+          className="w-full max-w-md sm:order-1"
+          onFloorTap={
+            placing
+              ? (p) => {
+                  setPlacing(false);
+                  set({ shield: onFloor(p) });
+                }
+              : undefined
+          }
+        />
       </div>
-
-      <ORMap
-        geometry={simGeometry(sim)}
-        fluoro={sim.fluoro}
-        className="max-w-md"
-        onFloorTap={
-          placing
-            ? (p) => {
-                setPlacing(false);
-                set({ shield: onFloor(p) });
-              }
-            : undefined
-        }
-      />
-
-      <button
-        type="button"
-        disabled={busy || !sim.show}
-        onClick={() => set({ fluoro: !sim.fluoro })}
-        aria-pressed={sim.fluoro}
-        className={`rounded-xl border-2 py-4 font-display text-lg font-bold disabled:opacity-40 ${
-          sim.fluoro ? "border-warn bg-warn text-ink" : "border-warn text-warn"
-        }`}
-      >
-        {sim.fluoro ? "■ หยุดฉายรังสี" : "▶ เปิดฉายรังสี"}
-      </button>
-      {!sim.show && <p className="-mt-1 text-xs text-mist">กด "แสดงบนจอหลักและมือถือ" ก่อน จึงเปิดฉายรังสีได้</p>}
     </section>
   );
 }

@@ -19,7 +19,7 @@ export function ScreenPreview({ room }: { room: string }) {
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={box} className="relative aspect-video w-full overflow-hidden rounded-xl border border-line bg-night">
+    <div ref={box} className="relative mx-auto aspect-video w-full max-w-[calc(36dvh*16/9)] overflow-hidden rounded-xl border border-line bg-night">
       {scale > 0 && (
         <iframe
           src={`${BASE_PATH}${roomHref("screen", room)}&preview=1`}

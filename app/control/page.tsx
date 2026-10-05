@@ -5,6 +5,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
 import { DemoControls } from "@/components/Demo";
+import { MODEL3D_SCENES, Model3DControls } from "@/components/Model3D";
 import { ORMap } from "@/components/ORMap";
 import { ResultBars } from "@/components/ResultBars";
 import { StatusPill } from "@/components/StatusPill";
@@ -163,7 +164,7 @@ function PresentView() {
   const presenterLink = `${base}${roomHref("control", room)}&k=${key}`;
 
   return (
-    <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+    <main className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-4 pt-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:pb-6">
       <div className="flex min-w-0 flex-col gap-6">
         <header className="flex flex-wrap items-center gap-3">
           <h1 className="font-display text-2xl font-bold">
@@ -176,22 +177,22 @@ function PresentView() {
           <button
             onClick={() => setConfirmRestart(RESTART_ALL)}
             disabled={busy}
-            className="ml-auto rounded-lg border border-warn px-3 py-1.5 text-sm font-semibold text-warn disabled:opacity-40"
+            className="ml-auto rounded-lg border border-warn px-3 py-2 text-sm font-semibold text-warn disabled:opacity-40"
             aria-haspopup="dialog"
           >
             เริ่มใหม่
           </button>
           <button
             onClick={() => toggleQr(true)}
-            className="rounded-lg bg-amber px-3 py-1.5 text-sm font-semibold text-ink"
+            className="rounded-lg bg-amber px-3 py-2 text-sm font-semibold text-ink"
             aria-haspopup="dialog"
           >
             QR เข้าห้อง
           </button>
-          <Link href={roomHref("summary", room)} target="_blank" className="rounded-lg border border-line px-3 py-1.5 text-sm">
+          <Link href={roomHref("summary", room)} target="_blank" className="rounded-lg border border-line px-3 py-2 text-sm">
             สรุปคะแนน
           </Link>
-          <Link href={roomHref("screen", room)} target="_blank" className="rounded-lg border border-sky px-3 py-1.5 text-sm text-sky">
+          <Link href={roomHref("screen", room)} target="_blank" className="rounded-lg border border-sky px-3 py-2 text-sm text-sky">
             เปิดจอหลัก (โปรเจกเตอร์)
           </Link>
         </header>
@@ -261,15 +262,6 @@ function PresentView() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => requestMove(index - 1)} disabled={busy || index === 0} className="rounded-xl border border-line py-5 font-display text-xl font-bold disabled:opacity-40">
-            ← ก่อนหน้า
-          </button>
-          <button onClick={() => requestMove(index + 1)} disabled={busy || !next || mustReveal} className="rounded-xl bg-amber py-5 font-display text-xl font-bold text-ink disabled:opacity-40">
-            {scoresNext ? "แสดงคะแนน →" : "ถัดไป →"}
-          </button>
-        </div>
-        {mustReveal && <p className="-mt-3 text-sm text-amber">ต้องกดเฉลยก่อน จึงไปฉากถัดไปได้</p>}
 
         {(scene.kind === "leaderboard" || phase === "scores") && (
           <section className="flex flex-col gap-3 rounded-2xl border border-line p-5">
@@ -290,14 +282,50 @@ function PresentView() {
         )}
 
 
+        {MODEL3D_SCENES.includes(scene.id) && <Model3DControls sim={sim} onChange={changeSim} busy={busy} />}
+
         <DemoControls sim={state?.sim ?? DEFAULT_SIM} onChange={changeSim} busy={busy} />
 
-        {next && <p className="text-sm text-mist">ถัดไป: {next.title}</p>}
-        {error && <p className="text-warn" role="alert">{error}</p>}
         <p className="text-xs text-mist">ใช้ปุ่มลูกศรซ้ายขวาหรือรีโมตเปลี่ยนสไลด์ได้</p>
+
+        {/* Pinned to the bottom so the iPad never has to scroll to move on. */}
+        <div className="sticky bottom-0 z-20 -mx-4 mt-auto flex flex-col gap-2 border-t border-line bg-night/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm">
+          {error && <p className="text-sm text-warn" role="alert">{error}</p>}
+          {mustReveal ? (
+            <p className="text-sm text-amber">ต้องกดเฉลยก่อน จึงไปฉากถัดไปได้</p>
+          ) : (
+            next && <p className="truncate text-sm text-mist">ถัดไป: {next.title}</p>
+          )}
+          <div className="grid grid-cols-[1fr_1.4fr] gap-3">
+            <button onClick={() => requestMove(index - 1)} disabled={busy || index === 0} className="rounded-xl border border-line py-4 font-display text-xl font-bold disabled:opacity-40">
+              ← ก่อนหน้า
+            </button>
+            <button onClick={() => requestMove(index + 1)} disabled={busy || !next || mustReveal} className="rounded-xl bg-amber py-4 font-display text-xl font-bold text-ink disabled:opacity-40">
+              {scoresNext ? "แสดงคะแนน →" : "ถัดไป →"}
+            </button>
+          </div>
+          {/* Portrait iPad: the scene list sits far below, so jump from here instead. */}
+          <label className="flex items-center gap-2 text-sm text-mist lg:hidden">
+            <span className="shrink-0">ไปที่ฉาก</span>
+            <select
+              id="scene-jump"
+              value={index}
+              disabled={busy}
+              onChange={(e) => requestMove(Number(e.target.value))}
+              className="min-w-0 flex-1 rounded-lg border border-line bg-night-2 px-3 py-2 text-paper disabled:opacity-40"
+            >
+              {SCENES.map((s, i) => (
+                <option key={s.id} value={i} disabled={i > index && mustReveal}>
+                  {i + 1}. {s.slide ? `สไลด์ ${s.slide} · ` : ""}
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
-      <aside className="flex min-w-0 flex-col gap-4">
+      <aside className="flex min-w-0 flex-col gap-4 pb-6 lg:sticky lg:top-4 lg:max-h-[calc(100dvh-2rem)] lg:self-start lg:overflow-y-auto lg:pb-0">
         <nav aria-label="ฉากทั้งหมด" className="flex flex-col gap-1 rounded-2xl border border-line p-2">
           {SCENES.map((s, i) => (
             <button
@@ -305,7 +333,7 @@ function PresentView() {
               onClick={() => requestMove(i)}
               disabled={busy || (i > index && mustReveal)}
               aria-current={i === index ? "step" : undefined}
-              className={`rounded-lg px-3 py-1.5 text-left text-sm disabled:opacity-40 ${i === index ? "bg-sea text-white disabled:opacity-100" : "hover:bg-night-2"}`}
+              className={`rounded-lg px-3 py-2 text-left text-sm disabled:opacity-40 ${i === index ? "bg-sea text-white disabled:opacity-100" : "hover:bg-night-2"}`}
             >
               <span className="mr-2 font-mono text-xs text-mist">{s.slide ?? "–"}</span>
               {s.title}

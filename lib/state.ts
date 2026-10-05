@@ -19,6 +19,15 @@ export const SimSchema = z.object({
   /** video scenes: false while the presenter has paused it; vidSeq goes up for "play from the start" */
   vidPlay: z.boolean().optional(),
   vidSeq: z.number().int().optional(),
+  /** 3D C-arm model (public/carm-3d.html) on the main screen: selected part, beam on, tube flipped above the table */
+  m3: z
+    .object({
+      on: z.boolean(),
+      part: z.string().max(16).nullable(),
+      fire: z.boolean(),
+      flip: z.boolean(),
+    })
+    .optional(),
 });
 export type Sim = z.infer<typeof SimSchema>;
 export const DEFAULT_SIM: Sim = { show: false, fluoro: false, proj: "LAT", apTube: "under", latTube: "far", shield: null };
