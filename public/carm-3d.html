@@ -493,12 +493,12 @@ function select(id){
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin'), bNotes=document.getElementById('bNotes');
 function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: หลอดอยู่เหนือเตียง':'Invert'; updateState(); }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: X Ray tube อยู่เหนือเตียง':'Invert'; updateState(); }
 function updateState(){
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
-    stateEl.innerHTML= st.fire ? '<b>หลอดอยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>หลอดอยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
+    stateEl.innerHTML= st.fire ? '<b>X Ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>X Ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
   else if(st.fire){ stateEl.hidden=false; stateEl.className='state';
-    stateEl.innerHTML='หลอดอยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม'; }
+    stateEl.innerHTML='X Ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม'; }
   else stateEl.hidden=true;
 }
 bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
