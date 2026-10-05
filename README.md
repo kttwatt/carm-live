@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# C-Arm Radiation Safety Live
 
-## Getting Started
+ห้องกิจกรรมสดสำหรับสัมมนาความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด ผู้เข้าร่วมสแกน QR ครั้งเดียว แล้วมือถือเปลี่ยนตามผู้บรรยาย
 
-First, run the development server:
+| หน้า | ใช้ทำอะไร |
+|---|---|
+| `/` | สร้างห้องใหม่ หรือกรอกรหัสห้อง |
+| `/present?r=รหัสห้อง` | ผู้บรรยาย: เปลี่ยนฉาก เปิด/ปิดรับคำตอบ เฉลย (ลูกศรหรือรีโมตใช้ได้) |
+| `/screen?r=รหัสห้อง` | จอหลัก: แสดงฉาก QR และจำนวนคน ไม่มีปุ่มควบคุม |
+| `/join?r=รหัสห้อง` | มือถือผู้เข้าร่วม |
+
+## รันในเครื่อง
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ถ้ายังไม่ใส่ค่า Supabase ระบบทำงานแบบทดลองในเบราว์เซอร์เดียว (เปิดหลายแท็บเพื่อซ้อมได้ แต่มือถือเครื่องอื่นเข้าไม่ได้)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ใช้กับมือถือใน wifi เดียวกัน
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+เปิดหน้าผู้บรรยายและจอหลักผ่าน `localhost` ได้เลย ระบบหาที่อยู่ wifi ของคอมพิวเตอร์เอง (`/api/lan`) แล้วใส่ใน QR ให้ ตรวจซ้ำทุก 30 วินาที ย้าย wifi แล้วไม่ต้องแก้อะไร
+คุมห้องจากมือถือ: หน้าผู้บรรยาย › "ลิงก์ผู้บรรยาย" ด้านล่างแถบข้าง › สแกน QR
 
-## Learn More
+## ต่อ Supabase เพื่อใช้กับมือถือจริง
 
-To learn more about Next.js, take a look at the following resources:
+1. สร้างโปรเจกต์ที่ supabase.com
+2. เปิด SQL Editor แล้วรัน `supabase/migrations/0001_session_shell.sql`
+3. Authentication › Sign In / Providers: เปิด **Allow anonymous sign-ins**
+4. Authentication › Rate Limits: เพิ่มขีดจำกัด anonymous sign-ins ต่อชั่วโมง (มือถือทั้งห้องใช้ wifi โรงพยาบาลจะออก IP เดียวกัน)
+5. คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ Project URL และ anon key
+6. ใช้ในเครื่องให้เว้น `NEXT_PUBLIC_SITE_URL` ว่างไว้ ระบบหาที่อยู่ wifi เอง
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## นำขึ้นเว็บด้วย GitHub Pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ทุกครั้งที่ push ขึ้น `main` GitHub จะสร้างเว็บและนำขึ้นให้เอง (`.github/workflows/pages.yml`)
 
-## Deploy on Vercel
+1. Settings › Pages › Source: เลือก **GitHub Actions**
+2. Settings › Secrets and variables › Actions › Variables: ใส่ `NEXT_PUBLIC_SUPABASE_URL` และ `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. ที่อยู่เว็บและที่อยู่ใน QR ตั้งให้เองตามที่อยู่ของ Pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ลองสร้างแบบเว็บนิ่งในเครื่อง: ลบ `app/api` ชั่วคราว แล้วรัน `STATIC_EXPORT=1 npm run build` (ได้โฟลเดอร์ `out/`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+โปรเจกต์ Supabase แบบฟรีจะหยุดเองถ้าไม่มีการใช้งานราว 7 วัน ให้เปิดใช้ก่อนวันสัมมนา
+
+## สถานะตามแผน
+
+- [x] ระยะ A: QR, เข้าร่วมด้วยชื่อเล่น, หน้าผู้บรรยาย/จอหลัก/มือถือ, session_state พร้อมเลขเวอร์ชัน, เชื่อมต่อใหม่แล้วกลับมาที่ฉากเดิม
+- [x] ระยะ B: โพลและคำถาม (บันทึกทันทีที่แตะ), เปิด/ปิดรับคำตอบ, เฉลย, นับคนตอบ, คะแนนและกระดานผู้นำ
+- [x] ระยะ C: ผังห้องผ่าตัด แตะเลือกจุด A–F (สไลด์ 6)
+- [x] ระยะ D: ผู้บรรยายสาธิตรังสี เปิด/หยุดฉาย ท่าเครื่อง ฉากกั้นตะกั่ว บนจอหลักและมือถือ
+- [ ] ระยะ E: เกมภารกิจสุดท้ายบนมือถือ + คะแนน ALARA (ต้นแบบอยู่ที่ `../carm-simulator/index.html`)
+- [ ] ระยะ F: ใส่เนื้อหาสไลด์
+- [ ] ระยะ G: ทดสอบ 50 เครื่อง, มือถือจริง, ซ้อมเต็มรอบ

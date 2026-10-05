@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* One deliberate look shared with the slide deck: night navy, paper, radiation amber, sea blue. */
+@theme {
+  --color-night: #0e1a2b;
+  --color-night-2: #16263b;
+  --color-paper: #f3f6f8;
+  --color-ink: #12202e;
+  --color-mist: #bfd0de;
+  --color-slate: #46566a;
+  --color-amber: #f2b233;
+  --color-sea: #0b6e99;
+  --color-sky: #5cc3e6;
+  --color-line: #2a3d55;
+  --color-ok: #5cc46f;
+  --color-warn: #f08a5d;
+  --font-display: var(--font-bai), Tahoma, sans-serif;
+  --font-sans: var(--font-plex), Tahoma, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html,
+body {
+  background: var(--color-night);
+  color: var(--color-paper);
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* leaderboard flourishes */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes glow {
+  50% {
+    box-shadow: 0 0 0 6px rgba(242, 178, 51, 0.35);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
