@@ -5,7 +5,7 @@ import { asset } from "@/lib/room";
 import type { Sim } from "@/lib/state";
 
 export type M3 = NonNullable<Sim["m3"]>;
-export const DEFAULT_M3: M3 = { on: false, part: null, fire: false, flip: false, spin: false };
+export const DEFAULT_M3: M3 = { on: false, part: null, fire: false, flip: false, spin: false, lat: false };
 
 export const M3_PARTS = [
   { id: "tube", n: 1, name: "หลอดเอกซเรย์" },
@@ -21,9 +21,9 @@ export const M3_PARTS = [
 export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const send = useCallback(() => {
-    const msg = { type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip, spin: !!m3.spin };
+    const msg = { type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip, spin: !!m3.spin, lat: !!m3.lat };
     ref.current?.contentWindow?.postMessage(msg, window.location.origin);
-  }, [m3.part, m3.fire, m3.flip, m3.spin]);
+  }, [m3.part, m3.fire, m3.flip, m3.spin, m3.lat]);
   useEffect(send, [send]);
   const frame = (
     <iframe
@@ -61,6 +61,25 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           {m3.on ? "ซ่อนจากจอหลักและมือถือ" : "แสดงบนจอหลักและมือถือ"}
         </button>
       </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-mist">ท่าถ่าย</span>
+        <div className="flex overflow-hidden rounded-xl border-2 border-sky" role="group" aria-label="ท่าถ่าย">
+          {([
+            [false, "AP"],
+            [true, "Lateral"],
+          ] as const).map(([lat, label]) => (
+            <button
+              key={label}
+              onClick={() => set({ lat })}
+              disabled={busy || !m3.on}
+              aria-pressed={!!m3.lat === lat}
+              className={`px-5 py-2 font-display font-bold disabled:opacity-40 ${!!m3.lat === lat ? "bg-sky text-ink" : "text-sky"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <button
           onClick={() => set({ fire: !m3.fire })}
@@ -76,7 +95,9 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.flip ? "border-amber bg-amber text-ink" : "border-amber text-amber"}`}
         >
           Invert
-          <span className="block text-xs font-normal">{m3.flip ? "X-ray tube อยู่เหนือเตียง" : "X-ray tube อยู่ใต้เตียง"}</span>
+          <span className="block text-xs font-normal">
+            {m3.lat ? (m3.flip ? "X-ray tube ฝั่งเดียวกับทีม" : "X-ray tube ฝั่งตรงข้ามทีม") : m3.flip ? "X-ray tube อยู่เหนือเตียง" : "X-ray tube อยู่ใต้เตียง"}
+          </span>
         </button>
         <button
           onClick={() => set({ spin: !m3.spin })}

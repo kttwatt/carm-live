@@ -28,6 +28,8 @@ export const SimSchema = z.object({
       flip: z.boolean(),
       /** camera circles the machine (optional: rooms saved before it existed) */
       spin: z.boolean().optional(),
+      /** Lateral projection: beam across the table; flip then means the tube is on the team's side */
+      lat: z.boolean().optional(),
     })
     .optional(),
 });

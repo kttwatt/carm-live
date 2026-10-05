@@ -147,6 +147,7 @@ html.lite .toolbar{left:10px;right:10px;bottom:10px}
     </aside>
     <div class="toolbar">
       <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
+      <button class="tb" id="bLat" aria-pressed="false">ท่า AP</button>
       <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
       <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
       <button class="tb" id="bHome">ภาพรวม</button>
@@ -415,7 +416,7 @@ const SC = new THREE.Color(0xff8a3d);
 const tubeDir = new THREE.Vector3(), tmp = new THREE.Vector3();
 function spawn(s){
   // entry skin = patient centre pushed toward the tube
-  s.p.set(0,1.05,0).addScaledVector(tubeDir,0.1);
+  s.p.set(0,1.05,0).addScaledVector(tubeDir,0.1+0.1*Math.abs(tubeDir.z));   // torso is wider than it is deep
   s.p.x+=(Math.random()-0.5)*0.12; s.p.z+=(Math.random()-0.5)*0.12;
   const u=Math.random()*2-1, th=Math.random()*Math.PI*2, q=Math.sqrt(1-u*u);
   s.v.set(q*Math.cos(th),u,q*Math.sin(th));
@@ -440,7 +441,7 @@ PARTS.forEach(p=>{
   li.firstChild.onclick=()=>select(sel===p.id?null:p.id); partsEl.appendChild(li);
 });
 
-const st = {fire:false, flip:false, tilt:0, beamScale:1, notes:false};
+const st = {fire:false, flip:false, lat:false, tilt:0, beamScale:1, notes:false};
 let sel=null;
 
 function extra(id){
@@ -493,8 +494,19 @@ function select(id){
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin'), bNotes=document.getElementById('bNotes');
 function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: X-ray tube อยู่เหนือเตียง':'Invert'; updateState(); }
+function flipLabel(){ return st.lat ? (st.flip?'X-ray tube ฝั่งเดียวกับทีม':'X-ray tube ฝั่งตรงข้ามทีม') : (st.flip?'X-ray tube อยู่เหนือเตียง':'X-ray tube อยู่ใต้เตียง'); }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: '+flipLabel():'Invert'; updateState(); }
+// Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
+function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า Lateral':'ท่า AP'; setFlip(st.flip); }
 function updateState(){
+  if(st.lat){
+    stateEl.hidden=!(st.fire||st.flip);
+    stateEl.className=st.flip?'state warn':'state';
+    stateEl.innerHTML = st.flip
+      ? (st.fire ? '<b>ท่า Lateral · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>ท่า Lateral · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
+      : 'ท่า Lateral · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
+    return;
+  }
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
     stateEl.innerHTML= st.fire ? '<b>X-ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>X-ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
   else if(st.fire){ stateEl.hidden=false; stateEl.className='state';
@@ -503,6 +515,8 @@ function updateState(){
 }
 bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
 bFlip.onclick=()=>setFlip(!st.flip);
+const bLat=document.getElementById('bLat');
+bLat.onclick=()=>setLat(!st.lat);
 bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-pressed',controls.autoRotate); };
 document.getElementById('bHome').onclick=()=>select(null);
 bNotes.onclick=()=>{ st.notes=!st.notes; notesEl.hidden=!st.notes; bNotes.setAttribute('aria-pressed',st.notes); };
@@ -519,6 +533,7 @@ addEventListener('keydown',e=>{
   else if(e.key==='0'||e.key==='Escape') select(null);
   else if(e.key==='x'||e.key==='X') bFire.click();
   else if(e.key==='f'||e.key==='F') bFlip.click();
+  else if(e.key==='l'||e.key==='L') bLat.click();
   else if(e.key==='n'||e.key==='N') bNotes.click();
   else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
 });
@@ -531,7 +546,7 @@ if(QS.has('embed')){
 }
 if(LITE){
   // viewers only look around; the presenter runs the beam and the tube
-  ['bFire','bFlip','bSpin'].forEach(id=>document.getElementById(id).hidden=true);
+  ['bFire','bFlip','bLat','bSpin'].forEach(id=>document.getElementById(id).hidden=true);
   const bHome=document.getElementById('bHome');
   bHome.textContent='กลับไปมุมของผู้บรรยาย';
   bHome.onclick=()=>select(remotePart);
@@ -539,6 +554,7 @@ if(LITE){
 addEventListener('message',e=>{
   const d=e.data;
   if(e.source!==window.parent||!d||d.type!=='carm3d') return;
+  if(typeof d.lat==='boolean'&&d.lat!==st.lat) setLat(d.lat);
   if(typeof d.flip==='boolean'&&d.flip!==st.flip) setFlip(d.flip);
   if(typeof d.fire==='boolean'&&d.fire!==st.fire) setFire(d.fire);
   if(typeof d.spin==='boolean'){ controls.autoRotate=d.spin; bSpin.setAttribute('aria-pressed',d.spin); }
@@ -592,7 +608,8 @@ new ResizeObserver(resize).observe(stage); resize();
 
 /* ---------- loop ---------- */
 const clock=new THREE.Clock(), black=new THREE.Color(0), accent=new THREE.Color(0xf0b443), proj=new THREE.Vector3();
-let beamA=0, danger=0, rot=0;
+let beamA=0, danger=0, rot=0, orb=0;
+const tubeW=new THREE.Vector3(), pivW=new THREE.Vector3();
 renderDetail();
 function frame(){
   const dt=Math.min(clock.getDelta(),0.05), t=clock.elapsedTime;
@@ -606,16 +623,21 @@ function frame(){
     else if(camera.view&&camera.view.enabled) camera.clearViewOffset();
   }
 
-  const targetRot=(st.flip?Math.PI:0)+st.tilt;
-  rot+= (targetRot-rot)*(REDUCED?1:Math.min(1,dt*2.6)); pivot.rotation.z=rot;
-  tubeDir.set(Math.sin(rot),-Math.cos(rot),0);
+  // AP: turn about the arm axis (z) to put the tube over/under; Lateral: orbit about x so the beam runs across the table
+  const targetRot=(st.lat?0:(st.flip?Math.PI:0))+st.tilt;
+  const targetOrb=st.lat?(st.flip?Math.PI/2:-Math.PI/2):0;
+  const k=REDUCED?1:Math.min(1,dt*2.6);
+  rot+=(targetRot-rot)*k; orb+=(targetOrb-orb)*k;
+  pivot.rotation.set(orb,0,rot);
+  pivot.updateMatrixWorld(true);
+  tubeDir.copy(tubeG.getWorldPosition(tubeW)).sub(pivot.getWorldPosition(pivW)).normalize();
 
   beamA+=((st.fire?1:0)-beamA)*Math.min(1,dt*8);
   beam.visible=beamA>0.01; beamMats[0].opacity=0.16*beamA; beamMats[1].opacity=0.3*beamA*(0.85+0.15*Math.sin(t*30));
   beam.scale.set(st.beamScale,1,st.beamScale);
   pedals[0].position.y += ((st.fire?0.05:0.066)-pedals[0].position.y)*Math.min(1,dt*12);
 
-  danger+=((st.fire?Math.max(0,tubeDir.y):0)-danger)*Math.min(1,dt*4);
+  danger+=((st.fire?Math.max(0,tubeDir.y,-tubeDir.z):0)-danger)*Math.min(1,dt*4);
   warnRing.material.opacity=danger*(0.55+0.35*Math.sin(t*6));
   warnRing.scale.setScalar(1+0.08*Math.sin(t*6));
 
