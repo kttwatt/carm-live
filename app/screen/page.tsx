@@ -91,14 +91,6 @@ function ScreenView() {
           alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด แลกเปลี่ยนความรู้เรื่องรังสีที่ใช้ในห้องผ่าตัดกับการป้องกันรังสี"
           className="absolute inset-0 h-full w-full object-contain"
         />
-        <footer className="absolute bottom-[2.5vh] right-[2vw] flex items-center gap-[1vw] rounded-2xl bg-night/85 p-[0.8vw] text-[1.1vw] text-mist backdrop-blur-sm">
-          <Qr value={url} size={96} />
-          <span>
-            สแกนเข้าร่วม · รหัส <b className="font-mono tracking-widest text-paper">{room}</b>
-            <br />
-            ออนไลน์ <b className="tabular-nums text-paper">{participants}</b> คน
-          </span>
-        </footer>
       </main>
     );
   }
@@ -189,14 +181,6 @@ function ScreenView() {
           )}
         </>
       }
-      <footer className="absolute bottom-[3vh] right-[3vw] flex items-center gap-[1vw] text-[1.1vw] text-mist">
-        <Qr value={url} size={96} />
-        <span>
-          เข้าร่วมได้ตลอด · รหัส <b className="font-mono tracking-widest text-paper">{room}</b>
-          <br />
-          ออนไลน์ <b className="tabular-nums text-paper">{participants}</b> คน
-        </span>
-      </footer>
       {status === "offline" && <p className="absolute left-[3vw] top-[3vh] text-[1vw] text-warn">หลุดการเชื่อมต่อ กำลังลองใหม่</p>}
     </main>
   );
