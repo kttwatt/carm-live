@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
-/* Light teal theme. Token names are kept from the old dark look: "night" is the page, "paper" the main text, "ink" the text on coloured buttons. */
+/* Deep blue theme matching the seminar cover: "night" is the page, "paper" the main text, "ink" the text on bright buttons. */
 @theme {
-  --color-night: #d9f0ee;
-  --color-night-2: #f1faf9;
-  --color-paper: #0f2e2c;
-  --color-ink: #ffffff;
-  --color-mist: #41615e;
+  --color-night: #0b1f45;
+  --color-night-2: #132c5c;
+  --color-paper: #f3f6f8;
+  --color-ink: #12202e;
+  --color-mist: #bccce6;
   --color-slate: #46566a;
-  --color-amber: #b86e00;
+  --color-amber: #f2b233;
   --color-sea: #0b6e99;
-  --color-sky: #0a7aa3;
-  --color-line: #a5d3ce;
-  --color-ok: #2f8a3e;
-  --color-warn: #c2491b;
+  --color-sky: #5cc3e6;
+  --color-line: #2c4a80;
+  --color-ok: #5cc46f;
+  --color-warn: #f08a5d;
   --font-display: var(--font-bai), Tahoma, sans-serif;
   --font-sans: var(--font-plex), Tahoma, sans-serif;
 }
@@ -22,7 +22,7 @@ html,
 body {
   background: var(--color-night);
   color: var(--color-paper);
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 h1,
