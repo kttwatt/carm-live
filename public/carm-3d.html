@@ -109,6 +109,7 @@ html.lite .toolbar{left:10px;right:10px;bottom:10px}
   .tag .t{display:none}
   .tag{padding:3px}
 }
+.diag{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:8px;background:rgba(14,20,24,.92);border:1px solid var(--line);font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre}
 @media (prefers-reduced-motion:reduce){.tag{transition:none}}
 </style>
 </head>
@@ -119,6 +120,7 @@ html.lite .toolbar{left:10px;right:10px;bottom:10px}
     <canvas id="c" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
     <div class="tags" id="tags"></div>
     <div class="state" id="state" hidden></div>
+    <div class="diag" id="diag" hidden></div>
     <aside class="notes" id="notes" hidden>
       <h3>บทพูดสไลด์ 2.1 (ประมาณ 1.5 นาที)</h3>
       <ol>
@@ -155,8 +157,10 @@ html.lite .toolbar{left:10px;right:10px;bottom:10px}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (function(){
-const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const QS = new URLSearchParams(location.search);
+// The projector screen passes ?motion=1: the camera flight and C-arm turn are the demo itself, so it animates
+// even when that computer has Windows animation effects off (which reports reduced motion).
+const REDUCED = !QS.has('motion') && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LITE = QS.has('lite');            // phones: no shadows, lower resolution, fewer scatter streaks
 if(LITE) document.documentElement.classList.add('lite');
 const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
@@ -499,6 +503,7 @@ addEventListener('keydown',e=>{
   else if(e.key==='x'||e.key==='X') bFire.click();
   else if(e.key==='f'||e.key==='F') bFlip.click();
   else if(e.key==='n'||e.key==='N') bNotes.click();
+  else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
 });
 
 /* embedded in the live app's main screen: the presenter's iPad drives it through postMessage */
@@ -537,9 +542,11 @@ canvas.addEventListener('pointerup',e=>{
 
 /* camera fly */
 let tw=null;
+// press D for a readout: frame rate, reduced motion, drawing size (to diagnose a jerky projector)
+const diagEl=document.getElementById('diag'); let diagFrames=0, diagT0=performance.now();
 function flyTo(target,pos){
   if(REDUCED){ controls.target.copy(target); camera.position.copy(pos); return; }
-  tw={t:0,dur:0.95,fT:controls.target.clone(),tT:target,fP:camera.position.clone(),tP:pos};
+  tw={t0:performance.now(),dur:0.95,fT:controls.target.clone(),tT:target,fP:camera.position.clone(),tP:pos};
 }
 const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
 
@@ -571,7 +578,7 @@ let beamA=0, danger=0, rot=0;
 renderDetail();
 function frame(){
   const dt=Math.min(clock.getDelta(),0.05), t=clock.elapsedTime;
-  if(tw){ tw.t+=dt; const k=ease(Math.min(1,tw.t/tw.dur));
+  if(tw){ const k=ease(Math.min(1,(performance.now()-tw.t0)/1000/tw.dur));
     controls.target.lerpVectors(tw.fT,tw.tT,k); camera.position.lerpVectors(tw.fP,tw.tP,k); if(k>=1) tw=null; }
   controls.update();
 
@@ -613,6 +620,14 @@ function frame(){
 
   renderer.render(scene,camera);
   governor(dt);
+  diagFrames++;
+  if(!diagEl.hidden && performance.now()-diagT0>1000){
+    const fps=Math.round(diagFrames*1000/(performance.now()-diagT0));
+    diagEl.textContent=`ภาพต่อวินาที  ${fps}
+ลดการเคลื่อนไหว  ${REDUCED?'เปิด (กล้องจะกระโดด)':'ปิด'}
+ความละเอียด  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.width}×${renderer.domElement.height}`;
+    diagFrames=0; diagT0=performance.now();
+  } else if(diagEl.hidden){ diagFrames=0; diagT0=performance.now(); }
 
   // pin badges
   const w=stage.clientWidth, h=stage.clientHeight;

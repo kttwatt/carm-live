@@ -27,7 +27,7 @@ export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
   const frame = (
     <iframe
       ref={ref}
-      src={asset(lite ? "/carm-3d.html?embed=1&lite=1" : "/carm-3d.html?embed=1")}
+      src={asset(lite ? "/carm-3d.html?embed=1&lite=1" : "/carm-3d.html?embed=1&motion=1")}
       title="แบบจำลองสามมิติของเครื่อง C-Arm"
       onLoad={send}
       className="absolute inset-0 h-full w-full border-0"
