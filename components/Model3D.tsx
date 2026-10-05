@@ -28,7 +28,7 @@ export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
   const frame = (
     <iframe
       ref={ref}
-      src={asset(lite ? "/carm-3d.html?embed=1&lite=1" : "/carm-3d.html?embed=1&motion=1")}
+      src={asset(`/carm-3d.html?embed=1&${lite ? "lite=1" : "motion=1"}&v=${process.env.MODEL_BUILD}`)}
       title="แบบจำลองสามมิติของเครื่อง C-Arm"
       onLoad={send}
       className="absolute inset-0 h-full w-full border-0"
@@ -66,7 +66,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
         <div className="flex overflow-hidden rounded-xl border-2 border-sky" role="group" aria-label="ท่าถ่าย">
           {([
             [false, "AP"],
-            [true, "Lateral"],
+            [true, "LAT"],
           ] as const).map(([lat, label]) => (
             <button
               key={label}

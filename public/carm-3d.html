@@ -497,14 +497,14 @@ function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.last
 function flipLabel(){ return st.lat ? (st.flip?'X-ray tube ฝั่งเดียวกับทีม':'X-ray tube ฝั่งตรงข้ามทีม') : (st.flip?'X-ray tube อยู่เหนือเตียง':'X-ray tube อยู่ใต้เตียง'); }
 function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: '+flipLabel():'Invert'; updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
-function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า Lateral':'ท่า AP'; setFlip(st.flip); }
+function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า LAT':'ท่า AP'; setFlip(st.flip); }
 function updateState(){
   if(st.lat){
     stateEl.hidden=!(st.fire||st.flip);
     stateEl.className=st.flip?'state warn':'state';
     stateEl.innerHTML = st.flip
-      ? (st.fire ? '<b>ท่า Lateral · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>ท่า Lateral · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
-      : 'ท่า Lateral · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
+      ? (st.fire ? '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
+      : 'ท่า LAT · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
     return;
   }
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
