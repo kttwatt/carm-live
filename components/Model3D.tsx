@@ -76,7 +76,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.flip ? "border-amber bg-amber text-ink" : "border-amber text-amber"}`}
         >
           Invert
-          <span className="block text-xs font-normal">{m3.flip ? "X Ray tube อยู่เหนือเตียง" : "X Ray tube อยู่ใต้เตียง"}</span>
+          <span className="block text-xs font-normal">{m3.flip ? "X-ray tube อยู่เหนือเตียง" : "X-ray tube อยู่ใต้เตียง"}</span>
         </button>
         <button
           onClick={() => set({ spin: !m3.spin })}
@@ -107,7 +107,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           </button>
         ))}
       </div>
-      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลัก และขึ้นบนมือถือผู้เข้าร่วมแบบเบา (หมุนดูเองได้) จนกว่าจะกดซ่อน เลือกชิ้นส่วนแล้วจอหลักจะซูมเข้าไปและขึ้นคำอธิบายกลางจอ กด Invert ให้เห็นรังสีพุ่งไปที่ศีรษะของทีมเมื่อX Ray tube อยู่เหนือเตียง</p>
+      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลัก และขึ้นบนมือถือผู้เข้าร่วมแบบเบา (หมุนดูเองได้) จนกว่าจะกดซ่อน เลือกชิ้นส่วนแล้วจอหลักจะซูมเข้าไปและขึ้นคำอธิบายกลางจอ กด Invert ให้เห็นรังสีพุ่งไปที่ศีรษะของทีมเมื่อX-ray tube อยู่เหนือเตียง</p>
     </section>
   );
 }
