@@ -33,6 +33,20 @@ function ScreenView() {
   const phase = state?.phase ?? "idle";
   const url = joinUrl(base, room);
 
+  // The presenter opened "QR เข้าห้อง": the join QR covers whatever scene is showing until it is closed.
+  if (state?.sim?.qr) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-[2.5vh] px-[5vw] py-[4vh]">
+        <p className="font-display text-[2.6vw] font-bold">สแกนเพื่อเข้าร่วม</p>
+        <Qr value={url} size={560} className="max-h-[66vh] max-w-[66vh] [&_img]:h-full [&_img]:w-full" />
+        <p className="text-[1.8vw] text-mist">
+          รหัสห้อง <b className="font-mono tracking-[0.2em] text-paper">{room}</b>
+          {" · "}เข้าร่วมแล้ว <b className="tabular-nums text-amber">{participants}</b> คน
+        </p>
+      </main>
+    );
+  }
+
   if (scene.kind === "leaderboard" || (question && phase === "scores")) {
     const midway = scene.kind !== "leaderboard";
     return (

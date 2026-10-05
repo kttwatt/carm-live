@@ -75,6 +75,15 @@ function PresentView() {
     [key, setSim],
   );
 
+  // The QR popup also puts the join QR on the main screen; it rides along in the shared demo settings.
+  const toggleQr = useCallback(
+    (open: boolean) => {
+      setShowQr(open);
+      if (key) setSim({ ...(state?.sim ?? DEFAULT_SIM), qr: open }, key).catch(() => {});
+    },
+    [key, setSim, state?.sim],
+  );
+
   const index = state?.sceneIndex ?? 0;
   const phase = state?.phase ?? "idle";
   const scene = sceneAt(index);
@@ -168,7 +177,7 @@ function PresentView() {
             เริ่มใหม่
           </button>
           <button
-            onClick={() => setShowQr(true)}
+            onClick={() => toggleQr(true)}
             className="rounded-lg bg-amber px-3 py-1.5 text-sm font-semibold text-ink"
             aria-haspopup="dialog"
           >
@@ -287,7 +296,7 @@ function PresentView() {
           <p className="mt-2 break-all">{presenterLink}</p>
         </details>
       </aside>
-      {showQr && <QrPopup room={room} participants={participants} onClose={() => setShowQr(false)} />}
+      {showQr && <QrPopup room={room} participants={participants} onClose={() => toggleQr(false)} />}
       {confirmRestart !== null && (
         <ConfirmRestart
           full={confirmRestart === RESTART_ALL}

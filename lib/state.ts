@@ -14,6 +14,8 @@ export const SimSchema = z.object({
   apTube: z.enum(["under", "over"]),
   latTube: z.enum(["far", "near"]),
   shield: PointSchema.nullable(),
+  /** the join QR is shown full-size on the main screen (presenter pressed "QR เข้าห้อง") */
+  qr: z.boolean().optional(),
 });
 export type Sim = z.infer<typeof SimSchema>;
 export const DEFAULT_SIM: Sim = { show: false, fluoro: false, proj: "LAT", apTube: "under", latTube: "far", shield: null };
