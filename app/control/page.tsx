@@ -8,6 +8,7 @@ import { DemoControls } from "@/components/Demo";
 import { ORMap } from "@/components/ORMap";
 import { ResultBars } from "@/components/ResultBars";
 import { StatusPill } from "@/components/StatusPill";
+import { ScreenPreview } from "@/components/ScreenPreview";
 import { questionFor } from "@/lib/questions";
 import { useSummary } from "@/lib/useSummary";
 import { KIND_LABEL, SCENES, isInteractive, sceneAt } from "@/lib/scenes";
@@ -158,7 +159,8 @@ function PresentView() {
             ฉาก {index + 1} จาก {SCENES.length} · {KIND_LABEL[scene.kind]}
             {scene.speaker && ` · วิทยากรคนที่ ${scene.speaker}`}
           </p>
-          <h2 className="font-display text-3xl font-bold leading-snug">{scene.title}</h2>
+          <h2 className="sr-only">{scene.title}</h2>
+          <ScreenPreview room={room} />
           {scene.activity && <p className="text-mist">กิจกรรม: {scene.activity}</p>}
           {interactive && (
             <p className="text-sm">
