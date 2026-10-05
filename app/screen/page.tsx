@@ -90,7 +90,7 @@ function ScreenView() {
             alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด"
             className="max-h-[58vh] w-full rounded-2xl object-cover"
           />
-          <h1 className="whitespace-nowrap font-display text-[2.6vw] font-bold leading-tight">ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด</h1>
+          <h1 className="whitespace-nowrap font-display text-[2.6vw] font-bold leading-tight">{scene.title}</h1>
           <ol className="list-decimal pl-[2vw] text-[1.5vw] leading-relaxed text-mist">
             <li>สแกน QR ด้วยกล้องมือถือ</li>
             <li>ตั้งเลขที่ ชื่อจริง</li>
