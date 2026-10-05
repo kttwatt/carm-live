@@ -80,8 +80,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .detail h2 .n{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:15px}
 .detail .en{margin:-6px 0 0 42px;color:var(--muted);font-size:13px}
 .detail p{margin:0}
-.callout{border:1px solid var(--scatter);border-radius:10px;padding:12px 14px;display:grid;gap:8px;background:rgba(255,138,61,.07)}
-.callout b{color:var(--scatter)}
 .act{justify-self:start;cursor:pointer;padding:7px 12px;border-radius:8px;background:none;border:1px solid var(--accent);color:var(--accent);font-size:13.5px}
 .act:hover{background:rgba(240,180,67,.1)}
 .range{display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
@@ -446,8 +444,6 @@ const st = {fire:false, flip:false, tilt:0, beamScale:1, notes:false};
 let sel=null;
 
 function extra(id){
-  if(id==='tube') return `<div class="callout"><b>ประเด็นที่ต้องเน้น</b><p>หลอดเอกซเรย์ควรอยู่ใต้เตียง ถ้ากลับด้าน รังสีฟุ้งกระจายจะพุ่งไปที่ศีรษะและตาของทีม</p>
-    <button class="act" type="button" data-act="flipdemo">${st.flip?'กลับหลอดลงใต้เตียง':'ให้ดู: กลับหลอดขึ้นเหนือเตียงแล้วฉายรังสี'}</button></div>`;
   if(id==='collimator') return `<label class="range" for="beamSize">ขนาดลำรังสี <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
     <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>
     <p class="muted">เลื่อนแล้วกดฉายรังสีเพื่อดูลำรังสีแคบลง</p>`;
@@ -472,7 +468,6 @@ function renderDetail(){
   detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${p.name}</h2>${p.en?`<p class="en">${p.en}</p>`:''}<p>${p.desc}</p>${extra(p.id)}`;
   detailEl.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.act;
-    if(a==='flipdemo'){ if(st.flip){ setFlip(false); } else { setFlip(true); setFire(true); } }
     if(a==='tilt'){ st.tilt = st.tilt?0:0.5; }
     if(a==='fire'){ setFire(!st.fire); }
     renderDetail();
@@ -498,7 +493,7 @@ function select(id){
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin'), bNotes=document.getElementById('bNotes');
 function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: หลอดอยู่เหนือเตียง':'Invert'; updateState(); if(sel==='tube') renderDetail(); }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: หลอดอยู่เหนือเตียง':'Invert'; updateState(); }
 function updateState(){
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
     stateEl.innerHTML= st.fire ? '<b>หลอดอยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>หลอดอยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
