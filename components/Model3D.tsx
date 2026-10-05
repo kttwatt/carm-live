@@ -95,9 +95,6 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.flip ? "border-amber bg-amber text-ink" : "border-amber text-amber"}`}
         >
           Invert
-          <span className="block text-xs font-normal">
-            {m3.lat ? (m3.flip ? "X-ray tube ฝั่งเดียวกับทีม" : "X-ray tube ฝั่งตรงข้ามทีม") : m3.flip ? "X-ray tube อยู่เหนือเตียง" : "X-ray tube อยู่ใต้เตียง"}
-          </span>
         </button>
         <button
           onClick={() => set({ spin: !m3.spin })}
