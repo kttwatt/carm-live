@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "ห้องกิจกรรมสดสำหรับสัมมนาความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด",
 };
 
-export const viewport: Viewport = { themeColor: "#0e1a2b", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#e6f4df", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

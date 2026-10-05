@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
-/* One deliberate look shared with the slide deck: night navy, paper, radiation amber, sea blue. */
+/* Light green theme. Token names are kept from the old dark look: "night" is the page, "paper" the main text, "ink" the text on coloured buttons. */
 @theme {
-  --color-night: #0e1a2b;
-  --color-night-2: #16263b;
-  --color-paper: #f3f6f8;
-  --color-ink: #12202e;
-  --color-mist: #bfd0de;
+  --color-night: #e6f4df;
+  --color-night-2: #f6fbf3;
+  --color-paper: #14301f;
+  --color-ink: #ffffff;
+  --color-mist: #4b6355;
   --color-slate: #46566a;
-  --color-amber: #f2b233;
+  --color-amber: #b86e00;
   --color-sea: #0b6e99;
-  --color-sky: #5cc3e6;
-  --color-line: #2a3d55;
-  --color-ok: #5cc46f;
-  --color-warn: #f08a5d;
+  --color-sky: #0a7aa3;
+  --color-line: #bcd8b4;
+  --color-ok: #2f8a3e;
+  --color-warn: #c2491b;
   --font-display: var(--font-bai), Tahoma, sans-serif;
   --font-sans: var(--font-plex), Tahoma, sans-serif;
 }
@@ -22,7 +22,7 @@ html,
 body {
   background: var(--color-night);
   color: var(--color-paper);
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 h1,

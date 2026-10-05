@@ -142,7 +142,7 @@ export function LeaderList({
               >
                 {r.rank}
               </span>
-              <span className={`min-w-0 flex-1 truncate ${lead ? "font-semibold text-ink" : ""}`}>
+              <span className={`min-w-0 flex-1 truncate ${lead ? "font-semibold text-[#12202e]" : ""}`}>
                 {r.nickname}
                 {mine && (
                   <span className={`ml-2 rounded-full bg-sky px-2 py-0.5 text-xs font-bold text-ink ${xl ? "text-[1vw]" : ""}`}>คุณ</span>
@@ -161,7 +161,7 @@ export function LeaderList({
                   +{m.gain}
                 </span>
               )}
-              <span className={`font-semibold tabular-nums ${lead ? "text-ink" : ""}`}>
+              <span className={`font-semibold tabular-nums ${lead ? "text-[#12202e]" : ""}`}>
                 <CountUp value={r.score} /> คะแนน
               </span>
             </div>

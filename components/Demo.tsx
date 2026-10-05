@@ -85,7 +85,7 @@ function Seg<T extends string>({ value, options, onChange, disabled }: { value: 
           disabled={disabled}
           aria-pressed={value === v}
           onClick={() => onChange(v)}
-          className={`px-3 py-1.5 text-sm disabled:opacity-40 ${value === v ? "bg-sea font-semibold text-paper" : ""}`}
+          className={`px-3 py-1.5 text-sm disabled:opacity-40 ${value === v ? "bg-sea font-semibold text-white" : ""}`}
         >
           {label}
         </button>

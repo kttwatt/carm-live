@@ -50,7 +50,7 @@ export function Qr({ value, size, className, label = "QR สำหรับเ�
     };
   }, [value, size]);
   return (
-    <div className={`rounded-2xl bg-paper p-3 ${className ?? ""}`} style={{ width: size + 24, height: size + 24 }}>
+    <div className={`rounded-2xl bg-white p-3 ${className ?? ""}`} style={{ width: size + 24, height: size + 24 }}>
       {src && <img src={src} alt={label} width={size} height={size} />}
     </div>
   );

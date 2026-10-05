@@ -244,7 +244,7 @@ function PresentView() {
               onClick={() => requestMove(i)}
               disabled={busy || (i > index && mustReveal)}
               aria-current={i === index ? "step" : undefined}
-              className={`rounded-lg px-3 py-1.5 text-left text-sm disabled:opacity-40 ${i === index ? "bg-sea text-paper disabled:opacity-100" : "hover:bg-night-2"}`}
+              className={`rounded-lg px-3 py-1.5 text-left text-sm disabled:opacity-40 ${i === index ? "bg-sea text-white disabled:opacity-100" : "hover:bg-night-2"}`}
             >
               <span className="mr-2 font-mono text-xs text-mist">{s.slide ?? "–"}</span>
               {s.title}
