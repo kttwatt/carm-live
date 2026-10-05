@@ -26,6 +26,8 @@ export const SimSchema = z.object({
       part: z.string().max(16).nullable(),
       fire: z.boolean(),
       flip: z.boolean(),
+      /** camera circles the machine (optional: rooms saved before it existed) */
+      spin: z.boolean().optional(),
     })
     .optional(),
 });

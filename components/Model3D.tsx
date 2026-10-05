@@ -5,24 +5,25 @@ import { asset } from "@/lib/room";
 import type { Sim } from "@/lib/state";
 
 export type M3 = NonNullable<Sim["m3"]>;
-export const DEFAULT_M3: M3 = { on: false, part: null, fire: false, flip: false };
+export const DEFAULT_M3: M3 = { on: false, part: null, fire: false, flip: false, spin: false };
 
 export const M3_PARTS = [
   { id: "tube", n: 1, name: "หลอดเอกซเรย์" },
   { id: "collimator", n: 2, name: "ตัวจำกัดลำรังสี" },
   { id: "detector", n: 3, name: "ตัวรับภาพ" },
-  { id: "carm", n: 4, name: "แขนรูปตัว C" },
+  { id: "carm", n: 4, name: "C Arm" },
   { id: "base", n: 5, name: "ฐานเครื่อง" },
-  { id: "monitor", n: 6, name: "รถจอภาพ" },
-  { id: "switch", n: 7, name: "สวิตช์ฉายรังสี" },
+  { id: "monitor", n: 6, name: "จอแสดงผล" },
+  { id: "switch", n: 7, name: "Switch" },
 ];
 
 /** The 3D page in a frame, kept in step with the presenter's settings. `lite` is the light phone version. */
 export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const send = useCallback(() => {
-    ref.current?.contentWindow?.postMessage({ type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip }, window.location.origin);
-  }, [m3.part, m3.fire, m3.flip]);
+    const msg = { type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip, spin: !!m3.spin };
+    ref.current?.contentWindow?.postMessage(msg, window.location.origin);
+  }, [m3.part, m3.fire, m3.flip, m3.spin]);
   useEffect(send, [send]);
   const frame = (
     <iframe
@@ -60,7 +61,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           {m3.on ? "ซ่อนจากจอหลักและมือถือ" : "แสดงบนจอหลักและมือถือ"}
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <button
           onClick={() => set({ fire: !m3.fire })}
           disabled={busy || !m3.on}
@@ -71,15 +72,29 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
         <button
           onClick={() => set({ flip: !m3.flip })}
           disabled={busy || !m3.on}
-          className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.flip ? "border-amber text-amber" : "border-line"}`}
+          aria-pressed={m3.flip}
+          className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.flip ? "border-amber bg-amber text-ink" : "border-amber text-amber"}`}
         >
-          {m3.flip ? "หลอดอยู่เหนือเตียง" : "หลอดอยู่ใต้เตียง"}
+          Invert
+          <span className="block text-xs font-normal">{m3.flip ? "หลอดอยู่เหนือเตียง" : "หลอดอยู่ใต้เตียง"}</span>
+        </button>
+        <button
+          onClick={() => set({ spin: !m3.spin })}
+          disabled={busy || !m3.on}
+          aria-pressed={!!m3.spin}
+          className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.spin ? "border-sky bg-sky text-ink" : "border-sky text-sky"}`}
+        >
+          {m3.spin ? "■ หยุดหมุน" : "⟳ หมุนรอบ"}
+        </button>
+        <button
+          onClick={() => set({ part: null })}
+          disabled={busy || !m3.on}
+          className={`rounded-xl border-2 py-3 font-display font-bold disabled:opacity-40 ${m3.part === null ? "border-paper bg-paper text-ink" : "border-line"}`}
+        >
+          ภาพรวม
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => set({ part: null })} disabled={busy || !m3.on} className={`${btn} ${m3.part === null ? "border-amber text-amber" : "border-line"}`}>
-          ภาพรวม
-        </button>
         {M3_PARTS.map((p) => (
           <button
             key={p.id}
@@ -92,7 +107,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           </button>
         ))}
       </div>
-      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลัก และขึ้นบนมือถือผู้เข้าร่วมแบบเบา (หมุนดูเองได้) จนกว่าจะกดซ่อน ฉายรังสีให้เห็นว่ารังสีกระเจิงออกจากตัวผู้ป่วย แล้วกลับด้านหลอดให้เห็นรังสีพุ่งไปที่ศีรษะของทีม</p>
+      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลัก และขึ้นบนมือถือผู้เข้าร่วมแบบเบา (หมุนดูเองได้) จนกว่าจะกดซ่อน เลือกชิ้นส่วนแล้วจอหลักจะซูมเข้าไปและขึ้นคำอธิบายกลางจอ กด Invert ให้เห็นรังสีพุ่งไปที่ศีรษะของทีมเมื่อหลอดอยู่เหนือเตียง</p>
     </section>
   );
 }

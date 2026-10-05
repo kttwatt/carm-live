@@ -90,6 +90,22 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .keys{margin-top:auto;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
 kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
 
+/* main screen (projector): model fills the screen, the selected part's description is a card at the bottom centre */
+html.scr,html.scr body{height:100%}
+html.scr .app{grid-template-columns:1fr;height:100%}
+html.scr .stage{height:auto;min-height:0}
+html.scr .rail,html.scr .toolbar,html.scr .act,html.scr .range{display:none}
+html.scr .detail{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);width:min(820px,calc(100% - 32px));
+  padding:clamp(14px,1.6vw,26px) clamp(18px,2vw,32px);border:1px solid var(--line);border-radius:18px;
+  background:rgba(14,20,24,.9);gap:.5em;font-size:clamp(16px,1.6vw,28px);line-height:1.5}
+html.scr .detail h2{font-size:clamp(22px,2.5vw,42px);gap:.4em}
+html.scr .detail h2 .n{width:1.4em;height:1.4em;font-size:.75em}
+html.scr .detail .en{margin:-.3em 0 0;font-size:.8em}
+html.scr .detail .muted{font-size:.8em}
+html.scr .tag{font-size:clamp(13px,1.1vw,19px)}
+html.scr .tag .n{width:1.7em;height:1.7em}
+html.scr .state{font-size:clamp(14px,1.3vw,22px)}
+
 /* light mode: participants' phones inside the join page; model on top, the part's description below */
 html.lite,html.lite body{height:100%}
 html.lite .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;height:100%}
@@ -133,7 +149,7 @@ html.lite .toolbar{left:10px;right:10px;bottom:10px}
     </aside>
     <div class="toolbar">
       <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
-      <button class="tb" id="bFlip" aria-pressed="false">หลอดอยู่ใต้เตียง</button>
+      <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
       <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
       <button class="tb" id="bHome">ภาพรวม</button>
       <button class="tb" id="bNotes" aria-pressed="false">บทพูด</button>
@@ -163,16 +179,19 @@ const QS = new URLSearchParams(location.search);
 const REDUCED = !QS.has('motion') && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const LITE = QS.has('lite');            // phones: no shadows, lower resolution, fewer scatter streaks
 if(LITE) document.documentElement.classList.add('lite');
+// main screen: no list and no buttons (the iPad runs them); the chosen part's description sits mid-screen
+const SCREEN = QS.has('embed') && !LITE;
+if(SCREEN) document.documentElement.classList.add('scr');
 const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
 
 const PARTS = [
-  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสีเอกซ์ ตำแหน่งมาตรฐานอยู่ปลายล่างของแขนรูปตัว C (ใต้เตียง)', off:[-1.25,0.45,1.35]},
-  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของลำรังสี', off:[-1.0,0.55,1.15]},
-  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Image intensifier / Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ', off:[-1.2,0.35,1.4]},
-  {id:'carm', n:4, name:'แขนรูปตัว C', en:'C-arm', desc:'ยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ', off:[-2.0,0.6,2.0]},
+  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสี X ตำแหน่งปกติอยู่ด้านล่างของ C Arm (ใต้เตียงผ่าตัด)', off:[-1.25,0.45,1.35]},
+  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของรังสี', off:[-1.0,0.55,1.15]},
+  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ', off:[-1.2,0.35,1.4]},
+  {id:'carm', n:4, name:'C Arm', en:'', desc:'แขนยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ', off:[-2.0,0.6,2.0]},
   {id:'base', n:5, name:'ฐานเครื่อง', en:'', desc:'ส่วนใหญ่บรรจุเครื่องกำเนิดไฟฟ้าแรงสูง และมีแผงควบคุม', off:[-1.6,0.9,1.4]},
-  {id:'monitor', n:6, name:'รถจอภาพ', en:'', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี', off:[-1.7,0.1,1.1]},
-  {id:'switch', n:7, name:'สวิตช์ฉายรังสี', en:'', desc:'สวิตช์เท้าหรือสวิตช์มือ', off:[-0.9,1.0,1.1]},
+  {id:'monitor', n:6, name:'จอแสดงผล', en:'', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี', off:[-1.7,0.1,1.1]},
+  {id:'switch', n:7, name:'Switch', en:'', desc:'Hand switch / Foot switch', off:[-0.9,1.0,1.1]},
 ];
 const byId = Object.fromEntries(PARTS.map(p=>[p.id,p]));
 
@@ -410,6 +429,7 @@ function spawn(s){
 
 /* ---------- UI ---------- */
 const tagsEl=document.getElementById('tags'), partsEl=document.getElementById('parts'), detailEl=document.getElementById('detail');
+if(SCREEN) stage.appendChild(detailEl);   // the card floats over the model instead of sitting in the side list
 const stateEl=document.getElementById('state'), notesEl=document.getElementById('notes');
 const tags={};
 PARTS.forEach(p=>{
@@ -431,8 +451,8 @@ function extra(id){
   if(id==='collimator') return `<label class="range" for="beamSize">ขนาดลำรังสี <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
     <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>
     <p class="muted">เลื่อนแล้วกดฉายรังสีเพื่อดูลำรังสีแคบลง</p>`;
-  if(id==='detector') return `<p class="muted">ตำแหน่งมาตรฐานอยู่ปลายบนของแขน C เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
-  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้งแขน C ตรง':'เอียงแขน C ให้ดู'}</button>
+  if(id==='detector') return `<p class="muted">ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
+  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้ง C Arm ตรง':'เอียง C Arm ให้ดู'}</button>
     <p class="muted">O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</p>`;
   if(id==='monitor') return `<p class="muted">มุมล่างของจอแสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)</p>`;
   if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?'ปล่อยสวิตช์':'เหยียบสวิตช์: ฉายรังสี'}</button>`;
@@ -440,6 +460,7 @@ function extra(id){
 }
 function renderDetail(){
   if(!sel){
+    detailEl.hidden=SCREEN;
     detailEl.innerHTML = LITE
       ? `<p class="muted">แตะหมายเลขบนภาพเพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุนดู</p>`
       : `<p class="muted">กดหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน</p>
@@ -447,6 +468,7 @@ function renderDetail(){
     return;
   }
   const p=byId[sel];
+  detailEl.hidden=false;
   detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${p.name}</h2>${p.en?`<p class="en">${p.en}</p>`:''}<p>${p.desc}</p>${extra(p.id)}`;
   detailEl.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.act;
@@ -476,7 +498,7 @@ function select(id){
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin'), bNotes=document.getElementById('bNotes');
 function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'หลอดอยู่เหนือเตียง':'หลอดอยู่ใต้เตียง'; updateState(); if(sel==='tube') renderDetail(); }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: หลอดอยู่เหนือเตียง':'Invert'; updateState(); if(sel==='tube') renderDetail(); }
 function updateState(){
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
     stateEl.innerHTML= st.fire ? '<b>หลอดอยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>หลอดอยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
@@ -524,6 +546,7 @@ addEventListener('message',e=>{
   if(e.source!==window.parent||!d||d.type!=='carm3d') return;
   if(typeof d.flip==='boolean'&&d.flip!==st.flip) setFlip(d.flip);
   if(typeof d.fire==='boolean'&&d.fire!==st.fire) setFire(d.fire);
+  if(typeof d.spin==='boolean'){ controls.autoRotate=d.spin; bSpin.setAttribute('aria-pressed',d.spin); }
   if(d.part!==undefined&&(d.part===null||byId[d.part])){ remotePart=d.part; if(d.part!==sel) select(d.part); }
 });
 
@@ -541,7 +564,7 @@ canvas.addEventListener('pointerup',e=>{
 });
 
 /* camera fly */
-let tw=null;
+let tw=null, vShift=0;
 // press D for a readout: frame rate, reduced motion, drawing size (to diagnose a jerky projector)
 const diagEl=document.getElementById('diag'); let diagFrames=0, diagT0=performance.now();
 function flyTo(target,pos){
@@ -581,6 +604,12 @@ function frame(){
   if(tw){ const k=ease(Math.min(1,(performance.now()-tw.t0)/1000/tw.dur));
     controls.target.lerpVectors(tw.fT,tw.tT,k); camera.position.lerpVectors(tw.fP,tw.tP,k); if(k>=1) tw=null; }
   controls.update();
+  if(SCREEN){
+    const want=sel?stage.clientHeight*0.17:0;
+    vShift+=(want-vShift)*Math.min(1,dt*4);
+    if(Math.abs(vShift)>0.5) camera.setViewOffset(stage.clientWidth,stage.clientHeight,0,vShift,stage.clientWidth,stage.clientHeight);
+    else if(camera.view&&camera.view.enabled) camera.clearViewOffset();
+  }
 
   const targetRot=(st.flip?Math.PI:0)+st.tilt;
   rot+= (targetRot-rot)*(REDUCED?1:Math.min(1,dt*2.6)); pivot.rotation.z=rot;
