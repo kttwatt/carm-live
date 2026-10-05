@@ -17,24 +17,30 @@ export const M3_PARTS = [
   { id: "switch", n: 7, name: "สวิตช์ฉายรังสี" },
 ];
 
-/** Main screen: the 3D page in a frame, kept in step with the presenter's settings. */
-export function Model3DStage({ m3 }: { m3: M3 }) {
+/** The 3D page in a frame, kept in step with the presenter's settings. `lite` is the light phone version. */
+export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const send = useCallback(() => {
     ref.current?.contentWindow?.postMessage({ type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip }, window.location.origin);
   }, [m3.part, m3.fire, m3.flip]);
   useEffect(send, [send]);
-  return (
-    <main className="relative flex-1">
-      <iframe
-        ref={ref}
-        src={asset("/carm-3d.html?embed=1")}
-        title="แบบจำลองสามมิติของเครื่อง C-Arm"
-        onLoad={send}
-        className="absolute inset-0 h-full w-full border-0"
-      />
-    </main>
+  const frame = (
+    <iframe
+      ref={ref}
+      src={asset(lite ? "/carm-3d.html?embed=1&lite=1" : "/carm-3d.html?embed=1")}
+      title="แบบจำลองสามมิติของเครื่อง C-Arm"
+      onLoad={send}
+      className="absolute inset-0 h-full w-full border-0"
+    />
   );
+  if (lite)
+    return (
+      <section aria-label="แบบจำลองสามมิติบนจอหลัก" className="flex flex-col gap-2">
+        <p className="text-sm font-semibold text-amber">แบบจำลองบนจอหลัก · ลากเพื่อหมุนดูเองได้</p>
+        <div className="relative h-[68svh] overflow-hidden rounded-2xl border border-line">{frame}</div>
+      </section>
+    );
+  return <main className="relative flex-1">{frame}</main>;
 }
 
 /** Control page: show/hide the model and drive it from the iPad. */
@@ -51,7 +57,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           disabled={busy}
           className={`ml-auto rounded-xl border-2 px-4 py-2 font-display font-bold disabled:opacity-40 ${m3.on ? "border-warn text-warn" : "border-sky text-sky"}`}
         >
-          {m3.on ? "ซ่อนจากจอหลัก" : "แสดงบนจอหลัก"}
+          {m3.on ? "ซ่อนจากจอหลักและมือถือ" : "แสดงบนจอหลักและมือถือ"}
         </button>
       </div>
       <div className="grid grid-cols-2 gap-2">
@@ -86,7 +92,7 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
           </button>
         ))}
       </div>
-      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลักจนกว่าจะกดซ่อน ฉายรังสีให้เห็นว่ารังสีกระเจิงออกจากตัวผู้ป่วย แล้วกลับด้านหลอดให้เห็นรังสีพุ่งไปที่ศีรษะของทีม</p>
+      <p className="text-xs text-mist">ใช้ได้ทุกฉาก แบบจำลองจะแสดงแทนฉากบนจอหลัก และขึ้นบนมือถือผู้เข้าร่วมแบบเบา (หมุนดูเองได้) จนกว่าจะกดซ่อน ฉายรังสีให้เห็นว่ารังสีกระเจิงออกจากตัวผู้ป่วย แล้วกลับด้านหลอดให้เห็นรังสีพุ่งไปที่ศีรษะของทีม</p>
     </section>
   );
 }

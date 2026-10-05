@@ -90,6 +90,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .keys{margin-top:auto;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
 kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
 
+/* light mode: participants' phones inside the join page; model on top, the part's description below */
+html.lite,html.lite body{height:100%}
+html.lite .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;height:100%}
+html.lite .stage{height:auto;min-height:0}
+html.lite .rail{max-height:38vh;padding:12px 16px;gap:8px;border-left:0;border-top:1px solid var(--line)}
+html.lite .rail header,html.lite .parts,html.lite .keys,html.lite .act,html.lite .range{display:none}
+html.lite .detail{border-top:0;padding-top:0}
+html.lite .detail h2{font-size:18px}
+html.lite .state{font-size:13px;top:10px}
+html.lite .toolbar{left:10px;right:10px;bottom:10px}
 @media (max-width:860px){
   html,body{height:auto}
   .app{grid-template-columns:1fr;height:auto}
@@ -146,6 +156,9 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 <script>
 (function(){
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const QS = new URLSearchParams(location.search);
+const LITE = QS.has('lite');            // phones: no shadows, lower resolution, fewer scatter streaks
+if(LITE) document.documentElement.classList.add('lite');
 const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
 
 const PARTS = [
@@ -163,11 +176,11 @@ const byId = Object.fromEntries(PARTS.map(p=>[p.id,p]));
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = !LITE;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 // Resolution budget: a full-screen projector at high display scaling would otherwise draw 3-4x the pixels.
-const PX_BUDGET = 2.2e6;
-let prCap = 2, prScale = 1;
+const PX_BUDGET = LITE ? 0.9e6 : 2.2e6;
+let prCap = LITE ? 1.5 : 2, prScale = 1;
 renderer.setClearColor(0x111a1f, 1);
 
 const scene = new THREE.Scene();
@@ -369,7 +382,7 @@ mesh(new THREE.CylinderGeometry(0.012,0.012,0.02,10), new THREE.MeshStandardMate
 anchor('switch', fs, 0,0.14,0);
 
 /* ---------- scatter: short orange streaks leaving the beam-entry skin ---------- */
-const NS = 360;
+const NS = LITE ? 150 : 360;
 const sPos = new Float32Array(NS*6), sCol = new Float32Array(NS*6);
 const sGeo = new THREE.BufferGeometry();
 sGeo.setAttribute('position', new THREE.BufferAttribute(sPos,3));
@@ -423,7 +436,9 @@ function extra(id){
 }
 function renderDetail(){
   if(!sel){
-    detailEl.innerHTML=`<p class="muted">กดหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน</p>
+    detailEl.innerHTML = LITE
+      ? `<p class="muted">แตะหมายเลขบนภาพเพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุนดู</p>`
+      : `<p class="muted">กดหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน</p>
       <p class="muted">ลำดับที่แนะนำ: เริ่มจากหลอดเอกซเรย์ (1) และตัวรับภาพ (3) ก่อน แล้วจึงอธิบายส่วนอื่น</p>`;
     return;
   }
@@ -444,11 +459,13 @@ function select(id){
   sel=id;
   PARTS.forEach(p=>{ tags[p.id].classList.toggle('on',p.id===id); document.getElementById('part-'+p.id).classList.toggle('on',p.id===id); });
   renderDetail();
-  if(!id){ flyTo(HOME.target.clone(), HOME.pos.clone()); return; }
+  // narrow (portrait) frames see less sideways, so pull the camera back
+  const back=camera.aspect<1.4?Math.pow(1.4/camera.aspect,0.75):1;
+  if(!id){ flyTo(HOME.target.clone(), HOME.pos.clone().sub(HOME.target).multiplyScalar(back).add(HOME.target)); return; }
   pivot.updateMatrixWorld(true);
   const t=anchors[id].getWorldPosition(new THREE.Vector3());
   if(id==='carm') t.set(0,CY,0.35);
-  const pos=t.clone().add(new THREE.Vector3(...byId[id].off));
+  const pos=t.clone().add(new THREE.Vector3(...byId[id].off).multiplyScalar(back));
   flyTo(t,pos);
 }
 
@@ -485,16 +502,24 @@ addEventListener('keydown',e=>{
 });
 
 /* embedded in the live app's main screen: the presenter's iPad drives it through postMessage */
-if(new URLSearchParams(location.search).has('embed')){
+let remotePart=null;
+if(QS.has('embed')){
   ['bNotes','bFull'].forEach(id=>document.getElementById(id).hidden=true);
   document.querySelectorAll('.hint,.keys').forEach(el=>el.hidden=true);
+}
+if(LITE){
+  // viewers only look around; the presenter runs the beam and the tube
+  ['bFire','bFlip','bSpin'].forEach(id=>document.getElementById(id).hidden=true);
+  const bHome=document.getElementById('bHome');
+  bHome.textContent='กลับไปมุมของผู้บรรยาย';
+  bHome.onclick=()=>select(remotePart);
 }
 addEventListener('message',e=>{
   const d=e.data;
   if(e.source!==window.parent||!d||d.type!=='carm3d') return;
   if(typeof d.flip==='boolean'&&d.flip!==st.flip) setFlip(d.flip);
   if(typeof d.fire==='boolean'&&d.fire!==st.fire) setFire(d.fire);
-  if(d.part!==undefined&&(d.part===null||byId[d.part])&&d.part!==sel) select(d.part);
+  if(d.part!==undefined&&(d.part===null||byId[d.part])){ remotePart=d.part; if(d.part!==sel) select(d.part); }
 });
 
 /* click on a part in 3D */
@@ -521,10 +546,14 @@ const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
 /* resize */
 function resize(){
   const w=stage.clientWidth, h=stage.clientHeight;
-  prCap=Math.min(window.devicePixelRatio||1, 2, Math.sqrt(PX_BUDGET/Math.max(1,w*h)));
+  prCap=Math.min(window.devicePixelRatio||1, LITE ? 1.5 : 2, Math.sqrt(PX_BUDGET/Math.max(1,w*h)));
   renderer.setPixelRatio(Math.max(0.5, prCap*prScale)); renderer.setSize(w,h,false);
   camera.aspect=w/h; camera.updateProjectionMatrix();
+  // first layout: open a narrow frame from further back so the whole machine fits
+  if(!framed && w>0){ framed=true; if(!sel && camera.aspect<1.4)
+    camera.position.copy(HOME.pos).sub(HOME.target).multiplyScalar(Math.pow(1.4/camera.aspect,0.75)).add(HOME.target); }
 }
+let framed=false;
 // Slow machine: drop resolution until frames come in under ~22 ms; raise it back when there is headroom.
 let fAcc=0, fN=0;
 function governor(dt){
@@ -560,7 +589,7 @@ function frame(){
   warnRing.scale.setScalar(1+0.08*Math.sin(t*6));
 
   // scatter
-  let spawnBudget = st.fire ? Math.ceil(dt*420*st.beamScale) : 0;
+  let spawnBudget = st.fire ? Math.ceil(dt*(LITE?170:420)*st.beamScale) : 0;
   for(let i=0;i<NS;i++){
     const s=S[i];
     if(!s.alive && spawnBudget>0){ spawn(s); spawnBudget--; }

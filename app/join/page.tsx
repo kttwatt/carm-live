@@ -5,6 +5,7 @@ import { AnswerPanel } from "@/components/AnswerPanel";
 import { LeaderList, MyScore, usePolled } from "@/components/Leaderboard";
 import { scoreAnswer } from "@/lib/scoring";
 import { StatusPill } from "@/components/StatusPill";
+import { Model3DStage } from "@/components/Model3D";
 import { questionFor } from "@/lib/questions";
 import { KIND_LABEL, isInteractive, sceneAt } from "@/lib/scenes";
 import { NicknameSchema, PHASE_LABEL } from "@/lib/state";
@@ -98,6 +99,8 @@ function JoinView() {
         </p>
         <StatusPill status={status} mode={mode} />
       </header>
+
+      {state?.sim?.m3?.on && <Model3DStage m3={state.sim.m3} lite />}
 
       <section aria-live="polite" className="flex flex-1 flex-col justify-center gap-4">
         {waiting ? (
