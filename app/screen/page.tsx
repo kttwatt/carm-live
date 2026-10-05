@@ -84,15 +84,19 @@ function ScreenView() {
   if (scene.kind === "join") {
     return (
       <main className="flex flex-1 items-center gap-[6vw] px-[7vw] py-[6vh]">
-        <div className="flex min-w-0 flex-1 flex-col gap-[3vh]">
-          <p className="text-[1.6vw] font-semibold tracking-wide text-amber">ก่อนเริ่ม · ใช้เวลา 2–3 นาที</p>
-          <h1 className="font-display text-[5vw] font-bold leading-tight">{scene.title}</h1>
-          <ol className="list-decimal pl-[2vw] text-[1.8vw] leading-relaxed text-mist">
+        <div className="flex min-w-0 flex-1 flex-col gap-[2.5vh]">
+          <img
+            src={asset("/cover.webp")}
+            alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด"
+            className="max-h-[42vh] w-full rounded-2xl object-contain object-left"
+          />
+          <h1 className="font-display text-[3.2vw] font-bold leading-tight">{scene.title}</h1>
+          <ol className="list-decimal pl-[2vw] text-[1.5vw] leading-relaxed text-mist">
             <li>สแกน QR ด้วยกล้องมือถือ</li>
             <li>ตั้งชื่อเล่น (ไม่ต้องใช้ชื่อจริง)</li>
             <li>เปิดหน้าจอค้างไว้ หน้าจอจะเปลี่ยนตามวิทยากร</li>
           </ol>
-          <p className="text-[2.2vw]">
+          <p className="text-[1.8vw]">
             เข้าร่วมแล้ว <b className="tabular-nums text-amber">{participants}</b> คน
           </p>
         </div>
