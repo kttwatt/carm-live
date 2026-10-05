@@ -189,6 +189,22 @@ function ScreenView() {
               <p className="text-[2vw] leading-snug">{scene.activity}</p>
               <p className="text-[1.4vw] font-semibold">{PHASE_LABEL[phase]}</p>
             </div>
+          ) : scene.content ? (
+            <div className="flex max-w-[84vw] flex-col gap-[2.6vh]">
+              {scene.content.heading && <p className="font-display text-[2.4vw] font-bold text-amber">{scene.content.heading}</p>}
+              <p className="text-[1.75vw] leading-relaxed">{scene.content.lead}</p>
+              {scene.content.points && (
+                <ol className="grid gap-[1.6vw]" style={{ gridTemplateColumns: `repeat(${scene.content.points.length}, minmax(0, 1fr))` }}>
+                  {scene.content.points.map((pt, i) => (
+                    <li key={pt.th} className="flex flex-col gap-[0.6vh] rounded-2xl border border-line bg-night-2 px-[1.6vw] py-[2vh]">
+                      <span className="font-display text-[1.6vw] font-bold tabular-nums text-amber">{i + 1}</span>
+                      <span className="font-display text-[2.1vw] font-bold leading-tight">{pt.th}</span>
+                      {pt.en && <span className="text-[1.3vw] text-mist">{pt.en}</span>}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
           ) : null}
         </>
       }
