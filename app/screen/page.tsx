@@ -129,9 +129,6 @@ function ScreenView() {
     <main className="relative flex flex-1 flex-col justify-center gap-[3vh] px-[7vw] py-[8vh]">
       {
         <>
-          <p className="text-[1.5vw] font-semibold tracking-wide text-amber">
-            {scene.speaker ? `วิทยากรคนที่ ${scene.speaker} · สไลด์ ${scene.slide} จาก 12` : KIND_LABEL[scene.kind]}
-          </p>
           <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
@@ -176,9 +173,7 @@ function ScreenView() {
               <p className="text-[2vw] leading-snug">{scene.activity}</p>
               <p className="text-[1.4vw] font-semibold">{PHASE_LABEL[phase]}</p>
             </div>
-          ) : (
-            scene.kind === "lecture" && <p className="text-[1.4vw] text-mist">[ เนื้อหาสไลด์จะแสดงที่นี่ ]</p>
-          )}
+          ) : null}
         </>
       }
       {status === "offline" && <p className="absolute left-[3vw] top-[3vh] text-[1vw] text-warn">หลุดการเชื่อมต่อ กำลังลองใหม่</p>}
