@@ -28,6 +28,10 @@ export type Page = {
   top?: boolean;
   /** cards per row, when the default (up to 3) would wrap their titles */
   cols?: number;
+  /** cards with a round number, text centred, all the same height */
+  round?: boolean;
+  /** the picture goes under the cards instead of above them */
+  imageBelow?: boolean;
   /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
   scale?: number;
 };
@@ -212,7 +216,16 @@ export const PAGES: Record<string, Page[]> = {
       ],
     },
     {
-      heading: "อุปกรณ์ป้องกันรังสี",
+      // the slide title names it; four cards across the top, the picture centred under them
+      heading: "",
+      top: true,
+      round: true,
+      cols: 4,
+      image: {
+        src: "/pages/ppe.webp",
+        alt: "ผู้สวมอุปกรณ์ป้องกันรังสี: หมวก แว่นตา ปลอกคอ เสื้อ กระโปรง และถุงมือกันรังสี และฉากกั้นรังสีแบบตั้งพื้นมีช่องมอง",
+      },
+      imageBelow: true,
       points: [
         { th: "ชุดป้องกันรังสี", en: "Lead apron", desc: "แบบชิ้นเดียว หรือแบบ 2 ชิ้น" },
         { th: "แว่นตากันรังสี", en: "Lead glasses" },

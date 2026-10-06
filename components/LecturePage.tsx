@@ -19,6 +19,14 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
   const lines = 1 + (named ? 1 : 0) + (detailed ? 1 : 0);
   const spans = firstCellSpans(page.table?.rows ?? []);
   // short row labels stay on one line, so the other columns take the wrapping
+  const image = page.image && (
+    // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
+    <img
+      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.image.src}`}
+      alt={page.image.alt}
+      className={`mx-auto w-auto max-w-full rounded-2xl bg-white object-contain ${page.imageBelow ? "max-h-[52cqh]" : "max-h-[62cqh]"}`}
+    />
+  );
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
     // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
@@ -28,16 +36,9 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
         <p className={`font-display font-bold leading-tight ${page.noTitle ? `text-[3cqw] ${page.amber ? "text-amber" : ""}` : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
       )}
       {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
-      {page.image && (
-        // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
-        <img
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.image.src}`}
-          alt={page.image.alt}
-          className="mx-auto max-h-[62cqh] w-auto max-w-full rounded-2xl bg-white object-contain"
-        />
-      )}
-      {page.figure === "radiation-ap" ? (
-        // the scatter page: a few short facts, each beside a round number and centred in an equal-height card
+      {!page.imageBelow && image}
+      {page.round || page.figure === "radiation-ap" ? (
+        // a few short items, each beside a round number and centred in an equal-height card
         <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
             <li key={pt.th} className="flex items-center gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh]">
@@ -45,7 +46,8 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
                 {i + 1}
               </span>
               <span className="flex min-w-0 flex-col gap-[0.5cqh]">
-                <span className="font-display text-[1.8cqw] font-bold leading-snug [text-wrap:balance]">{pt.th}</span>
+                <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
+                {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
                 {pt.desc && <span className="text-[1.4cqw] leading-snug text-mist">{pt.desc}</span>}
               </span>
             </li>
@@ -68,6 +70,7 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
           ))}
         </ol>
       )}
+      {page.imageBelow && image}
       {page.figure === "radiation-ap" && (
         <div className="flex justify-center">
           <RadiationJourney still style={{ height: "54cqh" }} />
