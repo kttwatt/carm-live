@@ -242,11 +242,14 @@ function ScreenView() {
       <main className="flex flex-1 items-center gap-[4vw] px-[6vw] py-[6vh]">
         <div className="flex min-w-0 flex-1 flex-col gap-[3vh]">
           <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
-          <p className="break-all text-[1.4vw] text-sky">{simUrl}</p>
         </div>
+        {/* the QR, and under it the address as a link, for anyone viewing this screen on a phone */}
         <div className="flex flex-col items-center gap-[2vh]">
           <Qr value={simUrl} size={420} label="QR เข้าเล่น C-Arm สามมิติ" className="max-h-[60vh] max-w-[34vw] [&_img]:h-full [&_img]:w-full" />
           <p className="text-[1.6vw] text-mist">สแกนเพื่อเข้าเล่น</p>
+          <a href={simUrl} target="_blank" rel="noopener" className="break-all text-[1.4vw] text-sky underline underline-offset-4">
+            {simUrl}
+          </a>
         </div>
       </main>
     );
