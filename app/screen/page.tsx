@@ -241,7 +241,7 @@ function ScreenView() {
     return (
       <main className="flex flex-1 items-center gap-[4vw] px-[6vw] py-[6vh]">
         <div className="flex min-w-0 flex-1 flex-col gap-[3vh]">
-          <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
+          <h1 className="text-right font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
         </div>
         {/* the QR, and under it the address as a link, for anyone viewing this screen on a phone */}
         <div className="flex flex-col items-center gap-[2vh]">
