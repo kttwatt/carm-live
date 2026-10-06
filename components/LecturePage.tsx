@@ -1,5 +1,5 @@
 import type { Page } from "@/lib/pages";
-import { JOURNEY_LOOP, RadiationJourney } from "@/components/RadiationJourney";
+import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
 
 /** One lecture page on the projector, sized in vw like the rest of the main screen. */
 export function LecturePage({ page, index, total }: { page: Page; index: number; total: number }) {
@@ -59,19 +59,20 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
 /** The diagram on the left plays the loop; the point of the step it is on lights up on the right. */
 function JourneyPage({ page, index, total }: { page: Page; index: number; total: number }) {
   const pts = page.points ?? [];
-  const step = JOURNEY_LOOP * 0.22;
+  // Steps start 12.5% into each exposure (after the C-arm turns) and last 19.5% of it.
+  const start = (i: number) => JOURNEY_SHOT * (0.125 + i * 0.195) - JOURNEY_SHOT;
   return (
     <div className="flex max-w-[86vw] flex-col gap-[2vh]">
       <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>
       {page.lead && <p className="text-[1.4vw] leading-relaxed text-mist">{page.lead}</p>}
       <div className="flex items-center gap-[3vw]">
-        <RadiationJourney className="shrink-0" style={{ width: "min(58vh, 36vw)" }} />
+        <RadiationJourney className="shrink-0" style={{ width: "min(60vh, 36vw)" }} />
         <ol className="flex min-w-0 flex-1 flex-col gap-[1.2vh]">
           {pts.map((pt, i) => (
             <li
               key={pt.th}
               className="flex items-baseline gap-[1vw] rounded-2xl border border-line bg-night-2 px-[1.3vw] py-[1.2vh]"
-              style={{ animation: `rj-step ${JOURNEY_LOOP}s linear infinite`, animationDelay: `${i * step - JOURNEY_LOOP}s` }}
+              style={{ animation: `rj-step ${JOURNEY_SHOT}s linear infinite`, animationDelay: `${start(i)}s` }}
             >
               <span className="font-display text-[1.5vw] font-bold tabular-nums text-amber">{i + 1}</span>
               <span className="flex flex-col gap-[0.3vh]">

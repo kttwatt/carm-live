@@ -1,41 +1,61 @@
-// Animated diagram for "การเดินทางของรังสี": one 12 s loop in four steps (keyframes `rj-*` in globals.css).
-// The steps line up with the page's four points, which LecturePage lights up on the same clock.
-// With reduced motion every animation is off and the whole diagram shows at once.
+// Animated diagram for "การเดินทางของรังสี": a C-arm seen from the patient's feet turns through AP, lateral
+// and inverted (keyframes `rj-*` in globals.css). At each position it fires one exposure in four steps, which
+// line up with the page's four points; LecturePage lights those up on the same clock.
+// With reduced motion every animation is off and the diagram rests at AP with everything shown.
 
-/** Seconds per loop; LecturePage starts each point card one step (22% of this) after the last. */
-export const JOURNEY_LOOP = 12;
+/** Seconds per position: about 1 s to turn, then one exposure. The point cards loop on this. */
+export const JOURNEY_SHOT = 8;
+const TURN = JOURNEY_SHOT * 3;
 
-const anim = (name: string, extra = "") => ({ animation: `${name} ${JOURNEY_LOOP}s linear infinite${extra}` });
+const shot = (name: string) => ({ animation: `${name} ${JOURNEY_SHOT}s linear infinite` });
+const turn = (name: string) => ({ animation: `${name} ${TURN}s linear infinite` });
 const flow = { animation: "rj-flow 0.6s linear infinite" };
 
-// Primary beam rays: from the tube window down to the patient's skin.
-const RAYS = [-62, -31, 0, 31, 62].map((dx) => ({ x1: 200 + dx * 0.15, x2: 200 + dx * 1.15 }));
+// The C turns about the patient's centre.
+const CX = 220;
+const CY = 230;
 
-// Scatter leaves the patient in every direction, more of it back toward the tube.
-const SCATTER: { x: number; y: number; a: number; len: number }[] = [
-  { x: 130, y: 238, a: -150, len: 62 },
-  { x: 160, y: 226, a: -120, len: 70 },
-  { x: 240, y: 226, a: -60, len: 70 },
-  { x: 270, y: 238, a: -30, len: 62 },
-  { x: 98, y: 268, a: 180, len: 52 },
-  { x: 302, y: 268, a: 0, len: 52 },
-  { x: 112, y: 296, a: 150, len: 40 },
-  { x: 288, y: 296, a: 30, len: 40 },
+// Drawn as AP (tube under the table, beam going up); the group rotates for the other positions.
+const RAYS = [-48, -24, 0, 24, 48].map((dx) => ({ x1: CX + dx * 0.25, x2: CX + dx }));
+
+// Scatter leaves the patient all round, most of it back toward the tube (down, at AP).
+const SCATTER = [
+  { a: 35, len: 78 },
+  { a: 60, len: 70 },
+  { a: 120, len: 70 },
+  { a: 145, len: 78 },
+  { a: 0, len: 52 },
+  { a: 180, len: 52 },
+  { a: -40, len: 32 },
+  { a: -140, len: 32 },
+].map(({ a, len }) => {
+  const r = (a * Math.PI) / 180;
+  const at = (d: number) => ({ x: CX + Math.cos(r) * d, y: CY + Math.sin(r) * d });
+  return { a, from: at(80), to: at(80 + len) };
+});
+
+const POSITIONS = [
+  { name: "AP", where: "หลอดอยู่ใต้โต๊ะ ตัวรับภาพอยู่ด้านบน", verdict: "แนะนำ: รังสีกระเจิงลงด้านล่าง", color: "#5cc46f" },
+  { name: "Lateral", where: "หลอดอยู่ด้านข้าง", verdict: "ยืนฝั่งตัวรับภาพ ไม่ยืนฝั่งหลอด", color: "#f2b233" },
+  { name: "Invert", where: "หลอดอยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและตา", color: "#f08a5d" },
 ];
+
+// Entrance skin, facing the tube at each position (patient ellipse rx 80, ry 62).
+const SKIN = ["M170 282 Q220 310 270 282", "M159 190 Q121 230 159 270", "M170 178 Q220 150 270 178"];
 
 export function RadiationJourney({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
-      viewBox="0 0 400 430"
+      viewBox="0 0 440 460"
       role="img"
-      aria-label="รังสีเอกซ์จาก X-ray tube เข้าสู่ผู้ป่วย กระเจิงออกรอบตัวผู้ป่วย และส่วนน้อยทะลุถึงตัวรับภาพ"
+      aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ"
       className={className}
       style={style}
     >
       <defs>
-        <linearGradient id="rj-cone" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f2b233" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#f2b233" stopOpacity="0.12" />
+        <linearGradient id="rj-cone" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0" stopColor="#f2b233" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#f2b233" stopOpacity="0.15" />
         </linearGradient>
         <radialGradient id="rj-hot">
           <stop offset="0" stopColor="#fff3c4" />
@@ -47,76 +67,83 @@ export function RadiationJourney({ className, style }: { className?: string; sty
         </marker>
       </defs>
 
-      {/* beam cone, on from the end of step 1 until the image is made */}
-      <polygon points="190,72 210,72 272,232 128,232" fill="url(#rj-cone)" style={anim("rj-beam")} />
-
-      {/* 2 · photons travelling down the primary beam */}
-      <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={anim("rj-rays")}>
-        {RAYS.map((r) => (
-          <line key={r.x1} x1={r.x1} y1={74} x2={r.x2} y2={230} style={flow} />
-        ))}
+      {/* legend */}
+      <g fontSize="12" fontWeight="600">
+        <rect x="12" y="12" width="14" height="10" rx="2" fill="#132c5c" stroke="#bccce6" />
+        <text x="32" y="21" fill="#f3f6f8">X-ray tube</text>
+        <rect x="12" y="30" width="14" height="6" rx="1" fill="#5cc3e6" />
+        <text x="32" y="37" fill="#5cc3e6">ตัวรับภาพ</text>
+        <line x1="12" y1="50" x2="26" y2="50" stroke="#f2b233" strokeWidth="3" />
+        <text x="32" y="54" fill="#f2b233">Primary beam</text>
+        <line x1="12" y1="66" x2="26" y2="66" stroke="#f08a5d" strokeWidth="3" strokeDasharray="4 3" />
+        <text x="32" y="70" fill="#f08a5d">Scatter</text>
       </g>
 
-      {/* 3 · scatter out of the patient */}
-      <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={anim("rj-scatter")}>
-        {SCATTER.map((s) => {
-          const r = (s.a * Math.PI) / 180;
-          return (
-            <line
-              key={`${s.x}-${s.y}`}
-              x1={s.x}
-              y1={s.y}
-              x2={s.x + Math.cos(r) * s.len}
-              y2={s.y + Math.sin(r) * s.len}
-              markerEnd="url(#rj-arrow)"
-              style={flow}
-            />
-          );
-        })}
+      {/* monitor */}
+      <rect x="356" y="12" width="72" height="48" rx="5" fill="#0b1f45" stroke="#bccce6" strokeWidth="2" />
+      <g style={shot("rj-image")}>
+        <ellipse cx="392" cy="36" rx="24" ry="14" fill="#bccce6" opacity="0.55" />
+        <circle cx="395" cy="39" r="7" fill="#f3f6f8" />
+      </g>
+      <text x="392" y="76" fill="#bccce6" fontSize="12" textAnchor="middle">จอภาพ</text>
+
+      {/* the C-arm with tube, detector and the exposure, turning about the patient */}
+      <g style={{ ...turn("rj-turn"), transformOrigin: `${CX}px ${CY}px`, transformBox: "view-box" }}>
+        <path d={`M${CX} ${CY + 168} A168 168 0 0 0 ${CX} ${CY - 168} L${CX} ${CY - 118}`} fill="none" stroke="#46566a" strokeWidth="14" strokeLinejoin="round" />
+
+        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={shot("rj-beam")} />
+        <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={shot("rj-rays")}>
+          {RAYS.map((r) => (
+            <line key={r.x1} x1={r.x1} y1={CY + 130} x2={r.x2} y2={CY + 58} style={flow} />
+          ))}
+        </g>
+
+        <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={shot("rj-scatter")}>
+          {SCATTER.map((s) => (
+            <line key={s.a} x1={s.from.x} y1={s.from.y} x2={s.to.x} y2={s.to.y} markerEnd="url(#rj-arrow)" style={flow} />
+          ))}
+        </g>
+
+        <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={shot("rj-through")}>
+          {[-24, 0, 24].map((dx) => (
+            <line key={dx} x1={CX + dx} y1={CY - 64} x2={CX + dx} y2={CY - 100} style={flow} />
+          ))}
+        </g>
+
+        {/* tube: filament, electrons, glowing target */}
+        <rect x={CX - 40} y={CY + 132} width="80" height="36" rx="8" fill="#132c5c" stroke="#bccce6" strokeWidth="2" />
+        <rect x={CX - 30} y={CY + 144} width="10" height="14" rx="2" fill="#bccce6" />
+        <polygon points={`${CX + 18},${CY + 140} ${CX + 30},${CY + 140} ${CX + 30},${CY + 160} ${CX + 12},${CY + 160}`} fill="#bccce6" />
+        <circle cx={CX + 18} cy={CY + 142} r="16" fill="url(#rj-hot)" style={shot("rj-tube")} />
+        <line x1={CX - 18} y1={CY + 151} x2={CX + 12} y2={CY + 149} stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 8" style={{ ...shot("rj-electrons"), ...flow }} />
+
+        {/* detector */}
+        <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#132c5c" stroke="#5cc3e6" strokeWidth="2" />
+        <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#5cc3e6" style={shot("rj-image")} />
       </g>
 
-      {/* 4 · the little that gets through, down to the image receptor */}
-      <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={anim("rj-through")}>
-        {[176, 200, 224].map((x) => (
-          <line key={x} x1={x} y1={318} x2={x} y2={366} style={flow} />
-        ))}
-      </g>
+      {/* patient on the table, which stay put */}
+      <rect x="110" y="294" width="220" height="10" rx="2" fill="#46566a" />
+      <ellipse cx={CX} cy={CY} rx="80" ry="62" fill="#e6ecf3" stroke="#bccce6" strokeWidth="2" />
+      <circle cx={CX + 8} cy={CY + 10} r="26" fill="none" stroke="#46566a" strokeWidth="2.5" />
+      {SKIN.map((d, i) => (
+        <path key={d} d={d} fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" opacity={i ? 0 : 1} style={turn(`rj-skin-${i + 1}`)} />
+      ))}
 
-      {/* X-ray tube with cathode and anode */}
-      <rect x="120" y="14" width="160" height="58" rx="10" fill="#132c5c" stroke="#bccce6" strokeWidth="2" />
-      <rect x="140" y="32" width="14" height="22" rx="3" fill="#bccce6" />
-      <polygon points="246,28 262,28 262,58 236,58" fill="#bccce6" />
-      <circle cx="243" cy="52" r="20" fill="url(#rj-hot)" style={anim("rj-tube")} />
-      {/* 1 · electrons from the hot filament to the target */}
-      <line x1="158" y1="43" x2="238" y2="47" stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 10" style={{ ...anim("rj-electrons"), ...flow }} />
-
-
-      {/* patient on the table */}
-      <ellipse cx="200" cy="270" rx="104" ry="48" fill="#e6ecf3" stroke="#bccce6" strokeWidth="2" />
-      <circle cx="210" cy="284" r="30" fill="none" stroke="#46566a" strokeWidth="2.5" />
-      {/* 2 · entrance skin takes the most dose */}
-      <path d="M134 236 Q200 206 266 236" fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" style={anim("rj-skin")} />
-      <rect x="70" y="320" width="260" height="10" rx="2" fill="#46566a" />
-
-      {/* image receptor and monitor */}
-      <rect x="130" y="368" width="140" height="16" rx="3" fill="#132c5c" stroke="#5cc3e6" strokeWidth="2" />
-      <rect x="130" y="368" width="140" height="16" rx="3" fill="#5cc3e6" style={anim("rj-image")} />
-      <rect x="306" y="352" width="76" height="52" rx="5" fill="#0b1f45" stroke="#bccce6" strokeWidth="2" />
-      <line x1="344" y1="404" x2="344" y2="416" stroke="#bccce6" strokeWidth="3" />
-      <g style={anim("rj-image")}>
-        <ellipse cx="344" cy="378" rx="26" ry="15" fill="#bccce6" opacity="0.55" />
-        <circle cx="347" cy="381" r="8" fill="#f3f6f8" />
-      </g>
-
-      {/* labels */}
-      <g fill="#f3f6f8" fontSize="14" fontWeight="600">
-        <text x="290" y="40">X-ray tube</text>
-        <text x="16" y="150" fill="#f2b233">Primary beam</text>
-        <text x="300" y="190" fill="#f08a5d">Scatter</text>
-        <text x="72" y="348">ผู้ป่วย</text>
-        <text x="130" y="402" fill="#5cc3e6">ตัวรับภาพ</text>
-        <text x="314" y="428" fill="#bccce6" fontSize="12">จอภาพ</text>
-      </g>
+      {/* which position is playing */}
+      {POSITIONS.map((p, i) => (
+        <g key={p.name} opacity={i ? 0 : 1} style={turn(`rj-pos-${i + 1}`)}>
+          <text x="12" y="432" fill="#f3f6f8" fontSize="17" fontWeight="700">
+            {p.name}
+            <tspan fill="#bccce6" fontSize="13" fontWeight="600" dx="8">
+              {p.where}
+            </tspan>
+          </text>
+          <text x="12" y="452" fill={p.color} fontSize="13" fontWeight="700">
+            {p.verdict}
+          </text>
+        </g>
+      ))}
     </svg>
   );
 }
