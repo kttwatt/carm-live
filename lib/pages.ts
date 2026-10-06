@@ -316,8 +316,15 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "มาตรฐานของห้องปฏิบัติการทางรังสี",
-      scale: 1.5,
+      // four cards across the top, the cut-away room centred under them
+      cols: 4,
+      round: true,
       points: [{ th: "ประตูห้อง" }, { th: "เพดานห้อง" }, { th: "ฉากกำบังรังสี" }, { th: "สัญญาณไฟสีแดง และป้ายเตือน" }],
+      image: {
+        src: "/pages/xray-room.webp",
+        alt: "ภาพตัดห้องเอกซเรย์: ผนัง ประตู และเพดานบุแผ่นตะกั่วหนา 1.5–2.0 มม. รอยต่อซ้อนกันอย่างน้อย 1.5 ซม. ห้องควบคุมมีกระจกตะกั่วดูภายในห้อง หน้าห้องมีไฟสีแดงและป้ายเตือนรังสีและหญิงตั้งครรภ์"
+      },
+      imageBelow: true,
     },
   ],
 
