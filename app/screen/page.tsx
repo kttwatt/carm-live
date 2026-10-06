@@ -37,14 +37,15 @@ function Answer({ text }: { text: string }) {
 
 // The choices on the projector while the room answers, in a fixed order, each with its live count (refreshed every 2 s);
 // the correct one stays hidden until the reveal.
-function ChoiceList({ question, summary, cols = 2 }: { question: Question; summary: Summary | null; cols?: 1 | 2 }) {
+function ChoiceList({ question, summary }: { question: Question; summary: Summary | null }) {
   const counts = summary?.counts ?? {};
   // Bars are scaled to the most-picked choice, so differences show even with few answers.
   const most = Math.max(0, ...question.choices.map((c) => counts[c.id] ?? 0));
   return (
     <>
       {question.multi && <p className="text-[1.4vw] font-semibold text-amber">เลือกได้หลายข้อ</p>}
-      <ul className={`grid gap-[1.2vh] ${cols === 2 ? "grid-cols-2 gap-x-[1.5vw]" : "grid-cols-1"}`}>
+      {/* one choice per row */}
+      <ul className="grid grid-cols-1 gap-[1.2vh]">
         {question.choices.map((c) => {
           const n = counts[c.id] ?? 0;
           const pct = most ? Math.round((n / most) * 100) : 0;
@@ -277,7 +278,7 @@ function ScreenView() {
                       <Answer text={question.explanation} />
                     ) : (
                       <>
-                        <ChoiceList question={question} summary={results} cols={1} />
+                        <ChoiceList question={question} summary={results} />
                         <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
                           {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
                           {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
@@ -298,8 +299,7 @@ function ScreenView() {
                 </div>
               ) : (
                 <>
-                  {/* one under another; eight choices need two columns to fit the screen */}
-                  <ChoiceList question={question} summary={results} cols={question.choices.length > 6 ? 2 : 1} />
+                  <ChoiceList question={question} summary={results} />
                   <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
                     {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
                     {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
