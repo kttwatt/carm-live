@@ -24,6 +24,8 @@ export type Page = {
   noTitle?: boolean;
   /** sits at the top of the screen instead of the middle */
   top?: boolean;
+  /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
+  scale?: number;
 };
 
 export const PAGES: Record<string, Page[]> = {
@@ -231,6 +233,7 @@ export const PAGES: Record<string, Page[]> = {
       heading: "Dosimeter",
       noTitle: true,
       top: true,
+      scale: 1.3,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงานที่ทำงานเกี่ยวกับรังสีต้องมี เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {

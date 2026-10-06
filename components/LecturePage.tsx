@@ -12,7 +12,8 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   const detailed = pts.some((p) => p.desc);
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
-    <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]">
+    // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
+    <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]" style={page.scale ? { zoom: page.scale, maxWidth: `${86 / page.scale}cqw` } : undefined}>
       {page.heading && (
         // Without the slide's title above, the heading stands in for it and looks like it.
         <p className={`font-display font-bold leading-tight ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
