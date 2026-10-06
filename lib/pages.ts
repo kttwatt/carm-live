@@ -90,6 +90,8 @@ export const PAGES: Record<string, Page[]> = {
     { heading: "ส่วนประกอบของ Fluoroscopy", figure: "carm-3d", noTitle: true, top: true },
     {
       heading: "การเดินทางของรังสี",
+      // its own heading stands as the title; the slide's title is left off
+      noTitle: true,
       figure: "radiation-journey",
       lead: "X-ray tube → ผู้ป่วย → ตัวรับภาพ → จอภาพ",
       points: [

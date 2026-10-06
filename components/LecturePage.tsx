@@ -1,6 +1,7 @@
 import { firstCellSpans, isTopic, type Page } from "@/lib/pages";
 import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
 import { SpinningModel } from "@/components/SpinningModel";
+import { JourneyBeep } from "@/components/JourneyBeep";
 
 /** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
  * mean the screen (same as vw/vh); the phone slides view puts each page in a 16:9 frame that is one. */
@@ -121,7 +122,9 @@ function JourneyPage({ page, index, total, lite }: { page: Page; index: number; 
   return (
     // On the projector the loop is the lesson, so it plays even under reduced motion; phones keep the viewer's setting.
     <div className={`flex max-w-[86cqw] flex-col gap-[2cqh] ${lite ? "" : "motion-demo"}`}>
-      <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>
+      {/* the exposure beep, on the projector only */}
+      {!lite && <JourneyBeep />}
+      <p className={`font-display font-bold leading-tight ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
       {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
       <div className="flex items-center gap-[3cqw]">
         <RadiationJourney className="shrink-0" style={{ width: "min(70cqh, 42cqw)" }} />
