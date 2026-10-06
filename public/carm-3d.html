@@ -487,7 +487,7 @@ function extra(id){
   if(id==='detector') return `<p class="muted">ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
   if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้ง C Arm ตรง':'เอียง C Arm ให้ดู'}</button>
     <p class="muted">O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</p>`;
-  if(id==='monitor') return `<p class="muted">มุมล่างของจอแสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)</p>`;
+  if(id==='monitor') return `<p class="muted">แสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)</p>`;
   if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?'ปล่อยสวิตช์':'เหยียบสวิตช์: ฉายรังสี'}</button>`;
   return '';
 }
