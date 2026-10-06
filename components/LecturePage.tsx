@@ -108,11 +108,11 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
         {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
         {!page.imageBelow && image}
         {page.figure === "team-step" ? (
-          // the team stepping back on the left (it plays even under reduced motion on the projector), the cards beside it
-          <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-center gap-[2.4cqw]">
+          // the team clearing the beam on the left (it plays even under reduced motion on the projector, silently), the cards beside it
+          // sized by its height, so it zooms with the page (sized by the column's width, it would not)
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-[2.4cqw]">
             <div className={lite ? "" : "motion-demo"}>
-              {!lite && <JourneyBeep beam="[data-ts-beam]" />}
-              <TeamStepBack className="w-full" />
+              <TeamStepBack className="h-[40cqh] w-auto" />
             </div>
             {cards}
           </div>

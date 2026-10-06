@@ -190,13 +190,21 @@ h3 {
   }
 }
 
-/* "ตำแหน่งที่ควรยืน: ทีมเข้าเคส" diagram (components/TeamStepBack.tsx), one 8 s loop: the team at the table's edge,
-   steps back (20-30%), the beam fires (33-75%) with scatter, stops, and the team comes back in (82-92%).
-   Each element's resting style is the moment of exposure, which is what reduced motion leaves. */
-@keyframes ts-team {
+/* "ตำแหน่งที่ควรยืน: ทีมเข้าเคส" diagram (components/TeamStepBack.tsx), one 8 s loop: everyone at the table's edge;
+   the Surgeon steps back and the Assistant and Scrub step back then along behind the shield (20-32%); the beam fires
+   (33-75%) with scatter, stops, and they all come back in (80-92%). Each element's resting style is the moment of
+   exposure, which is what reduced motion leaves. ts-hide moves by --dx/--dy, set on each person. */
+@keyframes ts-back {
   0%, 20% { transform: translateY(0); }
   30%, 80% { transform: translateY(-58px); }
   92%, 100% { transform: translateY(0); }
+}
+@keyframes ts-hide {
+  0%, 20% { transform: translate(0, 0); }
+  26% { transform: translate(0, var(--dy)); }
+  32%, 80% { transform: translate(var(--dx), var(--dy)); }
+  86% { transform: translate(0, var(--dy)); }
+  92%, 100% { transform: translate(0, 0); }
 }
 @keyframes ts-beam {
   0%, 31% { opacity: 0; }
