@@ -33,6 +33,13 @@ npm run dev
 5. คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ Project URL และ anon key
 6. ใช้ในเครื่องให้เว้น `NEXT_PUBLIC_SITE_URL` ว่างไว้ ระบบหาที่อยู่ wifi เอง
 
+### เฉลยคำถาม
+
+ฐานข้อมูลเก็บเฉลยตามลำดับหน้า เพิ่มหรือย้ายหน้าแล้วลำดับคำถามจะเลื่อน จึงไม่แก้เฉลยทีละครั้ง เมื่อสไลด์นิ่งแล้วให้
+
+1. รัน `npm run keys` สร้าง `supabase/answer_keys.sql` ใหม่จาก `lib/scenes.ts` และ `lib/questions.ts`
+2. รันไฟล์นั้นใน SQL Editor ครั้งเดียว (ลบเฉลยเก่าทั้งหมดแล้วใส่ชุดใหม่ รันซ้ำได้)
+
 ## นำขึ้นเว็บด้วย GitHub Pages
 
 ทุกครั้งที่ push ขึ้น `main` GitHub จะสร้างเว็บและนำขึ้นให้เอง (`.github/workflows/pages.yml`)
