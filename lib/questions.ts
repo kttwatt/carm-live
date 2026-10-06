@@ -14,6 +14,8 @@ export type Question = {
   promptAsTitle?: boolean;
   /** answer by tapping spots A–F on the operating-room map set up like this */
   map?: Geometry;
+  /** on the projector at the reveal, this diagram stands large beside the answer and the result bars */
+  figure?: "radiation-ap";
 };
 
 export const QUESTIONS: Record<string, Question> = {
@@ -39,6 +41,8 @@ export const QUESTIONS: Record<string, Question> = {
   s04: {
     prompt: "ขณะฉายรังสี รังสีกระเจิงที่บุคลากรได้รับมากที่สุดมาจากอะไร?",
     promptAsTitle: true,
+    // the AP diagram: primary beam into the patient, scatter leaving it
+    figure: "radiation-ap",
     choices: [
       { id: "tube", label: "หลอดเอกซเรย์" },
       { id: "patient", label: "ร่างกายผู้ป่วย" },

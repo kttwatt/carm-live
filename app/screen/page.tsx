@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
 import { LecturePage } from "@/components/LecturePage";
 import { OneLine } from "@/components/OneLine";
+import { RadiationJourney } from "@/components/RadiationJourney";
 import { isTopic, pagesFor } from "@/lib/pages";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
@@ -297,6 +298,15 @@ function ScreenView() {
                         </p>
                       </>
                     )}
+                  </div>
+                </div>
+              ) : phase === "revealed" && question.figure === "radiation-ap" ? (
+                // the diagram the answer explains (primary beam and scatter) large on the left; the answer, then the bars, beside it
+                <div className="flex items-start gap-[3vw]">
+                  <RadiationJourney still className="w-[min(36vw,64vh)] shrink-0" />
+                  <div className="flex min-w-0 flex-1 flex-col gap-[2.5vh]">
+                    <Answer text={question.explanation} />
+                    <ResultBars question={question} summary={results} showCorrect size="xl" />
                   </div>
                 </div>
               ) : phase === "revealed" ? (
