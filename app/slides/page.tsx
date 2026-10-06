@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { firstCellSpans, pagesFor, type Page } from "@/lib/pages";
 import { SCENES, isInteractive } from "@/lib/scenes";
 import { RadiationJourney } from "@/components/RadiationJourney";
+import { SlideDeck } from "@/components/SlideDeck";
 
-// Read-only copy of the lecture for phones: every slide's content in deck order, no room code needed.
+// Read-only copy of the lecture for phones: one slide per page, swiped left/right in deck order, no room code needed.
 export const metadata: Metadata = { title: "เนื้อหาสไลด์ · C-Arm Radiation Safety" };
 
 const OUTLINE = SCENES.find((s) => s.kind === "outline");
@@ -77,50 +78,52 @@ function Section({ page }: { page: Page }) {
 
 export default function Slides() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 py-10">
-      <header className="flex flex-col gap-3">
-        <p className="text-sm font-semibold tracking-widest text-amber">C-ARM RADIATION SAFETY</p>
-        <h1 className="font-display text-3xl font-bold leading-tight">{SCENES[0].title}</h1>
-      </header>
+    <main>
+      <SlideDeck ids={["intro", ...SLIDES.map((s) => s.id)]}>
+        <div className="flex flex-col gap-8">
+          <header className="flex flex-col gap-3">
+            <p className="text-sm font-semibold tracking-widest text-amber">C-ARM RADIATION SAFETY</p>
+            <h1 className="font-display text-3xl font-bold leading-tight">{SCENES[0].title}</h1>
+            <p className="text-sm text-mist">ปัดซ้าย–ขวาเพื่อเปลี่ยนสไลด์</p>
+          </header>
 
-      {OUTLINE?.items && (
-        <nav className="flex flex-col gap-3 rounded-2xl border border-line p-5">
-          <h2 className="font-display text-xl font-bold">{OUTLINE.title}</h2>
-          <ol className="list-decimal space-y-1 pl-6">
-            {OUTLINE.items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-          <h2 className="mt-3 font-display text-lg font-bold">สไลด์</h2>
-          <ol className="space-y-1">
-            {SLIDES.map((s) => (
-              <li key={s.id}>
-                <a href={`#${s.id}`} className="text-sky underline-offset-4 hover:underline">
-                  {s.slide}. {s.title}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      )}
+          {OUTLINE?.items && (
+            <nav className="flex flex-col gap-3 rounded-2xl border border-line p-5">
+              <h2 className="font-display text-xl font-bold">{OUTLINE.title}</h2>
+              <ol className="list-decimal space-y-1 pl-6">
+                {OUTLINE.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ol>
+              <h2 className="mt-3 font-display text-lg font-bold">สไลด์</h2>
+              <ol className="space-y-1">
+                {SLIDES.map((s) => (
+                  <li key={s.id}>
+                    <a href={`#${s.id}`} className="text-sky underline-offset-4 hover:underline">
+                      {s.slide}. {s.title}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+        </div>
 
-      {SLIDES.map((s) => {
-        const pages = pagesFor(s.id);
-        return (
-          <article key={s.id} id={s.id} className="flex scroll-mt-4 flex-col gap-6 border-t border-line pt-8">
+        {SLIDES.map((s) => (
+          <article key={s.id} className="flex flex-col gap-6">
             <header className="flex flex-col gap-1">
               <p className="text-sm font-semibold text-mist">สไลด์ {s.slide}</p>
               <h2 className="font-display text-2xl font-bold leading-snug">{s.title}</h2>
             </header>
-            {pages.map((p, i) => (
+            {pagesFor(s.id).map((p, i) => (
               <Section key={i} page={p} />
             ))}
             {isInteractive(s.kind) && s.activity && (
               <p className="rounded-xl border border-dashed border-line px-4 py-3 text-mist">กิจกรรม: {s.activity}</p>
             )}
           </article>
-        );
-      })}
+        ))}
+      </SlideDeck>
     </main>
   );
 }
