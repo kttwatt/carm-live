@@ -23,7 +23,7 @@ export type Page = {
   /** each line of the key message in its own smaller box, for a page where one big box would outweigh the table */
   keyApart?: boolean;
   /** an animated diagram beside the points, which light up step by step with it */
-  figure?: "radiation-journey" | "radiation-ap" | "carm-3d";
+  figure?: "radiation-journey" | "radiation-ap" | "carm-3d" | "team-step";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
   /** cards per row; the default is one card per row, across the screen, with a round number */
@@ -187,6 +187,8 @@ export const PAGES: Record<string, Page[]> = {
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมเข้าเคส",
       lead: "Surgeon Assistant Scrub",
+      // the team steps back while the beam fires, beside the three cards
+      figure: "team-step",
       points: [
         { th: "ยืนฝั่งเดียวกับตัวรับภาพ", en: "Detector" },
         { th: "ถอยหลัง 1–2 ก้าว" },

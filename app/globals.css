@@ -189,3 +189,32 @@ h3 {
     opacity: 0.55;
   }
 }
+
+/* "ตำแหน่งที่ควรยืน: ทีมเข้าเคส" diagram (components/TeamStepBack.tsx), one 8 s loop: the team at the table's edge,
+   steps back (20-30%), the beam fires (33-75%) with scatter, stops, and the team comes back in (82-92%).
+   Each element's resting style is the moment of exposure, which is what reduced motion leaves. */
+@keyframes ts-team {
+  0%, 20% { transform: translateY(0); }
+  30%, 80% { transform: translateY(-58px); }
+  92%, 100% { transform: translateY(0); }
+}
+@keyframes ts-beam {
+  0%, 31% { opacity: 0; }
+  34%, 74% { opacity: 0.6; }
+  77%, 100% { opacity: 0; }
+}
+@keyframes ts-scatter {
+  0%, 36% { opacity: 0; }
+  41%, 74% { opacity: 1; }
+  77%, 100% { opacity: 0; }
+}
+@keyframes ts-on {
+  0%, 18% { opacity: 0; }
+  22%, 80% { opacity: 1; }
+  84%, 100% { opacity: 0; }
+}
+@keyframes ts-off {
+  0%, 18% { opacity: 1; }
+  22%, 80% { opacity: 0; }
+  84%, 100% { opacity: 1; }
+}

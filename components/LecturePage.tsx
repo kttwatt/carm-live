@@ -4,6 +4,7 @@ import { JOURNEY_SHOT, JourneyCaption, RadiationJourney } from "@/components/Rad
 import { SpinningModel } from "@/components/SpinningModel";
 import { JourneyBeep } from "@/components/JourneyBeep";
 import { FitBox } from "@/components/FitBox";
+import { TeamStepBack } from "@/components/TeamStepBack";
 
 /** How much larger a page may draw when it has room to spare, unless it sets its own `scale`. */
 const GROW = 1.4;
@@ -106,7 +107,16 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       <FitBox of={page} cap={page.scale ?? GROW} className="flex flex-col gap-[2.4cqh]">
         {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
         {!page.imageBelow && image}
-        {page.side ? (
+        {page.figure === "team-step" ? (
+          // the team stepping back on the left (it plays even under reduced motion on the projector), the cards beside it
+          <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] items-center gap-[2.4cqw]">
+            <div className={lite ? "" : "motion-demo"}>
+              {!lite && <JourneyBeep beam="[data-ts-beam]" />}
+              <TeamStepBack className="w-full" />
+            </div>
+            {cards}
+          </div>
+        ) : page.side ? (
           // the cards on the left; the picture beside them on the right, the key message under it
           <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-center gap-[2.4cqw]">
             {cards}
