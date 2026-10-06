@@ -321,6 +321,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การทำความสะอาดและฆ่าเชื้อ",
+      noTitle: true,
       points: [
         { th: "น้ำสบู่เจือจาง หรือสารทำความสะอาดชนิดอ่อน", en: "Mild detergent", desc: "เช็ดคราบสกปรก คราบเหงื่อ หรือฝุ่นทั่วไปประจำวัน" },
         {
