@@ -46,7 +46,7 @@ export const PAGES: Record<string, Page[]> = {
   ],
 
   s03: [
-    // Topic pages: a heading alone shows as a section title.
+    // Topic pages (a heading alone): shown as a section title in the middle of the screen.
     { heading: "การทำงานของ Fluoroscopy" },
     { heading: "ส่วนประกอบของ Fluoroscopy" },
     {
@@ -292,6 +292,10 @@ export const PAGES: Record<string, Page[]> = {
 };
 
 export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
+
+/** A heading alone is a topic page: it shows as a section title, without the slide's title above it. */
+export const isTopic = (page: Page | undefined): boolean =>
+  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure;
 
 /** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
 export const firstCellSpans = (rows: string[][]): number[] =>

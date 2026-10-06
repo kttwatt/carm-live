@@ -8,7 +8,7 @@ import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
 import { LecturePage } from "@/components/LecturePage";
-import { pagesFor } from "@/lib/pages";
+import { isTopic, pagesFor } from "@/lib/pages";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
 import { questionFor } from "@/lib/questions";
@@ -147,12 +147,16 @@ function ScreenView() {
   const pages = pagesFor(scene.id);
   const pg = state?.sim?.pg;
   const pageN = pg && pg.s === sceneIndex ? Math.min(pg.n, Math.max(pages.length - 1, 0)) : 0;
+  // A topic page stands alone, centred, without the slide's title.
+  const topic = !question && !isInteractive(scene.kind) && isTopic(pages[pageN]);
 
   return (
     <main className="relative flex flex-1 flex-col justify-center gap-[3vh] px-[7vw] py-[8vh]">
       {
         <>
-          <h1 className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}>{scene.title}</h1>
+          {!topic && (
+            <h1 className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}>{scene.title}</h1>
+          )}
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
               <p className="text-[2.2vw] leading-snug">{question.prompt}</p>
