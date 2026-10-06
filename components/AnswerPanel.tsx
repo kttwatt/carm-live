@@ -1,5 +1,6 @@
 "use client";
 
+import { Highlighted } from "@/components/Highlighted";
 import { useEffect, useRef, useState } from "react";
 import { ORMap } from "@/components/ORMap";
 import type { Question } from "@/lib/questions";
@@ -143,7 +144,9 @@ export function AnswerPanel({
           <p className={`font-display text-lg font-bold ${sent ? (isRight ? "text-ok" : "text-warn") : "text-mist"}`}>
             {sent ? (isRight ? "ตอบถูก" : "ยังไม่ถูก") : "ไม่ได้ตอบข้อนี้"}
           </p>
-          <p className="text-sm leading-relaxed text-mist">{question.explanation}</p>
+          <p className="text-sm leading-relaxed text-mist">
+            <Highlighted text={question.explanation} />
+          </p>
         </div>
       )}
       {error && <p className="text-warn" role="alert">{error}</p>}

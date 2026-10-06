@@ -1,5 +1,6 @@
 "use client";
 
+import { Highlighted } from "@/components/Highlighted";
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
 import { Model3DStage } from "@/components/Model3D";
@@ -26,7 +27,9 @@ function Answer({ text }: { text: string }) {
   return (
     <div className="flex flex-col gap-[1vh] rounded-3xl border-2 border-ok bg-night-2 px-[2vw] py-[2vh]">
       <p className="font-display text-[2.6vw] font-extrabold leading-none tracking-wide text-ok">เฉลย</p>
-      <p className="text-[1.9vw] font-medium leading-relaxed text-paper">{text}</p>
+      <p className="text-[1.9vw] font-medium leading-relaxed text-paper">
+        <Highlighted text={text} />
+      </p>
     </div>
   );
 }
