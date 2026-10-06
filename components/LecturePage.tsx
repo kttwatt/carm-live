@@ -163,10 +163,10 @@ function AcronymPage({ page }: { page: Page }) {
   const { word, full } = page.acronym!;
   return (
     <FitBox of={page} cap={GROW} className="flex flex-col items-center gap-[2cqh]">
-      <p className="rounded-2xl border-2 border-paper/60 px-[5cqw] py-[0.6cqh] font-display text-[7cqw] font-bold leading-tight tracking-[0.08em]">{word}</p>
+      <p className="rounded-2xl border-2 border-amber/70 px-[5cqw] py-[0.6cqh] font-display text-[7cqw] font-bold leading-tight tracking-[0.08em] text-amber">{word}</p>
       <p className="font-display text-[1.7cqw] font-bold uppercase tracking-[0.12em] text-mist">{full}</p>
       <div className="mt-[3cqh] flex w-full items-center gap-[3cqw]">
-        {page.heading && <p className="shrink-0 font-display text-[4.2cqw] font-bold leading-tight text-amber">{page.heading}</p>}
+        {page.heading && <p className="shrink-0 font-display text-[4.2cqw] font-bold leading-tight">{page.heading}</p>}
         {page.lead && <p className="min-w-0 flex-1 rounded-2xl border border-line bg-night-2 px-[2.4cqw] py-[2.4cqh] text-[1.9cqw] leading-relaxed">{page.lead}</p>}
       </div>
     </FitBox>
