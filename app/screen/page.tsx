@@ -263,8 +263,8 @@ function ScreenView() {
       {
         <>
           {question ? (
-            // a question's title says it is one, and stays on one line
-            <OneLine size={4.2} className="font-display font-bold leading-tight">
+            // a question's title says it is one, and stays on one line unless that would make it too small
+            <OneLine size={4.2} min={2.6} className="font-display font-bold leading-tight">
               คำถาม: {question.promptAsTitle ? question.prompt : scene.title}
             </OneLine>
           ) : (

@@ -50,6 +50,7 @@ export const QUESTIONS: Record<string, Question> = {
   },
   s06: {
     prompt: "Lateral view หลอดเอกซเรย์อยู่ฝั่งตรงข้ามศัลยแพทย์ คุณเป็นพยาบาลช่วยรอบนอก จะยืนจุดไหนเพื่อรับรังสีกระเจิงน้อยที่สุด?",
+    promptAsTitle: true,
     choices: [
       { id: "A", label: "A · ฝั่งศัลยแพทย์ ใกล้ศีรษะ" },
       { id: "B", label: "B · ฝั่งศัลยแพทย์ ปลายเตียง" },
