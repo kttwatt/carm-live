@@ -62,10 +62,12 @@ h3 {
   }
 }
 
+/* .motion-demo: a teaching animation on the projector, which keeps moving even when that computer has
+   Windows animation effects off (reported as reduced motion), like the 3D model's ?motion=1. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not(.motion-demo, .motion-demo *),
+  *:not(.motion-demo, .motion-demo *)::before,
+  *:not(.motion-demo, .motion-demo *)::after {
     animation: none !important;
     transition: none !important;
   }

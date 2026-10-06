@@ -5,7 +5,7 @@ import { SpinningModel } from "@/components/SpinningModel";
 /** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
  * mean the screen (same as vw/vh); the phone slides view puts each page in a 16:9 frame that is one. */
 export function LecturePage({ page, index, total, lite }: { page: Page; index: number; total: number; lite?: boolean }) {
-  if (page.figure === "radiation-journey") return <JourneyPage page={page} index={index} total={total} />;
+  if (page.figure === "radiation-journey") return <JourneyPage page={page} index={index} total={total} lite={lite} />;
   if (page.figure === "carm-3d") return <ModelPage page={page} index={index} total={total} lite={lite} />;
   if (isTopic(page)) return <TopicPage page={page} index={index} total={total} />;
   const pts = page.points ?? [];
@@ -114,12 +114,13 @@ function ModelPage({ page, index, total, lite }: { page: Page; index: number; to
 }
 
 /** The diagram on the left plays the loop; the point of the step it is on lights up on the right. */
-function JourneyPage({ page, index, total }: { page: Page; index: number; total: number }) {
+function JourneyPage({ page, index, total, lite }: { page: Page; index: number; total: number; lite?: boolean }) {
   const pts = page.points ?? [];
   // Steps start 12.5% into each exposure (after the C-arm turns) and last 19.5% of it.
   const start = (i: number) => JOURNEY_SHOT * (0.125 + i * 0.195) - JOURNEY_SHOT;
   return (
-    <div className="flex max-w-[86cqw] flex-col gap-[2cqh]">
+    // On the projector the loop is the lesson, so it plays even under reduced motion; phones keep the viewer's setting.
+    <div className={`flex max-w-[86cqw] flex-col gap-[2cqh] ${lite ? "" : "motion-demo"}`}>
       <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>
       {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
       <div className="flex items-center gap-[3cqw]">
