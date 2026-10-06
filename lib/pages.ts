@@ -14,6 +14,8 @@ export type Page = {
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
   note?: string;
+  /** the page's take-home message, set large and highlighted under everything */
+  key?: string;
   /** an animated diagram beside the points, which light up step by step with it */
   figure?: "radiation-journey";
   /** a picture from the source document, shown as is (file in public/) */
@@ -244,7 +246,7 @@ export const PAGES: Record<string, Page[]> = {
           desc: "แผ่นติดเสื้อ ประเมินปริมาณรังสีสะสมระยะยาว เครื่องอ่านใช้แสงสีเขียวหรือเลเซอร์กระตุ้นผลึก ให้ปล่อยแสงสีน้ำเงินตามปริมาณรังสีที่ได้รับ อ่านค่าซ้ำได้",
         },
       ],
-      note: "หน่วยงานส่วนใหญ่ใช้ OSL เป็นหลัก",
+      key: "หน่วยงานส่วนใหญ่ใช้ OSL เป็นหลัก",
     },
   ],
 
@@ -341,7 +343,7 @@ export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
 
 /** A heading alone is a topic page: it shows as a section title, without the slide's title above it. */
 export const isTopic = (page: Page | undefined): boolean =>
-  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image && !page.after;
+  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image && !page.after && !page.key;
 
 /** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
 export const firstCellSpans = (rows: string[][]): number[] =>

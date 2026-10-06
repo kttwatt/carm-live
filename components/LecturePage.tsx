@@ -69,6 +69,9 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
         </table>
       )}
       {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
+      {page.key && (
+        <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>
+      )}
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );
