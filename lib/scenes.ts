@@ -47,7 +47,7 @@ export const SCENES: Scene[] = [
   },
   { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
   { id: "s02", slide: 2, speaker: 1, title: "ใครบ้างในห้องผ่าตัดที่ได้รับรังสี", kind: "poll", activity: "เลือกบุคลากรที่คิดว่าได้รับรังสี แล้วเฉลยภาพรังสีกระเจิงรอบผู้ป่วย" },
-  { id: "s03", slide: 3, speaker: 2, title: "เครื่อง C-arm ทำงานอย่างไร", kind: "lecture" },
+  { id: "s03", slide: 3, speaker: 2, title: "หลักการทำงานของเครื่องและอันตรายจากรังสี", kind: "lecture" },
   { id: "s04", slide: 4, speaker: 2, title: "รังสีมาจากไหน: ลำรังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
   { id: "s05", slide: 5, speaker: 3, title: "หลัก ALARA: เวลา ระยะห่าง การป้องกัน", kind: "lecture" },
   { id: "s06", slide: 6, speaker: 3, title: "ควรยืนตรงไหนในห้องผ่าตัด", kind: "position", activity: "แตะตำแหน่ง A–F รอบเตียง แล้วเฉลยดัชนีรังสีกระเจิง" },

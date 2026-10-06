@@ -298,3 +298,12 @@ export const PAGES: Record<string, Page[]> = {
 };
 
 export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
+
+/** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
+export const firstCellSpans = (rows: string[][]): number[] =>
+  rows.map((row, r) => {
+    if (r > 0 && rows[r - 1][0] === row[0]) return 0;
+    let n = 1;
+    while (rows[r + n]?.[0] === row[0]) n++;
+    return n;
+  });

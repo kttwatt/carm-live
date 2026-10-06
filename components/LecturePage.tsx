@@ -1,4 +1,4 @@
-import type { Page } from "@/lib/pages";
+import { firstCellSpans, type Page } from "@/lib/pages";
 import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
 
 /** One lecture page on the projector, sized in vw like the rest of the main screen. */
@@ -8,6 +8,7 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
   const cols = pts.length === 4 ? 2 : Math.min(pts.length, 3);
   const detailed = pts.some((p) => p.desc);
+  const spans = firstCellSpans(page.table?.rows ?? []);
   return (
     <div className="flex max-w-[86vw] flex-col gap-[2.4vh]">
       <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>
@@ -40,11 +41,17 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
           <tbody>
             {page.table.rows.map((row, r) => (
               <tr key={r} className="border-b border-line">
-                {row.map((cell, c) => (
-                  <td key={c} className={`px-[1vw] py-[1.2vh] align-top ${c === 0 ? "font-semibold" : ""}`}>
-                    {cell}
-                  </td>
-                ))}
+                {row.map((cell, c) =>
+                  c === 0 && spans[r] === 0 ? null : (
+                    <td
+                      key={c}
+                      rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
+                      className={`px-[1vw] py-[1.2vh] align-top ${c === 0 ? "border-b border-line font-semibold" : ""}`}
+                    >
+                      {cell}
+                    </td>
+                  ),
+                )}
               </tr>
             ))}
           </tbody>

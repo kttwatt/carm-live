@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pagesFor, type Page } from "@/lib/pages";
+import { firstCellSpans, pagesFor, type Page } from "@/lib/pages";
 import { SCENES, isInteractive } from "@/lib/scenes";
 import { RadiationJourney } from "@/components/RadiationJourney";
 
@@ -10,6 +10,7 @@ const OUTLINE = SCENES.find((s) => s.kind === "outline");
 const SLIDES = SCENES.filter((s) => s.slide != null);
 
 function Section({ page }: { page: Page }) {
+  const spans = firstCellSpans(page.table?.rows ?? []);
   return (
     <section className="flex flex-col gap-3">
       <h3 className="font-display text-xl font-bold leading-snug text-amber">{page.heading}</h3>
@@ -44,11 +45,17 @@ function Section({ page }: { page: Page }) {
             <tbody>
               {page.table.rows.map((row, r) => (
                 <tr key={r} className="border-b border-line">
-                  {row.map((cell, c) => (
-                    <td key={c} className={`px-2 py-2 align-top ${c === 0 ? "font-semibold" : ""}`}>
-                      {cell}
-                    </td>
-                  ))}
+                  {row.map((cell, c) =>
+                    c === 0 && spans[r] === 0 ? null : (
+                      <td
+                        key={c}
+                        rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
+                        className={`px-2 py-2 align-top ${c === 0 ? "border-b border-line font-semibold" : ""}`}
+                      >
+                        {cell}
+                      </td>
+                    ),
+                  )}
                 </tr>
               ))}
             </tbody>
