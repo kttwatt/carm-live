@@ -13,6 +13,8 @@ export type Page = {
   note?: string;
   /** an animated diagram beside the points, which light up step by step with it */
   figure?: "radiation-journey";
+  /** a picture from the source document, shown as is (file in public/) */
+  image?: { src: string; alt: string };
 };
 
 export const PAGES: Record<string, Page[]> = {
@@ -52,16 +54,7 @@ export const PAGES: Record<string, Page[]> = {
   s02c: [
     {
       heading: "",
-      lead:
-        "ข้อ 9 ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
-      points: [
-        { th: "ผู้ประกอบวิชาชีพเวชกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพเวชกรรม" },
-        { th: "ผู้ประกอบวิชาชีพทันตกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพทันตกรรม" },
-        { th: "ผู้ประกอบวิชาชีพการสัตวแพทย์", en: "ตามกฎหมายว่าด้วยวิชาชีพการสัตวแพทย์" },
-        { th: "ผู้ประกอบโรคศิลปะสาขารังสีเทคนิค", en: "ตามกฎหมายว่าด้วยการประกอบโรคศิลปะ" },
-        { th: "ผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์" },
-        { th: "ผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี" },
-      ],
+      image: { src: "/slides/controller-qualifications.png", alt: "ข้อ 9 ผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีต้องมีคุณสมบัติอย่างใดอย่างหนึ่ง (ก)–(ฉ)" },
       note: "ที่มา: ร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2569 ข้อ 9",
     },
   ],
@@ -319,7 +312,7 @@ export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
 
 /** A heading alone is a topic page: it shows as a section title, without the slide's title above it. */
 export const isTopic = (page: Page | undefined): boolean =>
-  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure;
+  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image;
 
 /** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
 export const firstCellSpans = (rows: string[][]): number[] =>
