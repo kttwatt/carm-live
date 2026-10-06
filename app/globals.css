@@ -70,3 +70,70 @@ h3 {
     transition: none !important;
   }
 }
+
+/* "การเดินทางของรังสี" diagram: a 12 s loop of five steps at 0, 18, 36, 54 and 72%, then a short rest.
+   Each element's resting style is fully shown, so reduced motion leaves the whole diagram visible. */
+@keyframes rj-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes rj-tube {
+  0%, 18% { opacity: 1; }
+  22%, 92% { opacity: 0.45; }
+  96%, 100% { opacity: 0; }
+}
+@keyframes rj-electrons {
+  0%, 92% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+@keyframes rj-collimator {
+  0%, 16%, 38%, 100% { filter: none; }
+  20%, 34% { filter: drop-shadow(0 0 5px #f2b233) brightness(1.4); }
+}
+@keyframes rj-beam {
+  0%, 17% { opacity: 0; }
+  24%, 90% { opacity: 1; }
+  95%, 100% { opacity: 0; }
+}
+@keyframes rj-rays {
+  0%, 35% { opacity: 0; }
+  40%, 90% { opacity: 1; }
+  95%, 100% { opacity: 0; }
+}
+@keyframes rj-skin {
+  0%, 38% { opacity: 0; }
+  44%, 54% { opacity: 1; }
+  60%, 90% { opacity: 0.5; }
+  95%, 100% { opacity: 0; }
+}
+@keyframes rj-scatter {
+  0%, 53% { opacity: 0; }
+  58%, 72% { opacity: 1; }
+  76%, 90% { opacity: 0.45; }
+  95%, 100% { opacity: 0; }
+}
+@keyframes rj-through {
+  0%, 71% { opacity: 0; }
+  75%, 90% { opacity: 1; }
+  95%, 100% { opacity: 0; }
+}
+@keyframes rj-image {
+  0%, 74% { opacity: 0; }
+  80%, 92% { opacity: 1; }
+  97%, 100% { opacity: 0; }
+}
+/* the point card of the step that is playing; each card is delayed one step */
+@keyframes rj-step {
+  0%, 17% {
+    border-color: var(--color-amber);
+    background: color-mix(in oklab, var(--color-amber) 18%, var(--color-night-2));
+    transform: translateX(-0.6vw);
+  }
+  19%, 100% {
+    border-color: var(--color-line);
+    background: var(--color-night-2);
+    transform: none;
+    opacity: 0.55;
+  }
+}

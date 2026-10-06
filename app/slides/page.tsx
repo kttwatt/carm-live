@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { pagesFor, type Page } from "@/lib/pages";
 import { SCENES, isInteractive } from "@/lib/scenes";
+import { RadiationJourney } from "@/components/RadiationJourney";
 
 // Read-only copy of the lecture for phones: every slide's content in deck order, no room code needed.
 export const metadata: Metadata = { title: "เนื้อหาสไลด์ · C-Arm Radiation Safety" };
@@ -13,6 +14,7 @@ function Section({ page }: { page: Page }) {
     <section className="flex flex-col gap-3">
       <h3 className="font-display text-xl font-bold leading-snug text-amber">{page.heading}</h3>
       {page.lead && <p className="leading-relaxed">{page.lead}</p>}
+      {page.figure === "radiation-journey" && <RadiationJourney className="mx-auto w-full max-w-sm" />}
       {page.points && page.points.length > 0 && (
         <ol className="flex flex-col gap-2">
           {page.points.map((pt, i) => (

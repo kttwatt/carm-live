@@ -10,6 +10,8 @@ export type Page = {
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
   note?: string;
+  /** an animated diagram beside the points, which light up step by step with it */
+  figure?: "radiation-journey";
 };
 
 export const PAGES: Record<string, Page[]> = {
@@ -46,6 +48,7 @@ export const PAGES: Record<string, Page[]> = {
   s03: [
     {
       heading: "การเดินทางของรังสี",
+      figure: "radiation-journey",
       lead: "เครื่องกำเนิดไฟฟ้าแรงสูง → X-ray tube → ตัวกรองและตัวจำกัดลำรังสี → ผู้ป่วย → ตัวรับภาพ → จอภาพ",
       points: [
         { th: "ผลิต", desc: "ไส้หลอดที่ร้อนปล่อยอิเล็กตรอน ไฟฟ้าแรงสูงเร่งให้ชนเป้าโลหะ (ทังสเตน) เกิดรังสีเอกซ์ พลังงานส่วนใหญ่กลายเป็นความร้อน" },
