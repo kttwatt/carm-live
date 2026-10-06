@@ -131,7 +131,7 @@ const SKIN = ["M170 282 Q220 310 270 282", "M159 190 Q121 230 159 270", "M170 17
 export function RadiationJourney({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
-      viewBox="-100 0 540 460"
+      viewBox="-100 0 540 492"
       role="img"
       aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ พยาบาลที่ยืนข้างเตียงเจ็บที่ขาในท่า AP ที่ลำตัวในท่า Lateral และที่ใบหน้าในท่า Invert"
       className={className}
@@ -231,13 +231,14 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       {/* which position is playing */}
       {POSITIONS.map((p, i) => (
         <g key={p.name} opacity={i ? 0 : 1} style={turn(`rj-pos-${i + 1}`)}>
-          <text x="12" y="432" fill="#f3f6f8" fontSize="17" fontWeight="700">
+          {/* set large: read from the back of the room */}
+          <text x="-90" y="444" fill="#f3f6f8" fontSize="26" fontWeight="700">
             {p.name}
-            <tspan fill="#bccce6" fontSize="13" fontWeight="600" dx="8">
+            <tspan fill="#bccce6" fontSize="19" fontWeight="600" dx="10">
               {p.where}
             </tspan>
           </text>
-          <text x="12" y="452" fill={p.color} fontSize="13" fontWeight="700">
+          <text x="-90" y="478" fill={p.color} fontSize="20" fontWeight="700">
             {p.verdict}
           </text>
         </g>
