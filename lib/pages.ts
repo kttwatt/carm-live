@@ -134,7 +134,7 @@ export const PAGES: Record<string, Page[]> = {
       note: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้ ส่วน Continuous mode ใช้เมื่อต้องการเห็นการเคลื่อนไหวรวดเร็ว ต่อเนื่อง",
     },
     {
-      heading: "ผลของรังสีต่อมนุษย์แบบ Deterministic effect",
+      heading: "ผลของรังสีต่อมนุษย์",
       table: {
         head: ["อวัยวะ", "ผลของรังสี", "Threshold (mGy)"],
         rows: [

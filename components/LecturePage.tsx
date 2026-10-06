@@ -31,6 +31,8 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
   // cards, so cards side by side line up line by line even when one wraps more than another.
   const lines = 1 + (named ? 1 : 0) + (detailed ? 1 : 0);
   const spans = firstCellSpans(page.table?.rows ?? []);
+  // which label group each row belongs to (a row whose label is merged into the one above joins its group)
+  const groups = spans.reduce<number[]>((g, s, r) => [...g, r === 0 ? 0 : g[r - 1] + (s === 0 ? 0 : 1)], []);
   // short row labels stay on one line, so the other columns take the wrapping
   const image = page.image && (
     // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
@@ -114,34 +116,37 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
         )}
         {page.after && <p className="text-[1.35cqw] leading-relaxed text-mist">{page.after}</p>}
         {page.table && (
-          <table className="w-full border-collapse text-[1.4cqw] leading-snug">
-            <thead>
-              <tr>
-                {page.table.head.map((h, i) => (
-                  <th key={i} className="border-b-2 border-amber px-[1cqw] py-[1cqh] text-left font-display font-bold text-amber">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {page.table.rows.map((row, r) => (
-                <tr key={r} className="border-b border-line">
-                  {row.map((cell, c) =>
-                    c === 0 && spans[r] === 0 ? null : (
-                      <td
-                        key={c}
-                        rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
-                        className={`px-[1cqw] py-[1.2cqh] align-top ${c === 0 ? `border-b border-line font-semibold ${shortLabels ? "whitespace-nowrap" : ""}` : ""}`}
-                      >
-                        {cell}
-                      </td>
-                    ),
-                  )}
+          // framed, with an amber header row; rows sharing a label are shaded as one group, alternate groups darker
+          <div className="overflow-hidden rounded-2xl border border-line">
+            <table className="w-full border-collapse text-[1.4cqw] leading-snug">
+              <thead>
+                <tr className="bg-amber text-ink">
+                  {page.table.head.map((h, i) => (
+                    <th key={i} className="px-[1.2cqw] py-[1.2cqh] text-left font-display font-bold">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {page.table.rows.map((row, r) => (
+                  <tr key={r} className={`border-t border-line ${groups[r] % 2 ? "bg-night-2" : "bg-night-2/40"}`}>
+                    {row.map((cell, c) =>
+                      c === 0 && spans[r] === 0 ? null : (
+                        <td
+                          key={c}
+                          rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
+                          className={`px-[1.2cqw] py-[1.2cqh] align-top ${c === 0 ? `font-semibold text-amber ${shortLabels ? "whitespace-nowrap" : ""}` : ""}`}
+                        >
+                          {cell}
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
         {page.units && (
           // what the units in the table mean: the unit, what it measures, where it is used
