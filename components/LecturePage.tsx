@@ -17,8 +17,8 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
   if (page.figure === "carm-3d") return <ModelPage page={page} lite={lite} />;
   if (isTopic(page)) return <TopicPage page={page} />;
   const pts = page.points ?? [];
-  // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
-  const cols = page.cols ?? (pts.length === 4 ? 2 : Math.min(pts.length, 3));
+  // One card per row unless the page asks for more.
+  const cols = page.cols ?? 1;
   const detailed = pts.some((p) => p.desc);
   const named = pts.some((p) => p.en);
   // round cards whose items carry a paragraph (not a one-line note) read from the top
@@ -39,7 +39,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       style={page.imageMax ? { maxHeight: `${page.imageMax}cqh` } : undefined}
     />
   );
-  const cards = page.round || page.figure === "radiation-ap" ? (
+  const cards = page.round || wide || page.figure === "radiation-ap" ? (
     // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
     <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {pts.map((pt, i) => (

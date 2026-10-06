@@ -22,9 +22,9 @@ export type Page = {
   figure?: "radiation-journey" | "radiation-ap" | "carm-3d";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
-  /** cards per row, when the default (up to 3) would wrap their titles */
+  /** cards per row; the default is one card per row, across the screen, with a round number */
   cols?: number;
-  /** cards with a round number, text centred, all the same height */
+  /** with cols above 1: cards with a round number, text centred, all the same height */
   round?: boolean;
   /** the picture goes under the cards instead of above them */
   imageBelow?: boolean;
@@ -106,8 +106,9 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "รังสีฟุ้งกระจายหรือรังสีกระเจิง (Scatter)",
-      // the AP diagram, held still, sits centred under the cards
+      // the AP diagram, held still, sits centred under the three cards
       figure: "radiation-ap",
+      cols: 3,
       points: [
         { th: "ผู้ป่วยคือแหล่งรังสีฟุ้งกระจาย (Scatter) หลักในห้องผ่าตัด" },
         { th: "ฝั่ง X-ray tube มีรังสีฟุ้งกระจายมากกว่าฝั่งตัวรับภาพ" },
@@ -224,9 +225,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ชุดป้องกันรังสี",
-      // one card per row, so each paragraph reads across the screen
-      cols: 1,
-      round: true,
       // two set lines; the word joiner keeps "97–99%" from breaking at the dash
       key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
       points: [
@@ -245,9 +243,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "Dosimeter",
-      // one card per row beside the picture
-      cols: 1,
-      round: true,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงาน เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {
@@ -362,10 +357,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การดูแลรักษาเครื่อง C-arm",
-      // one card per row
-      cols: 1,
-      scale: 1.4,
-      round: true,
       points: [
         {
           th: "บำรุงรักษาตามกำหนด",
