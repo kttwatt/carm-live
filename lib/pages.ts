@@ -102,7 +102,7 @@ export const PAGES: Record<string, Page[]> = {
       ],
     },
     {
-      heading: "รังสีฟุ้งกระจาย (Scatter)",
+      heading: "รังสีฟุ้งกระจายหรือรังสีกระเจิง (Scatter)",
       // its own heading stands as the title; the AP diagram, held still, sits centred under the cards
       noTitle: true,
       top: true,
