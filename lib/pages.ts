@@ -315,6 +315,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การจัดเก็บอุปกรณ์ป้องกันรังสีอย่างถูกวิธี",
+      noTitle: true,
       points: [
         { th: "ใช้ที่แขวนเฉพาะ", en: "Lead apron racks", desc: "แขวนเสื้อตะกั่วและฉากป้องกันบนที่แขวนที่ออกแบบมาโดยเฉพาะซึ่งมีความแข็งแรง" },
         {
