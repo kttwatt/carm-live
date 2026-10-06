@@ -49,7 +49,7 @@ export const SCENES: Scene[] = [
   { id: "s02b", slide: 2, speaker: 1, title: "ใครเป็นคนใช้ Fluoroscopy ในห้องผ่าตัด", kind: "lecture" },
   { id: "s02c", slide: 2, speaker: 1, title: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้", kind: "lecture" },
   { id: "s03", slide: 3, speaker: 2, title: "หลักการทำงานของเครื่องและอันตรายจากรังสี", kind: "lecture" },
-  { id: "s04", slide: 4, speaker: 2, title: "รังสีมาจากไหน: ลำรังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
+  { id: "s04", slide: 4, speaker: 2, title: "รังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
   { id: "s05", slide: 5, speaker: 3, title: "หลัก ALARA: เวลา ระยะห่าง การป้องกัน", kind: "lecture" },
   { id: "s06", slide: 6, speaker: 3, title: "ควรยืนตรงไหนในห้องผ่าตัด", kind: "position", activity: "แตะตำแหน่ง A–F รอบเตียง แล้วเฉลยดัชนีรังสีกระเจิง" },
   { id: "s07", slide: 7, speaker: 4, title: "อุปกรณ์ป้องกันรังสีส่วนบุคคล", kind: "lecture" },
