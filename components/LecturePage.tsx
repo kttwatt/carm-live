@@ -112,6 +112,15 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
       {page.key && (
         <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>
       )}
+      {page.corner && (
+        // pinned in the bottom-right corner, in the room beside the key message, so it never pushes the page down
+        // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
+        <img
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.corner.src}`}
+          alt={page.corner.alt}
+          className="absolute bottom-[3cqh] right-[7cqw] h-[18cqh] w-auto rounded-xl object-contain"
+        />
+      )}
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );

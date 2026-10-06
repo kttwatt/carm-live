@@ -34,6 +34,8 @@ export type Page = {
   imageBelow?: boolean;
   /** the picture's height limit, in % of the screen height, when the page has room for a larger one */
   imageMax?: number;
+  /** a small picture in the bottom-right corner, beside the key message */
+  corner?: { src: string; alt: string };
   /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
   scale?: number;
 };
@@ -278,6 +280,10 @@ export const PAGES: Record<string, Page[]> = {
         },
       ],
       key: "หน่วยงานส่วนใหญ่ใช้ OSL เป็นหลัก",
+      corner: {
+        src: "/pages/dosimeters.webp",
+        alt: "ตัวอย่างเครื่องวัดรังสีส่วนบุคคล: TLD แผ่นวัดรังสีแบบติดเสื้อ และเครื่องวัดรังสีแบบอิเล็กทรอนิกส์สีฟ้าและสีชมพู",
+      },
     },
     {
       heading: "ตำแหน่งการติด OSL dosimeter",
