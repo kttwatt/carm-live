@@ -1,15 +1,15 @@
-// Animated diagram for "การเดินทางของรังสี": one 12 s loop in five steps (keyframes `rj-*` in globals.css).
-// The steps line up with the page's five points, which LecturePage lights up on the same clock.
+// Animated diagram for "การเดินทางของรังสี": one 12 s loop in four steps (keyframes `rj-*` in globals.css).
+// The steps line up with the page's four points, which LecturePage lights up on the same clock.
 // With reduced motion every animation is off and the whole diagram shows at once.
 
-/** Seconds per loop; LecturePage starts each point card one step (18% of this) after the last. */
+/** Seconds per loop; LecturePage starts each point card one step (22% of this) after the last. */
 export const JOURNEY_LOOP = 12;
 
 const anim = (name: string, extra = "") => ({ animation: `${name} ${JOURNEY_LOOP}s linear infinite${extra}` });
 const flow = { animation: "rj-flow 0.6s linear infinite" };
 
-// Primary beam rays: from the collimator opening down to the patient's skin.
-const RAYS = [-62, -31, 0, 31, 62].map((dx) => ({ x1: 200 + dx * 0.25, x2: 200 + dx * 1.15 }));
+// Primary beam rays: from the tube window down to the patient's skin.
+const RAYS = [-62, -31, 0, 31, 62].map((dx) => ({ x1: 200 + dx * 0.15, x2: 200 + dx * 1.15 }));
 
 // Scatter leaves the patient in every direction, more of it back toward the tube.
 const SCATTER: { x: number; y: number; a: number; len: number }[] = [
@@ -28,7 +28,7 @@ export function RadiationJourney({ className, style }: { className?: string; sty
     <svg
       viewBox="0 0 400 430"
       role="img"
-      aria-label="รังสีเอกซ์จาก X-ray tube ผ่านตัวจำกัดลำรังสีเข้าสู่ผู้ป่วย กระเจิงออกรอบตัวผู้ป่วย และส่วนน้อยทะลุถึงตัวรับภาพ"
+      aria-label="รังสีเอกซ์จาก X-ray tube เข้าสู่ผู้ป่วย กระเจิงออกรอบตัวผู้ป่วย และส่วนน้อยทะลุถึงตัวรับภาพ"
       className={className}
       style={style}
     >
@@ -47,17 +47,17 @@ export function RadiationJourney({ className, style }: { className?: string; sty
         </marker>
       </defs>
 
-      {/* 2 · beam cone, on from the collimator step until the image is made */}
-      <polygon points="186,92 214,92 272,232 128,232" fill="url(#rj-cone)" style={anim("rj-beam")} />
+      {/* beam cone, on from the end of step 1 until the image is made */}
+      <polygon points="190,72 210,72 272,232 128,232" fill="url(#rj-cone)" style={anim("rj-beam")} />
 
-      {/* 3 · photons travelling down the primary beam */}
+      {/* 2 · photons travelling down the primary beam */}
       <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={anim("rj-rays")}>
         {RAYS.map((r) => (
-          <line key={r.x1} x1={r.x1} y1={94} x2={r.x2} y2={230} style={flow} />
+          <line key={r.x1} x1={r.x1} y1={74} x2={r.x2} y2={230} style={flow} />
         ))}
       </g>
 
-      {/* 4 · scatter out of the patient */}
+      {/* 3 · scatter out of the patient */}
       <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={anim("rj-scatter")}>
         {SCATTER.map((s) => {
           const r = (s.a * Math.PI) / 180;
@@ -75,7 +75,7 @@ export function RadiationJourney({ className, style }: { className?: string; sty
         })}
       </g>
 
-      {/* 5 · the little that gets through, down to the image receptor */}
+      {/* 4 · the little that gets through, down to the image receptor */}
       <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={anim("rj-through")}>
         {[176, 200, 224].map((x) => (
           <line key={x} x1={x} y1={318} x2={x} y2={366} style={flow} />
@@ -90,17 +90,11 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       {/* 1 · electrons from the hot filament to the target */}
       <line x1="158" y1="43" x2="238" y2="47" stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 10" style={{ ...anim("rj-electrons"), ...flow }} />
 
-      {/* filter and collimator under the tube */}
-      <g style={anim("rj-collimator")}>
-        <rect x="160" y="72" width="80" height="22" rx="3" fill="#132c5c" stroke="#bccce6" strokeWidth="2" />
-        <rect x="166" y="80" width="20" height="8" fill="#bccce6" />
-        <rect x="214" y="80" width="20" height="8" fill="#bccce6" />
-      </g>
 
       {/* patient on the table */}
       <ellipse cx="200" cy="270" rx="104" ry="48" fill="#e6ecf3" stroke="#bccce6" strokeWidth="2" />
       <circle cx="210" cy="284" r="30" fill="none" stroke="#46566a" strokeWidth="2.5" />
-      {/* 3 · entrance skin takes the most dose */}
+      {/* 2 · entrance skin takes the most dose */}
       <path d="M134 236 Q200 206 266 236" fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" style={anim("rj-skin")} />
       <rect x="70" y="320" width="260" height="10" rx="2" fill="#46566a" />
 
@@ -117,7 +111,6 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       {/* labels */}
       <g fill="#f3f6f8" fontSize="14" fontWeight="600">
         <text x="290" y="40">X-ray tube</text>
-        <text x="248" y="88" fill="#bccce6" fontSize="12">ตัวกรอง/จำกัดลำรังสี</text>
         <text x="16" y="150" fill="#f2b233">Primary beam</text>
         <text x="300" y="190" fill="#f08a5d">Scatter</text>
         <text x="72" y="348">ผู้ป่วย</text>

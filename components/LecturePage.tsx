@@ -59,7 +59,7 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
 /** The diagram on the left plays the loop; the point of the step it is on lights up on the right. */
 function JourneyPage({ page, index, total }: { page: Page; index: number; total: number }) {
   const pts = page.points ?? [];
-  const step = JOURNEY_LOOP * 0.18;
+  const step = JOURNEY_LOOP * 0.22;
   return (
     <div className="flex max-w-[86vw] flex-col gap-[2vh]">
       <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>

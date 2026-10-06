@@ -71,7 +71,7 @@ h3 {
   }
 }
 
-/* "การเดินทางของรังสี" diagram: a 12 s loop of five steps at 0, 18, 36, 54 and 72%, then a short rest.
+/* "การเดินทางของรังสี" diagram: a 12 s loop of four steps at 0, 22, 44 and 66%, then a short rest.
    Each element's resting style is fully shown, so reduced motion leaves the whole diagram visible. */
 @keyframes rj-flow {
   to {
@@ -79,58 +79,54 @@ h3 {
   }
 }
 @keyframes rj-tube {
-  0%, 18% { opacity: 1; }
-  22%, 92% { opacity: 0.45; }
-  96%, 100% { opacity: 0; }
+  0%, 20% { opacity: 1; }
+  26%, 88% { opacity: 0.45; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-electrons {
-  0%, 92% { opacity: 1; }
-  96%, 100% { opacity: 0; }
-}
-@keyframes rj-collimator {
-  0%, 16%, 38%, 100% { filter: none; }
-  20%, 34% { filter: drop-shadow(0 0 5px #f2b233) brightness(1.4); }
+  0%, 88% { opacity: 1; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-beam {
-  0%, 17% { opacity: 0; }
-  24%, 90% { opacity: 1; }
-  95%, 100% { opacity: 0; }
+  0%, 12% { opacity: 0; }
+  20%, 88% { opacity: 1; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-rays {
-  0%, 35% { opacity: 0; }
-  40%, 90% { opacity: 1; }
-  95%, 100% { opacity: 0; }
+  0%, 21% { opacity: 0; }
+  26%, 88% { opacity: 1; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-skin {
-  0%, 38% { opacity: 0; }
-  44%, 54% { opacity: 1; }
-  60%, 90% { opacity: 0.5; }
-  95%, 100% { opacity: 0; }
+  0%, 26% { opacity: 0; }
+  32%, 44% { opacity: 1; }
+  50%, 88% { opacity: 0.5; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-scatter {
-  0%, 53% { opacity: 0; }
-  58%, 72% { opacity: 1; }
-  76%, 90% { opacity: 0.45; }
-  95%, 100% { opacity: 0; }
+  0%, 43% { opacity: 0; }
+  48%, 66% { opacity: 1; }
+  70%, 88% { opacity: 0.45; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-through {
-  0%, 71% { opacity: 0; }
-  75%, 90% { opacity: 1; }
-  95%, 100% { opacity: 0; }
+  0%, 65% { opacity: 0; }
+  69%, 88% { opacity: 1; }
+  94%, 100% { opacity: 0; }
 }
 @keyframes rj-image {
-  0%, 74% { opacity: 0; }
-  80%, 92% { opacity: 1; }
-  97%, 100% { opacity: 0; }
+  0%, 68% { opacity: 0; }
+  74%, 90% { opacity: 1; }
+  96%, 100% { opacity: 0; }
 }
 /* the point card of the step that is playing; each card is delayed one step */
 @keyframes rj-step {
-  0%, 17% {
+  0%, 21% {
     border-color: var(--color-amber);
     background: color-mix(in oklab, var(--color-amber) 18%, var(--color-night-2));
     transform: translateX(-0.6vw);
   }
-  19%, 100% {
+  23%, 100% {
     border-color: var(--color-line);
     background: var(--color-night-2);
     transform: none;
