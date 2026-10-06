@@ -35,9 +35,9 @@ const SCATTER = [
 });
 
 const POSITIONS = [
-  { name: "AP", where: "หลอดอยู่ใต้โต๊ะ ตัวรับภาพอยู่ด้านบน", verdict: "แนะนำ: รังสีกระเจิงลงด้านล่าง", color: "#5cc46f" },
-  { name: "Lateral", where: "หลอดอยู่ด้านข้าง", verdict: "ยืนฝั่งตัวรับภาพ ไม่ยืนฝั่งหลอด", color: "#f2b233" },
-  { name: "Invert", where: "หลอดอยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและตา", color: "#f08a5d" },
+  { name: "AP View", where: "หลอดเอกซเรย์อยู่ใต้เตียงผ่าตัด ตัวรับภาพอยู่ด้านบน", verdict: "แนะนำ: รังสีกระเจิงลงด้านล่าง", color: "#5cc46f" },
+  { name: "Lateral", where: "หลอดเอกซเรย์อยู่ด้านซ้าย ตัวรับภาพอยู่ด้านขวา", verdict: "ควรยืนฝั่งตัวรับภาพ ไม่ยืนฝั่งหลอด", color: "#f2b233" },
+  { name: "Invert", where: "หลอดเอกซเรย์อยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและดวงตา", color: "#f08a5d" },
 ];
 
 // Entrance skin, facing the tube at each position (patient ellipse rx 80, ry 62).
