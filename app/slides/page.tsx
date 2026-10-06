@@ -30,26 +30,34 @@ if (COVER) {
   });
 }
 
-if (OUTLINE?.items) {
-  frames.push({
-    id: OUTLINE.id,
-    node: (
-      <main className="flex flex-1 flex-col justify-center gap-[4cqh] px-[8cqw] py-[7cqh]">
-        <h1 className="font-display text-[4cqw] font-bold leading-tight">{OUTLINE.title}</h1>
-        <ol className="flex flex-col gap-[2.2cqh]">
-          {OUTLINE.items.map((item, i) => (
-            <li key={item} className="flex items-baseline gap-[1.4cqw] text-[2.4cqw] leading-snug">
-              <span className="w-[2.6cqw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ol>
-      </main>
-    ),
-  });
-}
+/** The topics list (the outline, and the closing summary with a line under each topic). */
+const outlineFrame = (s: (typeof SCENES)[number]) => ({
+  id: s.id,
+  node: (
+    <main className="flex flex-1 flex-col justify-center gap-[4cqh] px-[8cqw] py-[7cqh]">
+      <h1 className="font-display text-[4cqw] font-bold leading-tight">{s.title}</h1>
+      <ol className={`flex flex-col ${s.notes ? "gap-[1.6cqh]" : "gap-[2.2cqh]"}`}>
+        {(s.items ?? []).map((item, i) => (
+          <li key={item} className="flex items-baseline gap-[1.4cqw] text-[2.4cqw] leading-snug">
+            <span className="w-[2.6cqw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
+            <span className="flex min-w-0 flex-col">
+              <span className={s.notes ? "font-semibold" : ""}>{item}</span>
+              {s.notes?.[i] && <span className="text-[1.6cqw] leading-snug text-sky">{s.notes[i]}</span>}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </main>
+  ),
+});
+
+if (OUTLINE?.items) frames.push(outlineFrame(OUTLINE));
 
 for (const s of SLIDES) {
+  if (s.kind === "outline" && s.items) {
+    frames.push(outlineFrame(s));
+    continue;
+  }
   const pages = pagesFor(s.id);
   if (isInteractive(s.kind) || pages.length === 0) {
     frames.push({

@@ -111,7 +111,10 @@ function JoinView() {
               {scene.items.map((item, i) => (
                 <li key={item} className="flex items-baseline gap-3 text-lg leading-snug">
                   <span className="w-5 shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
-                  <span>{item}</span>
+                  <span className="flex flex-col">
+                    <span>{item}</span>
+                    {scene.notes?.[i] && <span className="text-sm text-sky">{scene.notes[i]}</span>}
+                  </span>
                 </li>
               ))}
             </ol>

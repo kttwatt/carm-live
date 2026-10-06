@@ -22,12 +22,24 @@ export type Scene = {
   video?: string;
   /** outline scenes: the talk's topics, in order */
   items?: string[];
+  /** outline scenes: one short line under each topic (the closing summary) */
+  notes?: string[];
   slide?: number;
   speaker?: number;
   activity?: string;
   /** the title at the top of its lecture pages in amber instead of white */
   amber?: boolean;
 };
+
+// The talk's topics: listed at the start, and again with a take-home line at the end.
+const TOPICS = [
+  "รังสีที่ใช้ในห้องผ่าตัดและผู้ใช้งาน Fluoroscopy",
+  "การทำงานของ Fluoroscopy และอันตรายจากรังสีที่ใช้ในห้องผ่าตัด",
+  "หลัก ALARA: เวลา ระยะห่าง การป้องกัน",
+  "อุปกรณ์ป้องกันรังสี และเครื่องตรวจวัดรังสี",
+  "ค่ากำหนดปริมาณรังสี (Dose Limits)",
+  "ระยะเวลาการได้รับรังสีและการดูแลรักษาอุปกรณ์ทางรังสี",
+];
 
 export const SCENES: Scene[] = [
   { id: "join", title: "ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด", kind: "join" },
@@ -37,14 +49,7 @@ export const SCENES: Scene[] = [
     id: "outline",
     title: "หัวข้อการบรรยาย",
     kind: "outline",
-    items: [
-      "รังสีที่ใช้ในห้องผ่าตัดและผู้ใช้งาน Fluoroscopy",
-      "การทำงานของ Fluoroscopy และอันตรายจากรังสีที่ใช้ในห้องผ่าตัด",
-      "หลัก ALARA: เวลา ระยะห่าง การป้องกัน",
-      "อุปกรณ์ป้องกันรังสี และเครื่องตรวจวัดรังสี",
-      "ค่ากำหนดปริมาณรังสี (Dose Limits)",
-      "ระยะเวลาการได้รับรังสีและการดูแลรักษาอุปกรณ์ทางรังสี",
-    ],
+    items: TOPICS,
   },
   { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
   { id: "s02", slide: 2, speaker: 1, title: "ใครเป็นผู้ใช้งานเครื่อง Fluoroscopy", kind: "poll", activity: "เลือกบุคลากรที่ใช้เครื่อง Fluoroscopy ได้ แล้วเฉลยตามร่างกฎกระทรวง ข้อ 9" },
@@ -59,7 +64,23 @@ export const SCENES: Scene[] = [
   { id: "s09", slide: 9, speaker: 5, title: "เกณฑ์ปริมาณรังสีและผู้ปฏิบัติงานตั้งครรภ์", kind: "decision", activity: "เพื่อนร่วมทีมแจ้งว่าตั้งครรภ์ ทีมควรทำอย่างไร" },
   { id: "s10", slide: 10, speaker: 5, title: "ห้องเอกซเรย์และการป้องกันเชิงโครงสร้าง", kind: "lecture" },
   { id: "s11", slide: 11, speaker: 6, title: "การดูแลเครื่องและเวลาการฉายรังสี", kind: "lecture" },
-  { id: "s12", slide: 12, speaker: 6, title: "ภารกิจสุดท้ายและสรุป", kind: "simulation", activity: "ผ่าตัดยึดตรึงกระดูก: ตั้งท่าเครื่อง เลือกที่ยืน ฉายให้ได้ 4 ภาพ" },
+  // the closing summary: the same topics, each with its one-line take-home point
+  {
+    id: "s12",
+    slide: 12,
+    speaker: 6,
+    title: "สรุป",
+    kind: "outline",
+    items: TOPICS,
+    notes: [
+      "ผู้ควบคุมการใช้เครื่องมี 6 กลุ่มตามกฎหมาย พยาบาลไม่อยู่ในรายชื่อ",
+      "ผู้ป่วยคือแหล่งรังสีกระเจิงหลัก ฝั่งหลอดเอกซเรย์ได้รับมากกว่า ใช้ท่า AP",
+      "ฉายให้สั้น ถอยให้ห่าง และใช้เครื่องกำบัง",
+      "ชุดตะกั่ว 0.50 mm Pb ปลอกคอ แว่นตา และติด OSL ที่หน้าอกใต้เสื้อตะกั่ว",
+      "ผู้ปฏิบัติงาน 20 mSv/ปี เลนส์ตา 20 mSv/ปี ทารกในครรภ์ 1 mSv",
+      "ใช้ Pulsed mode บันทึกเวลาฉาย แขวนชุดตะกั่วไม่พับ บำรุงเครื่องตามกำหนด",
+    ],
+  },
   { id: "board", title: "อันดับคะแนน", kind: "leaderboard" },
   { id: "refs", title: "ขอบคุณ · เอกสารอ้างอิงหลัก", kind: "end" },
 ];
