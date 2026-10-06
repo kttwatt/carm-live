@@ -30,8 +30,8 @@ export type Page = {
   imageBelow?: boolean;
   /** the picture's height limit, in % of the screen height, when the page has room for a larger one */
   imageMax?: number;
-  /** a small picture in the bottom-right corner, beside the key message */
-  corner?: { src: string; alt: string };
+  /** a picture to the right of the cards, with the key message under it */
+  side?: { src: string; alt: string };
   /** the most the page may grow into spare room (default 1.4); it shrinks below 1 by itself when it would not fit */
   scale?: number;
 };
@@ -243,8 +243,9 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "Dosimeter",
-      // kept at its own size, so the corner picture has room
-      scale: 1,
+      // one card per row beside the picture
+      cols: 1,
+      round: true,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงาน เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {
@@ -263,8 +264,8 @@ export const PAGES: Record<string, Page[]> = {
           desc: "แผ่นติดเสื้อ ประเมินปริมาณรังสีสะสมระยะยาว เครื่องอ่านใช้แสงสีเขียวหรือเลเซอร์กระตุ้นผลึก ให้ปล่อยแสงสีน้ำเงินตามปริมาณรังสีที่ได้รับ อ่านค่าซ้ำได้",
         },
       ],
-      key: "หน่วยงานส่วนใหญ่ใช้ OSL เป็นหลัก",
-      corner: {
+      key: "หน่วยงานส่วนใหญ่ใช้\nOSL เป็นหลัก",
+      side: {
         src: "/pages/dosimeters.webp",
         alt: "ตัวอย่างเครื่องวัดรังสีส่วนบุคคล: TLD แผ่นวัดรังสีแบบติดเสื้อ และเครื่องวัดรังสีแบบอิเล็กทรอนิกส์สีฟ้าและสีชมพู",
       },

@@ -37,47 +37,62 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       style={page.imageMax ? { maxHeight: `${page.imageMax}cqh` } : undefined}
     />
   );
+  const cards = page.round || page.figure === "radiation-ap" ? (
+    // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
+    <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      {pts.map((pt, i) => (
+        <li key={pt.th} className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh] ${long ? "items-start" : "items-center"}`}>
+          <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
+            {i + 1}
+          </span>
+          <span className="flex min-w-0 flex-col gap-[0.5cqh]">
+            <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
+            {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
+            {pt.desc && <span className={`whitespace-pre-line text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
+          </span>
+        </li>
+      ))}
+    </ol>
+  ) : pts.length > 0 && (
+    <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      {pts.map((pt, i) => (
+        <li
+          key={pt.th}
+          // the number sits in its own column, so the lines under the title start where the title does
+          className="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-subgrid content-start items-baseline gap-x-[0.8cqw] gap-y-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
+          style={{ gridRow: `span ${lines}` }}
+        >
+          <span className="row-span-full font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
+          <span className={`col-start-2 font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
+          {named && <span className="col-start-2 text-[1.25cqw] text-mist">{pt.en}</span>}
+          {detailed && <span className="col-start-2 whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
+        </li>
+      ))}
+    </ol>
+  );
+  const keyMessage = page.key && (
+    <p className="w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
+  );
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
     <>
       {page.heading && <Heading text={page.heading} />}
-      {/* everything under the heading grows into the room left, or shrinks until it fits;
-          a page with a corner picture takes the whole room, so the picture can fill what is left */}
-      <FitBox of={page} cap={page.scale ?? GROW} stretch={!!page.corner} className="flex flex-col gap-[2.4cqh]">
+      {/* everything under the heading grows into the room left, or shrinks until it fits */}
+      <FitBox of={page} cap={page.scale ?? GROW} className="flex flex-col gap-[2.4cqh]">
         {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
         {!page.imageBelow && image}
-        {page.round || page.figure === "radiation-ap" ? (
-          // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
-          <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-            {pts.map((pt, i) => (
-              <li key={pt.th} className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh] ${long ? "items-start" : "items-center"}`}>
-                <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
-                  {i + 1}
-                </span>
-                <span className="flex min-w-0 flex-col gap-[0.5cqh]">
-                  <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
-                  {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
-                  {pt.desc && <span className={`whitespace-pre-line text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
-                </span>
-              </li>
-            ))}
-          </ol>
-        ) : pts.length > 0 && (
-          <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-            {pts.map((pt, i) => (
-              <li
-                key={pt.th}
-                // the number sits in its own column, so the lines under the title start where the title does
-                className="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-subgrid content-start items-baseline gap-x-[0.8cqw] gap-y-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
-                style={{ gridRow: `span ${lines}` }}
-              >
-                <span className="row-span-full font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
-                <span className={`col-start-2 font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
-                {named && <span className="col-start-2 text-[1.25cqw] text-mist">{pt.en}</span>}
-                {detailed && <span className="col-start-2 whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
-              </li>
-            ))}
-          </ol>
+        {page.side ? (
+          // the cards on the left; the picture beside them on the right, the key message under it
+          <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-center gap-[2.4cqw]">
+            {cards}
+            <div className="flex flex-col items-start gap-[3cqh]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
+              <img src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.side.src}`} alt={page.side.alt} className="w-full rounded-2xl" />
+              {keyMessage}
+            </div>
+          </div>
+        ) : (
+          cards
         )}
         {page.imageBelow && image}
         {page.figure === "radiation-ap" && (
@@ -117,25 +132,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
           </table>
         )}
         {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
-        {page.corner ? (
-          // the key message bottom left, the picture bottom right, sized to the height left on this screen
-          <div className="flex min-h-0 flex-1 items-end gap-[3cqw] pt-[1cqh]">
-            {page.key && <p className="w-fit shrink-0 rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>}
-            {/* the picture is laid over the room this row gets, so it can never make the page taller */}
-            <div className="relative min-w-0 flex-1 self-stretch">
-              {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
-              <img
-                src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.corner.src}`}
-                alt={page.corner.alt}
-                className="absolute bottom-0 right-0 h-full max-h-[26cqh] w-full object-contain object-right-bottom"
-              />
-            </div>
-          </div>
-        ) : (
-          page.key && (
-            <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
-          )
-        )}
+        {!page.side && keyMessage && <div className="mt-[3cqh]">{keyMessage}</div>}
       </FitBox>
     </>
   );

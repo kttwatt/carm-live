@@ -4,9 +4,8 @@ import { useLayoutEffect, useRef, type ReactNode } from "react";
 
 /** Fills the room left under a page's title: the content zooms up to `cap` times its size, or down as far as it
  * must, so no picture or line ever falls off the screen. The content is laid over the room rather than in it, so
- * zooming it never changes the room it is measured against. `stretch` makes the content as tall as the room, for a
- * page whose last row takes the space that is left (a corner picture). `of` is what it shows (the page): a new one is fitted afresh. */
-export function FitBox({ of, cap, stretch, className = "", children }: { of: unknown; cap: number; stretch?: boolean; className?: string; children: ReactNode }) {
+ * zooming it never changes the room it is measured against. `of` is what it shows (the page): a new one is fitted afresh. */
+export function FitBox({ of, cap, className = "", children }: { of: unknown; cap: number; className?: string; children: ReactNode }) {
   const room = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
 
@@ -22,7 +21,6 @@ export function FitBox({ of, cap, stretch, className = "", children }: { of: unk
       const fits = (z: number) => {
         el.style.zoom = String(z);
         el.style.width = `${w / z}px`;
-        el.style.height = stretch ? `${h / z}px` : "";
         const top = box.getBoundingClientRect();
         for (const n of el.querySelectorAll("*")) {
           const r = n.getBoundingClientRect();
@@ -51,10 +49,11 @@ export function FitBox({ of, cap, stretch, className = "", children }: { of: unk
       watch.disconnect();
       el.removeEventListener("load", fit, true);
     };
-  }, [of, cap, stretch]);
+  }, [of, cap]);
 
   return (
-    <div ref={room} className="relative min-h-0 flex-1">
+    // clipped, so a size being tried that is too large never gives the page a scrollbar (which would change the room)
+    <div ref={room} className="relative min-h-0 flex-1 overflow-hidden">
       <div ref={body} className={`absolute left-0 top-0 ${className}`}>
         {children}
       </div>
