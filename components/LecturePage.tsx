@@ -55,7 +55,7 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
               <span className="flex min-w-0 flex-col gap-[0.5cqh]">
                 <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
                 {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
-                {pt.desc && <span className={`text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
+                {pt.desc && <span className={`whitespace-pre-line text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
               </span>
             </li>
           ))}
