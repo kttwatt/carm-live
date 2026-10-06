@@ -261,3 +261,13 @@ h3 {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
 }
+
+/* Final ranking podium (components/Podium.tsx): each step rises from the floor, then its name fades in. */
+@keyframes pd-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes pd-fade {
+  from { opacity: 0; transform: translateY(1vh); }
+  to { opacity: 1; transform: none; }
+}

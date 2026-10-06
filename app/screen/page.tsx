@@ -3,6 +3,7 @@
 import { Explanation } from "@/components/Explanation";
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
+import { Podium } from "@/components/Podium";
 import { Model3DStage } from "@/components/Model3D";
 import { VideoScene } from "@/components/VideoScene";
 import { SoundHint } from "@/components/SoundHint";
@@ -129,9 +130,16 @@ function ScreenView() {
       <main className="flex flex-1 flex-col gap-[3vh] px-[7vw] py-[6vh]">
         {!midway && <p className="text-[1.5vw] font-semibold tracking-wide text-amber">สรุปคะแนนจากทุกกิจกรรม</p>}
         <h1 className="w-fit rounded-2xl bg-amber px-[2vw] py-[0.6vh] font-display text-[4vw] font-bold leading-tight text-ink">{midway ? "คะแนน" : "อันดับคะแนน"}</h1>
-        <div className="max-w-[70vw]">
-          <LeaderList rows={board} size="xl" />
-        </div>
+        {midway ? (
+          <div className="max-w-[70vw]">
+            <LeaderList rows={board} size="xl" />
+          </div>
+        ) : (
+          // the end: the top four on a podium, the rest under it (on the projector it plays even under reduced motion)
+          <div className="motion-demo flex flex-1 flex-col justify-end">
+            <Podium rows={board} />
+          </div>
+        )}
         <p className="text-[1.1vw] text-mist">แสดงเลขที่และชื่อ · ดูคะแนนและอันดับของตัวเองบนมือถือ</p>
       </main>
     );
