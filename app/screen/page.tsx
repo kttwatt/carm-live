@@ -104,7 +104,7 @@ function ScreenView() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-[2.5vh] px-[5vw] py-[4vh]">
         <p className="font-display text-[2.6vw] font-bold">สแกนเพื่อเข้าร่วม</p>
-        <Qr value={url} size={560} className="max-h-[66vh] max-w-[66vh] [&_img]:h-full [&_img]:w-full" />
+        <Qr value={url} carm size={560} className="max-h-[66vh] max-w-[66vh] [&_img]:h-full [&_img]:w-full" />
         <p className="text-[1.8vw] text-mist">
           รหัสห้อง <b className="font-mono tracking-[0.2em] text-paper">{room}</b>
           {" · "}เข้าร่วมแล้ว <b className="tabular-nums text-amber">{participants}</b> คน
@@ -225,7 +225,7 @@ function ScreenView() {
           </p>
         </div>
         <div className="flex flex-col items-center gap-[2vh]">
-          <Qr value={url} size={420} className="max-h-[60vh] max-w-[34vw] [&_img]:h-full [&_img]:w-full" />
+          <Qr value={url} carm size={420} className="max-h-[60vh] max-w-[34vw] [&_img]:h-full [&_img]:w-full" />
           <p className="text-[1.6vw] text-mist">
             รหัสห้อง <b className="font-mono tracking-[0.2em] text-paper">{room}</b>
           </p>
