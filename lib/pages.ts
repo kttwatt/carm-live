@@ -27,7 +27,7 @@ export type Page = {
   amber?: boolean;
   /** sits at the top of the screen instead of the middle */
   top?: boolean;
-  /** with top: start this far down instead (% of the screen height; the default is 6) */
+  /** with top: start this far down instead (% of the screen height; the default is 15) */
   topGap?: number;
   /** cards per row, when the default (up to 3) would wrap their titles */
   cols?: number;
@@ -248,7 +248,6 @@ export const PAGES: Record<string, Page[]> = {
       noTitle: true,
       amber: true,
       top: true,
-      topGap: 12,
       round: true,
       // two set lines; the word joiner keeps "97–99%" from breaking at the dash
       key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
@@ -305,7 +304,7 @@ export const PAGES: Record<string, Page[]> = {
         src: "/pages/osl-placement.webp",
         alt: "สำหรับเจ้าหน้าที่ที่ใช้แผ่นวัดรังสี 2 แผ่น แผ่นที่ 1 ควรติดด้านนอกปลอกคอกำบังรังสี แผ่นที่ 2 ติดด้านในเสื้อกำบังรังสี",
       },
-      imageMax: 78,
+      imageMax: 70,
     },
   ],
 
@@ -395,11 +394,10 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การดูแลรักษาเครื่อง C-arm",
-      // its own heading, in amber, stands as the title 15% of the way down
+      // its own heading, in amber, stands as the title near the top
       noTitle: true,
       amber: true,
       top: true,
-      topGap: 15,
       // one card per row, drawn larger for the room
       cols: 1,
       scale: 1.4,

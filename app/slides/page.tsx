@@ -107,7 +107,7 @@ for (const s of SLIDES) {
       id: n === 0 ? s.id : `${s.id}-${n + 1}`,
       node: (
         <main
-          className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start py-[6cqh]" : "justify-center py-[8cqh]"}`}
+          className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start pt-[15cqh] pb-[6cqh]" : "justify-center py-[8cqh]"}`}
           style={p.top && p.topGap ? { paddingTop: `${p.topGap}cqh` } : undefined}
         >
           {!isTopic(p) && !p.noTitle && (
