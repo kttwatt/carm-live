@@ -27,8 +27,6 @@ export type Scene = {
   slide?: number;
   speaker?: number;
   activity?: string;
-  /** the title at the top of its lecture pages in amber instead of white */
-  amber?: boolean;
 };
 
 // The talk's topics: listed at the start, and again with a take-home line at the end.
@@ -58,7 +56,7 @@ export const SCENES: Scene[] = [
   { id: "s04", slide: 4, speaker: 2, title: "รังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
   { id: "s05", slide: 5, speaker: 3, title: "หลัก ALARA: เวลา ระยะห่าง การป้องกัน", kind: "lecture" },
   { id: "s06", slide: 6, speaker: 3, title: "ควรยืนตรงไหนในห้องผ่าตัด", kind: "position", activity: "แตะตำแหน่ง A–F รอบเตียง แล้วเฉลยดัชนีรังสีกระเจิง" },
-  { id: "s07", slide: 7, speaker: 4, title: "อุปกรณ์ป้องกันรังสีส่วนบุคคล", kind: "lecture", amber: true },
+  { id: "s07", slide: 7, speaker: 4, title: "อุปกรณ์ป้องกันรังสีส่วนบุคคล", kind: "lecture" },
   { id: "s08", slide: 8, speaker: 4, title: "แผ่นวัดรังสีประจำตัว: ติดด้านนอกหรือด้านใน", kind: "quiz", activity: "เลือกอุปกรณ์ป้องกันและตำแหน่งติดแผ่นวัดรังสี" },
   { id: "s09a", slide: 9, speaker: 5, title: "ค่ากำหนดปริมาณรังสี (Dose Limits)", kind: "lecture" },
   { id: "s09", slide: 9, speaker: 5, title: "เกณฑ์ปริมาณรังสีและผู้ปฏิบัติงานตั้งครรภ์", kind: "decision", activity: "เพื่อนร่วมทีมแจ้งว่าตั้งครรภ์ ทีมควรทำอย่างไร" },

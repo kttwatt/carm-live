@@ -1,11 +1,12 @@
-// What the main screen shows under a lecture slide's title, one page at a time (the presenter's "next" steps
+// What the main screen shows for a lecture slide, one page at a time (the presenter's "next" steps
 // through them before moving on). Text comes from the seminar's Canva deck and speaker 2's script, with
 // typing and PDF-copy errors fixed.
 
 /** label replaces the card's running number, e.g. "(ก)" for a lettered clause */
 export type Point = { th: string; en?: string; desc?: string; label?: string };
 export type Page = {
-  /** empty when the scene title already says it */
+  /** the page's title, in amber 15% down the screen (the slide's title is not shown on lecture pages);
+   * empty when a picture on the page carries its own */
   heading: string;
   lead?: string;
   points?: Point[];
@@ -21,14 +22,6 @@ export type Page = {
   figure?: "radiation-journey" | "radiation-ap" | "carm-3d";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
-  /** leave out the slide's title above this page: its heading names the page on its own */
-  noTitle?: boolean;
-  /** with noTitle: the title-size heading in amber instead of white */
-  amber?: boolean;
-  /** sits at the top of the screen instead of the middle */
-  top?: boolean;
-  /** with top: start this far down instead (% of the screen height; the default is 15) */
-  topGap?: number;
   /** cards per row, when the default (up to 3) would wrap their titles */
   cols?: number;
   /** cards with a round number, text centred, all the same height */
@@ -39,7 +32,7 @@ export type Page = {
   imageMax?: number;
   /** a small picture in the bottom-right corner, beside the key message */
   corner?: { src: string; alt: string };
-  /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
+  /** the most the page may grow into spare room (default 1.4); it shrinks below 1 by itself when it would not fit */
   scale?: number;
 };
 
@@ -57,7 +50,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "รังสีวินิจฉัย (Diagnostic radiology)",
-      noTitle: true,
       lead: "การนำรังสีเอกซ์มาช่วยสร้างภาพอวัยวะ เพื่อการตรวจรักษาและวินิจฉัย รวมถึงการตรวจคัดกรองโรค เช่น",
       points: [
         { th: "เครื่องเอกซเรย์ทั่วไป", en: "General X-ray" },
@@ -71,7 +63,7 @@ export const PAGES: Record<string, Page[]> = {
 
   s02c: [
     {
-      heading: "",
+      heading: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้",
       lead:
         "จากร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2566 ข้อ 9 ระบุว่า ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
       // two per row so each clause's name stays on one line
@@ -99,12 +91,10 @@ export const PAGES: Record<string, Page[]> = {
   s03: [
     // Topic pages (a heading alone): shown as a section title in the middle of the screen.
     { heading: "หลักการทำงานของ Fluoroscopy" },
-    // the heading at the top and the 3D C-arm turning under it
-    { heading: "ส่วนประกอบของ Fluoroscopy", figure: "carm-3d", noTitle: true, top: true },
+    // the 3D C-arm turning under the heading
+    { heading: "ส่วนประกอบของ Fluoroscopy", figure: "carm-3d" },
     {
       heading: "การเดินทางของรังสี",
-      // its own heading stands as the title; the slide's title is left off
-      noTitle: true,
       figure: "radiation-journey",
       lead: "X-ray tube → ผู้ป่วย → ตัวรับภาพ → จอภาพ",
       points: [
@@ -116,9 +106,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "รังสีฟุ้งกระจายหรือรังสีกระเจิง (Scatter)",
-      // its own heading stands as the title; the AP diagram, held still, sits centred under the cards
-      noTitle: true,
-      top: true,
+      // the AP diagram, held still, sits centred under the cards
       figure: "radiation-ap",
       points: [
         { th: "ผู้ป่วยคือแหล่งรังสีฟุ้งกระจาย (Scatter) หลักในห้องผ่าตัด" },
@@ -128,10 +116,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "โหมดการฉายรังสี",
-      // its own heading, in amber, stands as the title at the top; the table drawn larger
-      noTitle: true,
-      amber: true,
-      top: true,
+      // the table drawn larger
       scale: 1.8,
       table: {
         head: ["", "Continuous", "Pulsed"],
@@ -204,8 +189,6 @@ export const PAGES: Record<string, Page[]> = {
   s07: [
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมเข้าเคส",
-      noTitle: true,
-      amber: true,
       lead: "แพทย์ Scrub nurse และผู้ช่วยผ่าตัด",
       points: [
         { th: "ยืนฝั่งเดียวกับตัวรับภาพ", en: "Detector" },
@@ -215,8 +198,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมรอบนอก",
-      noTitle: true,
-      amber: true,
       lead: "ทีมส่งของ และทีมดูแลนอกเขตปลอดเชื้อ",
       points: [
         { th: "รักษาระยะห่างอย่างน้อย 2 เมตร (6 ฟุต)" },
@@ -225,9 +206,8 @@ export const PAGES: Record<string, Page[]> = {
       ],
     },
     {
-      // the slide title names it; four cards across the top, the picture centred under them
-      heading: "",
-      top: true,
+      // four cards across the top, the picture centred under them
+      heading: "อุปกรณ์ป้องกันรังสีส่วนบุคคล",
       round: true,
       cols: 4,
       image: {
@@ -244,10 +224,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ชุดป้องกันรังสี",
-      // its own heading, in amber, stands as the title near the top
-      noTitle: true,
-      amber: true,
-      top: true,
       round: true,
       // two set lines; the word joiner keeps "97–99%" from breaking at the dash
       key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
@@ -267,10 +243,8 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "Dosimeter",
-      noTitle: true,
-      amber: true,
-      top: true,
-      scale: 1.2,
+      // kept at its own size, so the corner picture has room
+      scale: 1,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงาน เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {
@@ -297,9 +271,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ตำแหน่งการติด OSL dosimeter",
-      noTitle: true,
-      amber: true,
-      top: true,
       image: {
         src: "/pages/osl-placement.webp",
         alt: "สำหรับเจ้าหน้าที่ที่ใช้แผ่นวัดรังสี 2 แผ่น แผ่นที่ 1 ควรติดด้านนอกปลอกคอกำบังรังสี แผ่นที่ 2 ติดด้านในเสื้อกำบังรังสี",
@@ -312,7 +283,6 @@ export const PAGES: Record<string, Page[]> = {
   s09a: [
     {
       heading: "ค่ากำหนดปริมาณรังสี (Dose Limits)",
-      noTitle: true,
       scale: 1.5,
       table: {
         head: ["ประเภทของขีดจำกัด", "ผู้ปฏิบัติงานทางรังสี", "ประชาชนทั่วไป"],
@@ -329,8 +299,6 @@ export const PAGES: Record<string, Page[]> = {
   s10: [
     {
       heading: "แนวทางปฏิบัติเมื่อผู้ปฏิบัติงานทางรังสีตั้งครรภ์",
-      noTitle: true,
-      // 1.4 rather than 1.5 like its neighbours, so the long heading stays on one line
       scale: 1.4,
       points: [
         { th: "แจ้งผู้บังคับบัญชารับทราบ" },
@@ -348,7 +316,6 @@ export const PAGES: Record<string, Page[]> = {
   s11: [
     {
       heading: "Fluoroscopy time",
-      noTitle: true,
       points: [
         {
           th: "การบันทึกข้อมูล",
@@ -369,7 +336,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การจัดเก็บอุปกรณ์ป้องกันรังสีอย่างถูกวิธี",
-      noTitle: true,
       points: [
         { th: "ใช้ที่แขวนเฉพาะ", en: "Lead apron racks", desc: "แขวนเสื้อตะกั่วและฉากป้องกันบนที่แขวนที่ออกแบบมาโดยเฉพาะซึ่งมีความแข็งแรง" },
         {
@@ -381,7 +347,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การทำความสะอาดและฆ่าเชื้อ",
-      noTitle: true,
       points: [
         { th: "น้ำสบู่เจือจาง หรือสารทำความสะอาดชนิดอ่อน", en: "Mild detergent", desc: "เช็ดคราบสกปรก คราบเหงื่อ หรือฝุ่นทั่วไปประจำวัน" },
         {
@@ -394,11 +359,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การดูแลรักษาเครื่อง C-arm",
-      // its own heading, in amber, stands as the title near the top
-      noTitle: true,
-      amber: true,
-      top: true,
-      // one card per row, drawn larger for the room
+      // one card per row
       cols: 1,
       scale: 1.4,
       round: true,

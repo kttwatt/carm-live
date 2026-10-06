@@ -237,23 +237,19 @@ function ScreenView() {
   const pages = pagesFor(scene.id);
   const pg = state?.sim?.pg;
   const pageN = pg && pg.s === sceneIndex ? Math.min(pg.n, Math.max(pages.length - 1, 0)) : 0;
-  // A topic page stands alone, centred, without the slide's title.
-  const topic = !question && !isInteractive(scene.kind) && isTopic(pages[pageN]);
-  const noTitle = topic || (!question && !isInteractive(scene.kind) && !!pages[pageN]?.noTitle);
+  // A lecture page carries its own title (its heading), so the slide's title is left off. A topic page stands
+  // alone in the middle; the others start 15% down the screen.
+  const lecture = !question && !isInteractive(scene.kind) && pages.length > 0;
+  const top = lecture && !isTopic(pages[pageN]);
 
   return (
     <main
-      className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && !isInteractive(scene.kind) && pages[pageN]?.top ? "justify-start pt-[15vh] pb-[6vh]" : question && phase === "revealed" ? "justify-center py-[5vh]" : "justify-center py-[8vh]"}`}
-      style={!question && !isInteractive(scene.kind) && pages[pageN]?.top && pages[pageN]?.topGap ? { paddingTop: `${pages[pageN].topGap}vh` } : undefined}
+      className={`relative flex min-h-0 flex-1 flex-col gap-[3vh] px-[7vw] ${top ? "justify-start pt-[15vh] pb-[6vh]" : question && phase === "revealed" ? "justify-center py-[5vh]" : "justify-center py-[8vh]"}`}
     >
       {
         <>
-          {!noTitle && (
-            // A scaled page's title grows with it, so it stays larger than the page's own heading.
-            <h1
-              className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"} ${scene.amber ? "text-amber" : ""}`}
-              style={!question && pages[pageN]?.scale ? { zoom: pages[pageN].scale } : undefined}
-            >
+          {!lecture && (
+            <h1 className="font-display text-[4.2vw] font-bold leading-tight">
               {question?.promptAsTitle ? question.prompt : scene.title}
             </h1>
           )}

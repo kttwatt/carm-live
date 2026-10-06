@@ -107,14 +107,9 @@ for (const s of SLIDES) {
       id: n === 0 ? s.id : `${s.id}-${n + 1}`,
       node: (
         <main
-          className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start pt-[15cqh] pb-[6cqh]" : "justify-center py-[8cqh]"}`}
-          style={p.top && p.topGap ? { paddingTop: `${p.topGap}cqh` } : undefined}
+          // the page's heading is its title: a topic page in the middle, the others from 15% down
+          className={`relative flex min-h-0 flex-1 flex-col gap-[3cqh] px-[7cqw] ${isTopic(p) ? "justify-center py-[8cqh]" : "justify-start pt-[15cqh] pb-[6cqh]"}`}
         >
-          {!isTopic(p) && !p.noTitle && (
-            <h1 className={`font-display text-[3cqw] font-bold leading-tight ${s.amber ? "text-amber" : ""}`} style={p.scale ? { zoom: p.scale } : undefined}>
-              {s.title}
-            </h1>
-          )}
           <LecturePage page={p} lite />
         </main>
       ),

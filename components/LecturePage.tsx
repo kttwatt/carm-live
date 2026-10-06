@@ -2,6 +2,13 @@ import { firstCellSpans, isTopic, type Page } from "@/lib/pages";
 import { JOURNEY_SHOT, JourneyCaption, RadiationJourney } from "@/components/RadiationJourney";
 import { SpinningModel } from "@/components/SpinningModel";
 import { JourneyBeep } from "@/components/JourneyBeep";
+import { FitBox } from "@/components/FitBox";
+
+/** How much larger a page may draw when it has room to spare, unless it sets its own `scale`. */
+const GROW = 1.4;
+
+/** The page's heading: the title of the screen, in amber at the top. */
+const Heading = ({ text }: { text: string }) => <p className="font-display text-[4.2cqw] font-bold leading-tight text-amber">{text}</p>;
 
 /** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
  * mean the screen (same as vw/vh); the phone slides view puts each page in a 16:9 frame that is one. */
@@ -32,109 +39,105 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
   );
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
-    // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
-    // A page with a corner picture stretches to the bottom of the screen, so the picture can take the room that is left.
-    <div
-      className={`flex max-w-[86cqw] flex-col gap-[2.4cqh] ${page.corner ? "min-h-0 flex-1" : ""}`}
-      style={page.scale ? { zoom: page.scale, maxWidth: `${86 / page.scale}cqw` } : undefined}
-    >
-      {page.heading && (
-        // Without the slide's title above, the heading stands in for it and looks like it.
-        <p className={`font-display font-bold leading-tight ${page.noTitle ? `text-[3cqw] ${page.amber ? "text-amber" : ""}` : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
-      )}
-      {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
-      {!page.imageBelow && image}
-      {page.round || page.figure === "radiation-ap" ? (
-        // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
-        <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-          {pts.map((pt, i) => (
-            <li key={pt.th} className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh] ${long ? "items-start" : "items-center"}`}>
-              <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
-                {i + 1}
-              </span>
-              <span className="flex min-w-0 flex-col gap-[0.5cqh]">
-                <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
-                {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
-                {pt.desc && <span className={`whitespace-pre-line text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
-              </span>
-            </li>
-          ))}
-        </ol>
-      ) : pts.length > 0 && (
-        <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-          {pts.map((pt, i) => (
-            <li
-              key={pt.th}
-              // the number sits in its own column, so the lines under the title start where the title does
-              className="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-subgrid content-start items-baseline gap-x-[0.8cqw] gap-y-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
-              style={{ gridRow: `span ${lines}` }}
-            >
-              <span className="row-span-full font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
-              <span className={`col-start-2 font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
-              {named && <span className="col-start-2 text-[1.25cqw] text-mist">{pt.en}</span>}
-              {detailed && <span className="col-start-2 whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
-            </li>
-          ))}
-        </ol>
-      )}
-      {page.imageBelow && image}
-      {page.figure === "radiation-ap" && (
-        <div className="flex justify-center">
-          <RadiationJourney still style={{ height: "54cqh" }} />
-        </div>
-      )}
-      {page.after && <p className="text-[1.35cqw] leading-relaxed text-mist">{page.after}</p>}
-      {page.table && (
-        <table className="w-full border-collapse text-[1.4cqw] leading-snug">
-          <thead>
-            <tr>
-              {page.table.head.map((h, i) => (
-                <th key={i} className="border-b-2 border-amber px-[1cqw] py-[1cqh] text-left font-display font-bold text-amber">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {page.table.rows.map((row, r) => (
-              <tr key={r} className="border-b border-line">
-                {row.map((cell, c) =>
-                  c === 0 && spans[r] === 0 ? null : (
-                    <td
-                      key={c}
-                      rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
-                      className={`px-[1cqw] py-[1.2cqh] align-top ${c === 0 ? `border-b border-line font-semibold ${shortLabels ? "whitespace-nowrap" : ""}` : ""}`}
-                    >
-                      {cell}
-                    </td>
-                  ),
-                )}
-              </tr>
+    <>
+      {page.heading && <Heading text={page.heading} />}
+      {/* everything under the heading grows into the room left, or shrinks until it fits;
+          a page with a corner picture takes the whole room, so the picture can fill what is left */}
+      <FitBox of={page} cap={page.scale ?? GROW} stretch={!!page.corner} className="flex flex-col gap-[2.4cqh]">
+        {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
+        {!page.imageBelow && image}
+        {page.round || page.figure === "radiation-ap" ? (
+          // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
+          <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+            {pts.map((pt, i) => (
+              <li key={pt.th} className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh] ${long ? "items-start" : "items-center"}`}>
+                <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
+                  {i + 1}
+                </span>
+                <span className="flex min-w-0 flex-col gap-[0.5cqh]">
+                  <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
+                  {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
+                  {pt.desc && <span className={`whitespace-pre-line text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
+                </span>
+              </li>
             ))}
-          </tbody>
-        </table>
-      )}
-      {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
-      {page.corner ? (
-        // the key message bottom left, the picture bottom right, sized to the height left on this screen
-        <div className="flex min-h-0 flex-1 items-end gap-[3cqw] pt-[1cqh]">
-          {page.key && <p className="w-fit shrink-0 rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>}
-          {/* the picture is laid over the room this row gets, so it can never make the page taller */}
-          <div className="relative min-w-0 flex-1 self-stretch">
-            {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
-            <img
-              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.corner.src}`}
-              alt={page.corner.alt}
-              className="absolute bottom-0 right-0 h-full max-h-[26cqh] w-full object-contain object-right-bottom"
-            />
+          </ol>
+        ) : pts.length > 0 && (
+          <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+            {pts.map((pt, i) => (
+              <li
+                key={pt.th}
+                // the number sits in its own column, so the lines under the title start where the title does
+                className="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-subgrid content-start items-baseline gap-x-[0.8cqw] gap-y-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
+                style={{ gridRow: `span ${lines}` }}
+              >
+                <span className="row-span-full font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
+                <span className={`col-start-2 font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
+                {named && <span className="col-start-2 text-[1.25cqw] text-mist">{pt.en}</span>}
+                {detailed && <span className="col-start-2 whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
+              </li>
+            ))}
+          </ol>
+        )}
+        {page.imageBelow && image}
+        {page.figure === "radiation-ap" && (
+          <div className="flex justify-center">
+            <RadiationJourney still style={{ height: "54cqh" }} />
           </div>
-        </div>
-      ) : (
-        page.key && (
-          <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
-        )
-      )}
-    </div>
+        )}
+        {page.after && <p className="text-[1.35cqw] leading-relaxed text-mist">{page.after}</p>}
+        {page.table && (
+          <table className="w-full border-collapse text-[1.4cqw] leading-snug">
+            <thead>
+              <tr>
+                {page.table.head.map((h, i) => (
+                  <th key={i} className="border-b-2 border-amber px-[1cqw] py-[1cqh] text-left font-display font-bold text-amber">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {page.table.rows.map((row, r) => (
+                <tr key={r} className="border-b border-line">
+                  {row.map((cell, c) =>
+                    c === 0 && spans[r] === 0 ? null : (
+                      <td
+                        key={c}
+                        rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
+                        className={`px-[1cqw] py-[1.2cqh] align-top ${c === 0 ? `border-b border-line font-semibold ${shortLabels ? "whitespace-nowrap" : ""}` : ""}`}
+                      >
+                        {cell}
+                      </td>
+                    ),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
+        {page.corner ? (
+          // the key message bottom left, the picture bottom right, sized to the height left on this screen
+          <div className="flex min-h-0 flex-1 items-end gap-[3cqw] pt-[1cqh]">
+            {page.key && <p className="w-fit shrink-0 rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>}
+            {/* the picture is laid over the room this row gets, so it can never make the page taller */}
+            <div className="relative min-w-0 flex-1 self-stretch">
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
+              <img
+                src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.corner.src}`}
+                alt={page.corner.alt}
+                className="absolute bottom-0 right-0 h-full max-h-[26cqh] w-full object-contain object-right-bottom"
+              />
+            </div>
+          </div>
+        ) : (
+          page.key && (
+            <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
+          )
+        )}
+      </FitBox>
+    </>
   );
 }
 
@@ -151,7 +154,7 @@ function TopicPage({ page }: { page: Page }) {
 function ModelPage({ page, lite }: { page: Page; lite?: boolean }) {
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col gap-[2.5cqh]">
-      <p className="text-center font-display text-[3.6cqw] font-bold leading-tight text-amber">{page.heading}</p>
+      <Heading text={page.heading} />
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-line">
         <SpinningModel lite={lite} />
       </div>
@@ -166,31 +169,33 @@ function JourneyPage({ page, lite }: { page: Page; lite?: boolean }) {
   const start = (i: number) => JOURNEY_SHOT * (0.125 + i * 0.195) - JOURNEY_SHOT;
   return (
     // On the projector the loop is the lesson, so it plays even under reduced motion; phones keep the viewer's setting.
-    <div className={`flex max-w-[86cqw] flex-col gap-[2cqh] ${lite ? "" : "motion-demo"}`}>
-      {/* the exposure beep, on the projector only */}
-      {!lite && <JourneyBeep />}
-      <p className={`font-display font-bold leading-tight text-amber ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw]"}`}>{page.heading}</p>
-      {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
-      <div className="flex items-center gap-[3cqw]">
-        <RadiationJourney className="shrink-0" style={{ width: "min(70cqh, 42cqw)" }} />
-        <ol className="flex min-w-0 flex-1 flex-col gap-[1.2cqh]">
-          {pts.map((pt, i) => (
-            <li
-              key={pt.th}
-              className="flex items-baseline gap-[1cqw] rounded-2xl border border-line bg-night-2 px-[1.3cqw] py-[1.2cqh]"
-              style={{ animation: `rj-step ${JOURNEY_SHOT}s linear infinite`, animationDelay: `${start(i)}s` }}
-            >
-              <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{i + 1}</span>
-              <span className="flex flex-col gap-[0.3cqh]">
-                <span className="font-display text-[1.6cqw] font-bold leading-tight">{pt.th}</span>
-                {pt.desc && <span className="text-[1.25cqw] leading-snug">{pt.desc}</span>}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </div>
-      {/* the position playing, large and centred under everything */}
-      <JourneyCaption />
-    </div>
+    <>
+      <Heading text={page.heading} />
+      <FitBox of={page} cap={1} className={`flex flex-col gap-[2cqh] ${lite ? "" : "motion-demo"}`}>
+        {/* the exposure beep, on the projector only */}
+        {!lite && <JourneyBeep />}
+        {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
+        <div className="flex items-center gap-[3cqw]">
+          <RadiationJourney className="shrink-0" style={{ width: "min(70cqh, 42cqw)" }} />
+          <ol className="flex min-w-0 flex-1 flex-col gap-[1.2cqh]">
+            {pts.map((pt, i) => (
+              <li
+                key={pt.th}
+                className="flex items-baseline gap-[1cqw] rounded-2xl border border-line bg-night-2 px-[1.3cqw] py-[1.2cqh]"
+                style={{ animation: `rj-step ${JOURNEY_SHOT}s linear infinite`, animationDelay: `${start(i)}s` }}
+              >
+                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{i + 1}</span>
+                <span className="flex flex-col gap-[0.3cqh]">
+                  <span className="font-display text-[1.6cqw] font-bold leading-tight">{pt.th}</span>
+                  {pt.desc && <span className="text-[1.25cqw] leading-snug">{pt.desc}</span>}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        {/* the position playing, large and centred under everything */}
+        <JourneyCaption />
+      </FitBox>
+    </>
   );
 }
