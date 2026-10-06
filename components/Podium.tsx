@@ -24,12 +24,17 @@ const landsAt = (place: number) => STEPS.find((s) => s.place === place)!.delay +
 /** `muted`: no sound, as in the control page's miniature of the screen. */
 export function Podium({ rows, muted }: { rows: LeaderRow[] | null; muted?: boolean }) {
   const hasScores = !!rows?.some((r) => r.score > 0);
-  // the ceremony plays once, when the podium first goes up (the board refreshes every few seconds after)
+  // the ceremony plays once, when the podium first goes up (the board refreshes every few seconds after),
+  // and fades out if the page changes before the music ends
   const played = useRef(false);
   useEffect(() => {
-    if (!hasScores || played.current || muted) return;
+    if (!hasScores || muted || played.current) return;
     played.current = true;
-    playCeremony({ fourth: landsAt(4), third: landsAt(3), second: landsAt(2), first: landsAt(1) });
+    const stop = playCeremony({ fourth: landsAt(4), third: landsAt(3), second: landsAt(2), first: landsAt(1) });
+    return () => {
+      stop();
+      played.current = false;
+    };
   }, [hasScores, muted]);
 
   if (!rows) return <p className="text-[1.6vw] text-mist">กำลังรวมคะแนน…</p>;
