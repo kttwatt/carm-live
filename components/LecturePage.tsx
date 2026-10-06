@@ -18,12 +18,14 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
   // cards, so cards side by side line up line by line even when one wraps more than another.
   const lines = 1 + (named ? 1 : 0) + (detailed ? 1 : 0);
   const spans = firstCellSpans(page.table?.rows ?? []);
+  // short row labels stay on one line, so the other columns take the wrapping
+  const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
     // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
     <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]" style={page.scale ? { zoom: page.scale, maxWidth: `${86 / page.scale}cqw` } : undefined}>
       {page.heading && (
         // Without the slide's title above, the heading stands in for it and looks like it.
-        <p className={`font-display font-bold leading-tight ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
+        <p className={`font-display font-bold leading-tight ${page.noTitle ? `text-[3cqw] ${page.amber ? "text-amber" : ""}` : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
       )}
       {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
       {page.image && (
@@ -91,7 +93,7 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
                     <td
                       key={c}
                       rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
-                      className={`px-[1cqw] py-[1.2cqh] align-top ${c === 0 ? "border-b border-line font-semibold" : ""}`}
+                      className={`px-[1cqw] py-[1.2cqh] align-top ${c === 0 ? `border-b border-line font-semibold ${shortLabels ? "whitespace-nowrap" : ""}` : ""}`}
                     >
                       {cell}
                     </td>

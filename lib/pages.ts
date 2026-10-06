@@ -22,6 +22,8 @@ export type Page = {
   image?: { src: string; alt: string };
   /** leave out the slide's title above this page: its heading names the page on its own */
   noTitle?: boolean;
+  /** with noTitle: the title-size heading in amber instead of white */
+  amber?: boolean;
   /** sits at the top of the screen instead of the middle */
   top?: boolean;
   /** cards per row, when the default (up to 3) would wrap their titles */
@@ -115,6 +117,11 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "โหมดการฉายรังสี",
+      // its own heading, in amber, stands as the title at the top; the table drawn larger
+      noTitle: true,
+      amber: true,
+      top: true,
+      scale: 1.8,
       table: {
         head: ["", "Continuous", "Pulsed"],
         rows: [
