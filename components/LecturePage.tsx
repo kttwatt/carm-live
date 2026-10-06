@@ -84,9 +84,20 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       ))}
     </ol>
   );
-  const keyMessage = page.key && (
-    <p className={`w-fit rounded-2xl bg-amber font-display font-bold whitespace-pre-line text-ink ${page.smallKey ? "px-[1.6cqw] py-[1cqh] text-[1.6cqw]" : "px-[2cqw] py-[1.4cqh] text-[2.2cqw]"}`}>{page.key}</p>
-  );
+  const keyMessage =
+    page.key &&
+    (page.keyApart ? (
+      // each line its own smaller box, one under the other
+      <div className="flex flex-col items-start gap-[1.2cqh]">
+        {page.key.split("\n").map((line) => (
+          <p key={line} className="rounded-2xl bg-amber px-[1.6cqw] py-[1cqh] font-display text-[1.6cqw] font-bold text-ink">
+            {line}
+          </p>
+        ))}
+      </div>
+    ) : (
+      <p className="w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
+    ));
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
     <>
