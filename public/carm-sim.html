@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>C-Arm สามมิติ · ทดลองใช้เอง</title>
+<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วนได้เอง">
+<meta name="theme-color" content="#0e1418">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Self-guided copy of carm-3d.html for anyone, any time (no room, no presenter).
+   Layout: 3D stage (an OR seen from the anaesthetist's corner) + toolbar + a rail listing the 7 numbered parts.
+   Side by side on desktop, tablet landscape and phone landscape; stacked on phone and tablet portrait. */
+:root{
+  --bg:#0e1418; --stage:#111a1f; --panel:#151e24; --line:#27353d; --ink:#e7eef1; --muted:#90a4ad;
+  --accent:#f0b443; --accent-ink:#1b1305; --beam:#e5484d; --scatter:#ff8a3d;
+  --f-display:"Bai Jamjuree","IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,30vw,380px);height:100%;height:100dvh}
+.view{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0}
+.stage{position:relative;flex:1;min-width:0;min-height:0;background:radial-gradient(120% 90% at 40% 35%,#18242b 0%,var(--stage) 60%);overflow:hidden}
+#c{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+#c:active{cursor:grabbing}
+
+/* number badges pinned to parts */
+ter-events:none}
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;pointer-events:auto;cursor:pointer;
+  background:rgba(14,20,24,.82);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;
+  font-size:13px;white-space:nowrap;transition:background .2s,border-color .2s;will-change:transform}
+.tag .n{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+  font-family:var(--f-mono);font-size:13px;font-weight:500}
+.tag:hover{border-color:var(--accent)}
+.tag.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tag.on .n{background:var(--accent-ink);color:var(--accent)}
+
+.state{position:absolute;left:50%;top:16px;transform:translateX(-50%);max-width:calc(100% - 32px);
+  padding:8px 16px;border-radius:10px;font-size:14px;text-align:center;text-wrap:balance;
+  background:rgba(14,20,24,.88);border:1px solid var(--line)}
+.state.warn{border-color:var(--scatter);color:#ffd2b5}
+.state b{color:var(--scatter);font-weight:600}
+
+.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
+.toolbar>*{pointer-events:auto}
+.tb{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
+  background:rgba(21,30,36,.9);border:1px solid var(--line);font-size:14px}
+.tb:hover{border-color:#3d525c}
+.tb[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.tb.fire[aria-pressed="true"]{background:var(--beam);border-color:var(--beam);color:#fff}
+.tb .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.8}
+.hint{margin-left:auto;color:var(--muted);font-size:12.5px;pointer-events:none}
+.tb[hidden]{display:none}
+
+/* rail */
+.rail{display:flex;flex-direction:column;gap:18px;padding:22px 20px;background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-width:0}
+.eyebrow{margin:0;font-size:12px;letter-spacing:.06em;color:var(--muted)}
+.rail h1{margin:4px 0 0;font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.25;text-wrap:balance}
+.home{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;color:var(--muted);font-size:13.5px;text-decoration:none}
+.home:hover{color:var(--ink)}
+.try{margin:0;padding-left:20px;display:grid;gap:6px}
+.try b{color:var(--accent);font-weight:600}
+.parts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.parts button{width:100%;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;text-align:left;cursor:pointer;
+  padding:7px 10px;border-radius:9px;background:none;border:1px solid transparent}
+.parts button:hover{background:#1b262d}
+.parts button.on{background:#1f2b32;border-color:var(--accent)}
+.parts .n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);
+  font-family:var(--f-mono);font-size:13px}
+.parts button.on .n{background:var(--accent);color:var(--accent-ink)}
+.parts .nm{font-weight:500}
+.parts .en{display:block;color:var(--muted);font-size:12px;line-height:1.3}
+
+.detail{border-top:1px solid var(--line);padding-top:16px;display:grid;gap:10px}
+.detail h2{margin:0;font-family:var(--f-display);font-weight:600;font-size:21px;line-height:1.3;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.detail h2 .n{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);font-size:15px}
+/* English name on the heading line, quieter than the Thai name */
+.detail h2 .en{font-family:var(--f-body);font-weight:400;font-size:.62em;color:var(--muted)}
+/* notes under the description read as part of it: same size and color */
+.detail h2 ~ .muted{font-size:inherit;color:inherit}
+.detail p{margin:0}
+.act{justify-self:start;cursor:pointer;padding:7px 12px;border-radius:8px;background:none;border:1px solid var(--accent);color:var(--accent);font-size:13.5px}
+.act:hover{background:rgba(240,180,67,.1)}
+.range{display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
+.range input{width:100%;accent-color:var(--accent)}
+.muted{color:var(--muted);font-size:13.5px}
+.keys{margin-top:auto;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
+
+.diag{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:8px;background:rgba(14,20,24,.92);border:1px solid var(--line);font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre}
+@media (prefers-reduced-motion:reduce){.tag{transition:none}}
+
+/* tablet landscape and small laptops */
+@media (max-width:1180px){
+  .hint{display:none}
+  .rail{padding:18px 16px;gap:14px}
+  .rail h1{font-size:22px}
+  .tb{padding:8px 12px}
+}
+/* short landscape screens (phones turned sideways) */
+@media (max-height:560px) and (orientation:landscape){
+  .app{grid-template-columns:minmax(0,1fr) clamp(240px,34vw,340px)}
+  .toolbar{left:8px;right:8px;bottom:8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
+  .toolbar::-webkit-scrollbar{display:none}
+  .tb{flex:none;padding:6px 10px;font-size:13px;white-space:nowrap}
+  .rail{padding:12px 14px;gap:10px}
+  .rail h1{font-size:18px}
+  .eyebrow,.keys{display:none}
+  .detail h2{font-size:18px}
+  .state{top:8px;font-size:13px;padding:6px 12px}
+  .tag .t{display:none}
+  .tag{padding:3px}
+}
+/* phone and tablet portrait: model on top, buttons under it, then the description and the parts list */
+@media (orientation:portrait) and (max-width:1023px),(max-width:599px){
+  html,body{height:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{flex:none;height:min(62svh,720px);min-height:320px}
+  .toolbar{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 12px;
+    background:var(--panel);border-top:1px solid var(--line);pointer-events:auto}
+  .tb{justify-content:center;text-align:center;line-height:1.3;padding:10px 6px}
+  .rail{border-left:0;border-top:1px solid var(--line);padding:16px 16px calc(20px + env(safe-area-inset-bottom));overflow:visible}
+  .rail>header{order:0}
+  .detail{order:1;border-top:0;padding-top:0}
+  .parts{order:2;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line);padding-top:14px}
+  .keys{display:none}
+  .state{top:10px;font-size:13.5px}
+}
+@media (orientation:portrait) and (min-width:600px) and (max-width:1023px){
+  .stage{height:min(58svh,760px)}
+  .toolbar{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media (max-width:599px){
+  .tag .t{display:none}
+  .tag{padding:3px}
+  .rail h1{font-size:22px}
+}
+@media (max-width:359px){
+  .parts{grid-template-columns:1fr}
+}
+/* fingers: bigger targets */
+@media (pointer:coarse){
+  .tb{min-height:44px}
+  .parts button{min-height:44px}
+  .tag .n{width:30px;height:30px}
+  .act{padding:10px 14px}
+  .range input{height:32px}
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="view">
+    <section class="stage" id="stage">
+      <canvas id="c" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
+      <div class="tags" id="tags"></div>
+      <div class="state" id="state" hidden></div>
+      <div class="diag" id="diag" hidden></div>
+    </section>
+    <div class="toolbar" role="toolbar" aria-label="ควบคุมแบบจำลอง">
+      <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
+      <button class="tb" id="bLat" aria-pressed="false">ท่า AP</button>
+      <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
+      <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
+      <button class="tb" id="bHome">ภาพรวม</button>
+      <button class="tb" id="bFull" aria-pressed="false">เต็มจอ</button>
+      <span class="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
+    </div>
+  </div>
+
+  <aside class="rail">
+    <header>
+      <a class="home" href="./" target="_top">‹ หน้าแรก</a>
+      <p class="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
+      <h1>ส่วนประกอบของเครื่อง C-Arm</h1>
+    </header>
+    <ol class="parts" id="parts"></ol>
+    <article class="detail" id="detail" aria-live="polite"></article>
+    <footer class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> ท่า AP/LAT · <kbd>R</kbd> หมุนรอบ</footer>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const QS = new URLSearchParams(location.search);
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// small touch screens draw the light version: no shadows, lower resolution, fewer scatter streaks (?lite=1 forces it)
+const LITE = QS.has('lite') || (matchMedia('(pointer:coarse)').matches && Math.min(screen.width,screen.height)<700);
+const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
+
+const PARTS = [
+  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสี X ตำแหน่งปกติอยู่ด้านล่างของ C Arm (ใต้เตียงผ่าตัด)', off:[-1.25,0.45,1.35]},
+  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของรังสี', off:[-1.0,0.55,1.15]},
+  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ', off:[-1.2,0.35,1.4]},
+  {id:'carm', n:4, name:'C Arm', en:'', desc:'แขนยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ', off:[-2.0,0.6,2.0]},
+  {id:'base', n:5, name:'ฐานเครื่อง', en:'', desc:'ส่วนใหญ่บรรจุเครื่องกำเนิดไฟฟ้าแรงสูง และมีแผงควบคุม', off:[-1.6,0.9,1.4]},
+  {id:'monitor', n:6, name:'จอแสดงผล', en:'', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี', off:[-1.7,0.1,1.1]},
+  {id:'switch', n:7, name:'Switch', en:'', desc:'Hand switch / Foot switch', off:[-0.9,1.0,1.1]},
+];
+const byId = Object.fromEntries(PARTS.map(p=>[p.id,p]));
+
+/* ---------- renderer / scene ---------- */
+const stage = document.getElementById('stage');
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.shadowMap.enabled = !LITE;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+// Resolution budget: a full-screen projector at high display scaling would otherwise draw 3-4x the pixels.
+const PX_BUDGET = LITE ? 0.9e6 : 2.2e6;
+let prCap = LITE ? 1.5 : 2, prScale = 1;
+renderer.setClearColor(0x111a1f, 1);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x111a1f, 9, 20);
+const camera = new THREE.PerspectiveCamera(36, 1, 0.05, 60);
+const HOME = {pos:new THREE.Vector3(-4.1,2.7,4.3), target:new THREE.Vector3(0.35,0.95,0.45)};
+camera.position.copy(HOME.pos);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.target.copy(HOME.target);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 0.8; controls.maxDistance = 9;
+controls.maxPolarAngle = Math.PI*0.495;
+controls.autoRotateSpeed = 0.9;
+
+scene.add(new THREE.HemisphereLight(0xdfeaf0, 0x1a2228, 0.62));
+const key = new THREE.DirectionalLight(0xffffff, 0.85);
+key.position.set(-3, 6, 4); key.castShadow = true;
+key.shadow.mapSize.set(1024,1024);
+Object.assign(key.shadow.camera, {left:-4,right:4,top:4,bottom:-4,near:1,far:20});
+key.shadow.bias = -0.0005;
+scene.add(key);
+const surgical = new THREE.SpotLight(0xfff4e0, 0.55, 8, 0.45, 0.6);
+surgical.position.set(-0.2, 3.2, -0.4); surgical.target.position.set(-0.1, 1, 0);
+scene.add(surgical, surgical.target);
+
+/* ---------- materials ---------- */
+const M = {
+  plastic: new THREE.MeshStandardMaterial({color:0xe2e8eb, roughness:0.42, metalness:0.05}),
+  trim:    new THREE.MeshStandardMaterial({color:0x4d6c7a, roughness:0.5,  metalness:0.1}),
+  dark:    new THREE.MeshStandardMaterial({color:0x23292e, roughness:0.6,  metalness:0.2}),
+  metal:   new THREE.MeshStandardMaterial({color:0x9aa7ae, roughness:0.32, metalness:0.75}),
+  glass:   new THREE.MeshStandardMaterial({color:0x0b1418, roughness:0.15, metalness:0.6}),
+  pad:     new THREE.MeshStandardMaterial({color:0x2f4e5a, roughness:0.9}),
+  gown:    new THREE.MeshStandardMaterial({color:0x3f7590, roughness:0.85}),
+  skin:    new THREE.MeshStandardMaterial({color:0xc9a183, roughness:0.7}),
+};
+const partMeshes = {}; PARTS.forEach(p=>partMeshes[p.id]=[]);
+const anchors = {};
+function mesh(geo, mat, part, parent, shadow=true){
+  const m = new THREE.Mesh(geo, mat.clone());
+  m.castShadow = shadow; m.receiveShadow = true;
+  if(part){ m.userData.part = part; partMeshes[part].push(m); }
+  parent.add(m); return m;
+}
+function anchor(id, parent, x,y,z){ const o=new THREE.Object3D(); o.position.set(x,y,z); parent.add(o); anchors[id]=o; }
+
+/* ---------- canvas textures ---------- */
+function canvasTex(w,h,draw){
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const t=new THREE.CanvasTexture(c); t.anisotropy=4;
+  t.redraw=(...a)=>{draw(c.getContext('2d'),w,h,...a); t.needsUpdate=true;};
+  t.redraw(); return t;
+}
+function drawFluoro(g,w,h,label,withImplant,live){
+  g.fillStyle='#030506'; g.fillRect(0,0,w,h);
+  const cx=w/2, cy=h/2+6, r=h*0.44;
+  g.save(); g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.clip();
+  const rg=g.createRadialGradient(cx,cy,10,cx,cy,r); rg.addColorStop(0,'#6d7477'); rg.addColorStop(1,'#353b3e');
+  g.fillStyle=rg; g.fillRect(0,0,w,h);
+  g.translate(cx,cy); g.rotate(-0.32);
+  g.fillStyle='#d4d8d8'; g.beginPath(); g.roundRect(-48,-r-10,96,2*r+20,40); g.fill();      // femoral shaft
+  g.fillStyle='#a9afb0'; g.fillRect(-20,-r-10,40,2*r+20);                                   // medullary canal
+  g.strokeStyle='#2a2f31'; g.lineWidth=3; g.beginPath(); g.moveTo(-50,12); g.lineTo(50,-6); g.stroke(); // fracture line
+  if(withImplant){
+    g.fillStyle='#ffffff'; g.fillRect(48,-r*0.8,18,r*1.6);                                 // plate
+    for(let i=-3;i<=3;i++){ if(i===0) continue; const y=i*r*0.22; g.fillRect(-46,y-4,112,8);
+      g.fillStyle='#e9ecec'; for(let k=-40;k<60;k+=9) g.fillRect(k,y-6,3,12); g.fillStyle='#ffffff'; }
+  }
+  g.restore();
+  g.fillStyle='#e7eef1'; g.font='600 22px Tahoma, sans-serif'; g.fillText(label,18,32);
+  g.font='18px Consolas, monospace'; g.fillStyle='#b9c7cd';
+  g.fillText('0:42   71 kV   2.4 mA', 18, h-16);
+  g.textAlign='right'; g.fillText('12.6 mGy', w-18, h-16); g.textAlign='left';
+  if(live){ g.fillStyle='#f0b443'; g.beginPath(); g.arc(w-150,26,8,0,7); g.fill();
+    g.font='600 20px Tahoma, sans-serif'; g.fillText('ฉายรังสี', w-134, 33); }
+}
+function drawTrefoil(g,w,h){
+  g.fillStyle='#f2c418'; g.beginPath(); g.arc(w/2,h/2,w/2-2,0,7); g.fill();
+  g.fillStyle='#111'; const c=w/2, r1=w*0.1, r2=w*0.42;
+  g.beginPath(); g.arc(c,c,w*0.07,0,7); g.fill();
+  for(let i=0;i<3;i++){ const a=-Math.PI/2+i*2*Math.PI/3; g.beginPath();
+    g.arc(c,c,r2,a-Math.PI/6,a+Math.PI/6); g.arc(c,c,r1,a+Math.PI/6,a-Math.PI/6,true); g.closePath(); g.fill(); }
+}
+function drawPanel(g,w,h,on){
+  g.fillStyle='#0d1417'; g.fillRect(0,0,w,h);
+  g.fillStyle='#14303a'; g.fillRect(14,14,w*0.55,h-28);
+  g.fillStyle='#8fe0f0'; g.font='22px Consolas, monospace';
+  g.fillText('71 kV', 30, 52); g.fillText('2.4 mA', 30, 84); g.fillText('PULSE 15', 30, 116);
+  const cols=['#4d6c7a','#4d6c7a','#e5484d','#4d6c7a'];
+  cols.forEach((c,i)=>{ g.fillStyle=c; g.beginPath(); g.roundRect(w*0.64+(i%2)*56, 22+Math.floor(i/2)*56, 44, 40, 6); g.fill(); });
+  g.fillStyle= on ? '#f0b443' : '#3a3220'; g.beginPath(); g.arc(w-30,h-26,10,0,7); g.fill();
+}
+
+/* ---------- room: floor, table, patient ---------- */
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40,40), new THREE.MeshStandardMaterial({color:0x1a242a, roughness:0.95}));
+floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+const grid = new THREE.GridHelper(14,28,0x2b3a42,0x202d34); grid.position.y=0.002;
+grid.material.transparent=true; grid.material.opacity=0.55; scene.add(grid);
+
+const room = new THREE.Group(); scene.add(room);
+mesh(new THREE.BoxGeometry(2.25,0.06,0.56), M.metal, null, room).position.set(-0.12,0.87,0);
+mesh(new THREE.BoxGeometry(2.25,0.05,0.56), M.pad,   null, room).position.set(-0.12,0.925,0);
+mesh(new THREE.BoxGeometry(0.26,0.8,0.3),   M.metal, null, room).position.set(-0.8,0.44,0);
+mesh(new THREE.BoxGeometry(0.85,0.06,0.52), M.dark,  null, room).position.set(-0.8,0.03,0);
+const torso = mesh(new THREE.SphereGeometry(1,40,20), M.gown, null, room);
+torso.scale.set(0.78,0.11,0.22); torso.position.set(-0.08,1.04,0);
+mesh(new THREE.SphereGeometry(0.1,24,16), M.skin, null, room).position.set(-0.98,1.06,0);
+mesh(new THREE.BoxGeometry(0.3,0.05,0.34), M.plastic, null, room).position.set(-0.98,0.97,0);
+
+// a scrub nurse standing across the table (ghosted) — the person scatter reaches
+const ghost = new THREE.MeshStandardMaterial({color:0x9db3bd, transparent:true, opacity:0.26, depthWrite:false, roughness:0.8});
+const staff = new THREE.Group(); staff.position.set(0.42,0,-0.78); room.add(staff);
+[[-0.08],[0.08]].forEach(([x])=>{ const l=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.055,0.85,12),ghost); l.position.set(x,0.43,0); staff.add(l); });
+const body = new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.15,0.62,18),ghost); body.position.y=1.17; staff.add(body);
+const head = new THREE.Mesh(new THREE.SphereGeometry(0.105,20,16),ghost); head.position.y=1.62; staff.add(head);
+const warnRing = new THREE.Mesh(new THREE.TorusGeometry(0.17,0.012,8,40),
+  new THREE.MeshBasicMaterial({color:0xff8a3d, transparent:true, opacity:0}));
+warnRing.position.y=1.62; warnRing.rotation.x=Math.PI/2; staff.add(warnRing);
+
+/* ---------- C-arm: pivot holds the C, tube, collimator, detector, beam ---------- */
+const pivot = new THREE.Group(); pivot.position.set(0,CY,0); scene.add(pivot);
+class Arc extends THREE.Curve{ getPoint(t,out=new THREE.Vector3()){ const a=-Math.PI/2+t*Math.PI; return out.set(0,R*Math.sin(a),R*Math.cos(a)); } }
+mesh(new THREE.TubeGeometry(new Arc(),96,0.062,16,false), M.plastic, 'carm', pivot);
+[-1,1].forEach(s=>{ const ring=mesh(new THREE.CylinderGeometry(0.075,0.075,0.05,20), M.trim, 'carm', pivot);
+  ring.position.set(0, s*(R-0.005), 0.06); ring.rotation.x=Math.PI/2; });
+anchor('carm', pivot, 0, R*Math.sin(0.75), R*Math.cos(0.75)+0.08);
+
+const tubeG = new THREE.Group(); tubeG.position.set(0,-R,0); pivot.add(tubeG);
+mesh(new THREE.BoxGeometry(0.34,0.17,0.3), M.plastic, 'tube', tubeG).position.y=-0.03;
+const tcyl = mesh(new THREE.CylinderGeometry(0.105,0.105,0.4,28), M.trim, 'tube', tubeG); tcyl.rotation.z=Math.PI/2; tcyl.position.y=-0.03;
+const sticker = new THREE.Mesh(new THREE.CircleGeometry(0.06,32), new THREE.MeshBasicMaterial({map:canvasTex(128,128,drawTrefoil)}));
+sticker.position.set(-0.201,-0.03,0); sticker.rotation.y=-Math.PI/2; tubeG.add(sticker);
+mesh(new THREE.BoxGeometry(0.22,0.1,0.22), M.dark, 'collimator', tubeG).position.y=0.11;
+mesh(new THREE.BoxGeometry(0.16,0.025,0.16), M.trim, 'collimator', tubeG).position.y=0.172;
+anchor('tube', tubeG, -0.22,-0.06,0.05);
+anchor('collimator', tubeG, -0.13,0.13,0.0);
+
+const detG = new THREE.Group(); detG.position.set(0,R,0); pivot.add(detG);
+mesh(new THREE.CylinderGeometry(0.2,0.23,0.3,44), M.plastic, 'detector', detG).position.y=0.0;
+mesh(new THREE.CylinderGeometry(0.245,0.245,0.04,44), M.trim, 'detector', detG).position.y=-0.15;
+const face = mesh(new THREE.CircleGeometry(0.235,44), M.glass, 'detector', detG); face.rotation.x=Math.PI/2; face.position.y=-0.172;
+mesh(new THREE.TorusGeometry(0.12,0.018,8,28,Math.PI), M.dark, 'detector', detG).position.set(0,0.17,0);
+anchor('detector', detG, -0.26,0.02,0.05);
+
+// beam: collimator exit → detector face
+const BEAM_Y0 = -R+0.185, BEAM_Y1 = R-0.172, BEAM_H = BEAM_Y1-BEAM_Y0;
+const beam = new THREE.Group(); beam.position.y=(BEAM_Y0+BEAM_Y1)/2; pivot.add(beam);
+const beamMats=[0.14,0.28].map(o=>new THREE.MeshBasicMaterial({color:0xe5484d,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+beam.add(new THREE.Mesh(new THREE.CylinderGeometry(0.19,0.045,BEAM_H,40,1,true), beamMats[0]));
+beam.add(new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.015,BEAM_H,24,1,true), beamMats[1]));
+beam.visible=false;
+
+/* static stand: holder, arm, column, base */
+const stand = new THREE.Group(); scene.add(stand);
+mesh(new THREE.BoxGeometry(0.22,0.38,0.2), M.trim, 'carm', stand).position.set(0,CY,R+0.07);
+mesh(new THREE.BoxGeometry(0.16,0.16,0.5), M.plastic, 'base', stand).position.set(0,CY,R+0.42);
+mesh(new THREE.BoxGeometry(0.24,0.82,0.24), M.plastic, 'base', stand).position.set(0,0.78,1.42);
+mesh(new THREE.BoxGeometry(0.62,0.5,0.98), M.plastic, 'base', stand).position.set(0,0.33,1.76);
+mesh(new THREE.BoxGeometry(0.64,0.06,1.0), M.trim, 'base', stand).position.set(0,0.1,1.76);
+[[-0.27,1.36],[0.27,1.36],[-0.27,2.16],[0.27,2.16]].forEach(([x,z])=>{
+  const w=mesh(new THREE.CylinderGeometry(0.07,0.07,0.05,20), M.dark, 'base', stand); w.rotation.z=Math.PI/2; w.position.set(x,0.07,z); });
+const panelTex = canvasTex(320,200,drawPanel);
+const panel = new THREE.Group(); panel.position.set(0,0.62,2.02); panel.rotation.x=-0.55; stand.add(panel);
+mesh(new THREE.BoxGeometry(0.46,0.04,0.3), M.dark, 'base', panel);
+const pscreen = new THREE.Mesh(new THREE.PlaneGeometry(0.42,0.26), new THREE.MeshBasicMaterial({map:panelTex}));
+pscreen.rotation.x=-Math.PI/2; pscreen.position.y=0.021; panel.add(pscreen);
+const handle = mesh(new THREE.TorusGeometry(0.2,0.022,10,30,Math.PI), M.trim, 'base', stand);
+handle.position.set(0,0.72,2.27); handle.rotation.x=-0.2;
+anchor('base', stand, -0.34,0.5,1.92);
+
+/* monitor cart */
+const cart = new THREE.Group(); cart.position.set(2.05,0,0.75); cart.rotation.y=-1.0; scene.add(cart);
+mesh(new THREE.BoxGeometry(0.72,0.1,0.56), M.trim, 'monitor', cart).position.y=0.12;
+mesh(new THREE.BoxGeometry(0.56,0.82,0.44), M.plastic, 'monitor', cart).position.y=0.6;
+mesh(new THREE.BoxGeometry(0.1,0.42,0.1), M.dark, 'monitor', cart).position.y=1.21;
+[[-0.3,0.3],[0.3,-0.3]].forEach(([x,ry])=>{ const w=mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16), M.dark, 'monitor', cart); w.rotation.z=Math.PI/2; w.position.set(x*1.05,0.05,0.2); });
+const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,'ภาพสด',true,!!on));
+const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,'ภาพอ้างอิง',false,false));
+[[-0.3,0.14,liveTex],[0.3,-0.14,refTex]].forEach(([x,ry,tex])=>{
+  const m=new THREE.Group(); m.position.set(x,1.6,0.02); m.rotation.y=ry; cart.add(m);
+  mesh(new THREE.BoxGeometry(0.58,0.44,0.05), M.dark, 'monitor', m);
+  const s=new THREE.Mesh(new THREE.PlaneGeometry(0.54,0.405), new THREE.MeshBasicMaterial({map:tex}));
+  s.position.z=0.026; s.userData.part='monitor'; partMeshes.monitor.push(s); m.add(s);
+});
+const cartLamp = new THREE.Mesh(new THREE.SphereGeometry(0.025,12,8), new THREE.MeshBasicMaterial({color:0x3a3220}));
+cartLamp.position.set(0,1.86,0.02); cart.add(cartLamp);
+anchor('monitor', cart, 0,1.93,0.02);
+
+/* foot switch + hand switch + cable */
+const fs = new THREE.Group(); fs.position.set(0.55,0,-0.6); fs.rotation.y=0.35; scene.add(fs);
+mesh(new THREE.BoxGeometry(0.36,0.05,0.24), M.dark, 'switch', fs).position.y=0.025;
+const pedals = [-0.085,0.085].map((x,i)=>{ const p=mesh(new THREE.BoxGeometry(0.13,0.03,0.17), i?M.trim:new THREE.MeshStandardMaterial({color:0xb9852a,roughness:0.5}), 'switch', fs);
+  p.position.set(x,0.066,0.01); p.rotation.x=-0.12; return p; });
+const guard = mesh(new THREE.TorusGeometry(0.17,0.012,8,24,Math.PI), M.metal, 'switch', fs); guard.position.set(0,0.05,-0.1); guard.rotation.x=-0.9;
+const cablePts=[[0.55,0.015,-0.48],[0.95,0.015,-0.1],[1.0,0.015,0.9],[0.55,0.015,1.55],[0.31,0.18,2.0]].map(a=>new THREE.Vector3(...a));
+mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cablePts),80,0.011,6,false), M.dark, 'switch', scene, false);
+const hs = mesh(new THREE.CylinderGeometry(0.026,0.022,0.15,14), M.trim, 'switch', stand); hs.position.set(0.335,0.42,1.95);
+mesh(new THREE.CylinderGeometry(0.012,0.012,0.02,10), new THREE.MeshStandardMaterial({color:0xb9852a}), 'switch', stand).position.set(0.335,0.505,1.95);
+anchor('switch', fs, 0,0.14,0);
+
+/* ---------- scatter: short orange streaks leaving the beam-entry skin ---------- */
+const NS = LITE ? 150 : 360;
+const sPos = new Float32Array(NS*6), sCol = new Float32Array(NS*6);
+const sGeo = new THREE.BufferGeometry();
+sGeo.setAttribute('position', new THREE.BufferAttribute(sPos,3));
+sGeo.setAttribute('color', new THREE.BufferAttribute(sCol,3));
+const scatter = new THREE.LineSegments(sGeo, new THREE.LineBasicMaterial({vertexColors:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+scatter.frustumCulled=false; scene.add(scatter);
+const S = Array.from({length:NS},()=>({p:new THREE.Vector3(),v:new THREE.Vector3(),age:1,life:1,alive:false}));
+const SC = new THREE.Color(0xff8a3d);
+const tubeDir = new THREE.Vector3(), tmp = new THREE.Vector3();
+function spawn(s){
+  // entry skin = patient centre pushed toward the tube
+  s.p.set(0,1.05,0).addScaledVector(tubeDir,0.1+0.1*Math.abs(tubeDir.z));   // torso is wider than it is deep
+  s.p.x+=(Math.random()-0.5)*0.12; s.p.z+=(Math.random()-0.5)*0.12;
+  const u=Math.random()*2-1, th=Math.random()*Math.PI*2, q=Math.sqrt(1-u*u);
+  s.v.set(q*Math.cos(th),u,q*Math.sin(th));
+  const d=s.v.dot(tubeDir);
+  if(d<0 && Math.random()<0.78) s.v.addScaledVector(tubeDir,-2*d);   // most scatter goes back toward the tube side
+  s.v.multiplyScalar(1.3+Math.random()*0.9);
+  s.age=0; s.life=0.9+Math.random()*0.5; s.alive=true;
+}
+
+/* ---------- UI ---------- */
+const tagsEl=document.getElementById('tags'), partsEl=document.getElementById('parts'), detailEl=document.getElementById('detail');
+const stateEl=document.getElementById('state');
+const tags={};
+PARTS.forEach(p=>{
+  const b=document.createElement('button'); b.className='tag'; b.type='button';
+  b.innerHTML=`<span class="n">${p.n}</span><span class="t">${p.name}</span>`;
+  b.setAttribute('aria-label',`${p.n} ${p.name}`);
+  b.onclick=()=>select(sel===p.id?null:p.id); tagsEl.appendChild(b); tags[p.id]=b;
+  const li=document.createElement('li');
+  li.innerHTML=`<button type="button" id="part-${p.id}"><span class="n">${p.n}</span><span><span class="nm">${p.name}</span>${p.en?`<span class="en">${p.en}</span>`:''}</span></button>`;
+  li.firstChild.onclick=()=>select(sel===p.id?null:p.id); partsEl.appendChild(li);
+});
+
+const st = {fire:false, flip:false, lat:false, tilt:0, beamScale:1};
+let sel=null;
+
+function extra(id){
+  if(id==='collimator') return `<label class="range" for="beamSize">ขนาดลำรังสี <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
+    <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>
+    <p class="muted">เลื่อนแล้วกดฉายรังสีเพื่อดูลำรังสีแคบลง</p>`;
+  if(id==='detector') return `<p class="muted">ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
+  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้ง C Arm ตรง':'เอียง C Arm ให้ดู'}</button>
+    <p class="muted">O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</p>`;
+  if(id==='monitor') return `<p class="muted">มุมล่างของจอแสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)</p>`;
+  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?'ปล่อยสวิตช์':'เหยียบสวิตช์: ฉายรังสี'}</button>`;
+  return '';
+}
+function renderDetail(){
+  if(!sel){
+    detailEl.innerHTML = `<p class="muted">แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม</p>
+      <ol class="try muted">
+        <li><b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง</li>
+        <li><b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม</li>
+        <li><b>ท่า LAT</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ</li>
+        <li>เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง</li>
+      </ol>`;
+    return;
+  }
+  const p=byId[sel];
+  detailEl.hidden=false;
+  detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${p.name}${p.en?`<span class="en">${p.en}</span>`:''}</h2><p>${p.desc}</p>${extra(p.id)}`;
+  detailEl.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
+    const a=b.dataset.act;
+    if(a==='tilt'){ st.tilt = st.tilt?0:0.5; }
+    if(a==='fire'){ setFire(!st.fire); }
+    renderDetail();
+  });
+  const r=document.getElementById('beamSize');
+  if(r) r.oninput=()=>{ st.beamScale=r.value/100; document.getElementById('beamPct').textContent=r.value+'%'; };
+}
+
+function select(id){
+  sel=id;
+  PARTS.forEach(p=>{ tags[p.id].classList.toggle('on',p.id===id); document.getElementById('part-'+p.id).classList.toggle('on',p.id===id); });
+  renderDetail();
+  // narrow (portrait) frames see less sideways, so pull the camera back
+  const back=camera.aspect<1.4?Math.pow(1.4/camera.aspect,0.75):1;
+  if(!id){ flyTo(HOME.target.clone(), HOME.pos.clone().sub(HOME.target).multiplyScalar(back).add(HOME.target)); return; }
+  pivot.updateMatrixWorld(true);
+  const t=anchors[id].getWorldPosition(new THREE.Vector3());
+  if(id==='carm') t.set(0,CY,0.35);
+  const pos=t.clone().add(new THREE.Vector3(...byId[id].off).multiplyScalar(back));
+  flyTo(t,pos);
+}
+
+const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin');
+function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
+  liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
+function flipLabel(){ return st.lat ? 'หลอดฝั่งทีม' : 'หลอดเหนือเตียง'; }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
+// Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
+function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า LAT':'ท่า AP'; setFlip(st.flip); }
+function updateState(){
+  if(st.lat){
+    stateEl.hidden=!(st.fire||st.flip);
+    stateEl.className=st.flip?'state warn':'state';
+    stateEl.innerHTML = st.flip
+      ? (st.fire ? '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
+      : 'ท่า LAT · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
+    return;
+  }
+  if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
+    stateEl.innerHTML= st.fire ? '<b>X-ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>X-ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
+  else if(st.fire){ stateEl.hidden=false; stateEl.className='state';
+    stateEl.innerHTML='X-ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม'; }
+  else stateEl.hidden=true;
+}
+bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
+bFlip.onclick=()=>setFlip(!st.flip);
+const bLat=document.getElementById('bLat');
+bLat.onclick=()=>setLat(!st.lat);
+bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-pressed',controls.autoRotate); };
+document.getElementById('bHome').onclick=()=>select(null);
+// Fullscreen: hidden where the browser has none (iPhone Safari) or the frame doesn't allow it
+const bFull=document.getElementById('bFull');
+bFull.hidden=!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+bFull.onclick=()=>{
+  const el=document.getElementById('app');
+  try{
+    if(document.fullscreenElement||document.webkitFullscreenElement) (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+    else { const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el); if(p&&p.catch) p.catch(()=>{}); }
+  }catch(e){}
+};
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
+  const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?'ออกจากเต็มจอ':'เต็มจอ';
+}));
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey) return;
+  const i=sel?byId[sel].n-1:-1;
+  if(e.key==='ArrowRight'){ select(PARTS[(i+1)%7].id); e.preventDefault(); }
+  else if(e.key==='ArrowLeft'){ select(PARTS[(i+6)%7].id); e.preventDefault(); }
+  else if(e.key>='1'&&e.key<='7') select(PARTS[+e.key-1].id);
+  else if(e.key==='0'||e.key==='Escape') select(null);
+  else if(e.key==='x'||e.key==='X') bFire.click();
+  else if(e.key==='f'||e.key==='F') bFlip.click();
+  else if(e.key==='l'||e.key==='L') bLat.click();
+  else if(e.key==='r'||e.key==='R') bSpin.click();
+  else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
+});
+
+/* click on a part in 3D */
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2(); let down=null;
+const pickables=[].concat(...Object.values(partMeshes));
+canvas.addEventListener('pointerdown',e=>{ down=[e.clientX,e.clientY]; });
+canvas.addEventListener('pointerup',e=>{
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5) return;
+  const r=canvas.getBoundingClientRect();
+  ndc.set((e.clientX-r.left)/r.width*2-1, -(e.clientY-r.top)/r.height*2+1);
+  ray.setFromCamera(ndc,camera);
+  const hit=ray.intersectObjects(pickables,false)[0];
+  if(hit) select(sel===hit.object.userData.part?null:hit.object.userData.part);
+});
+
+/* camera fly */
+let tw=null;
+// press D for a readout: frame rate, reduced motion, drawing size (to diagnose a jerky projector)
+const diagEl=document.getElementById('diag'); let diagFrames=0, diagT0=performance.now();
+function flyTo(target,pos){
+  if(REDUCED){ controls.target.copy(target); camera.position.copy(pos); return; }
+  tw={t0:performance.now(),dur:0.95,fT:controls.target.clone(),tT:target,fP:camera.position.clone(),tP:pos};
+}
+const ease=k=>k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+
+/* resize */
+function resize(){
+  const w=stage.clientWidth, h=stage.clientHeight;
+  prCap=Math.min(window.devicePixelRatio||1, LITE ? 1.5 : 2, Math.sqrt(PX_BUDGET/Math.max(1,w*h)));
+  renderer.setPixelRatio(Math.max(0.5, prCap*prScale)); renderer.setSize(w,h,false);
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+  // first layout: open a narrow frame from further back so the whole machine fits
+  if(!framed && w>0){ framed=true; if(!sel && camera.aspect<1.4)
+    camera.position.copy(HOME.pos).sub(HOME.target).multiplyScalar(Math.pow(1.4/camera.aspect,0.75)).add(HOME.target); }
+}
+let framed=false;
+// Slow machine: drop resolution until frames come in under ~22 ms; raise it back when there is headroom.
+let fAcc=0, fN=0;
+function governor(dt){
+  fAcc+=dt; fN++;
+  if(fN<40) return;
+  const avg=fAcc/fN; fAcc=0; fN=0;
+  const next = avg>0.022 ? Math.max(0.55, prScale-0.15) : avg<0.0145 ? Math.min(1, prScale+0.1) : prScale;
+  if(next!==prScale){ prScale=next; resize(); }
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+/* ---------- loop ---------- */
+const clock=new THREE.Clock(), black=new THREE.Color(0), accent=new THREE.Color(0xf0b443), proj=new THREE.Vector3();
+let beamA=0, danger=0, rot=0, orb=0;
+const tubeW=new THREE.Vector3(), pivW=new THREE.Vector3();
+renderDetail();
+function frame(){
+  const dt=Math.min(clock.getDelta(),0.05), t=clock.elapsedTime;
+  if(tw){ const k=ease(Math.min(1,(performance.now()-tw.t0)/1000/tw.dur));
+    controls.target.lerpVectors(tw.fT,tw.tT,k); camera.position.lerpVectors(tw.fP,tw.tP,k); if(k>=1) tw=null; }
+  controls.update();
+  // AP: turn about the arm axis (z) to put the tube over/under; Lateral: orbit about x so the beam runs across the table
+  const targetRot=(st.lat?0:(st.flip?Math.PI:0))+st.tilt;
+  const targetOrb=st.lat?(st.flip?Math.PI/2:-Math.PI/2):0;
+  const k=REDUCED?1:Math.min(1,dt*2.6);
+  rot+=(targetRot-rot)*k; orb+=(targetOrb-orb)*k;
+  pivot.rotation.set(orb,0,rot);
+  pivot.updateMatrixWorld(true);
+  tubeDir.copy(tubeG.getWorldPosition(tubeW)).sub(pivot.getWorldPosition(pivW)).normalize();
+
+  beamA+=((st.fire?1:0)-beamA)*Math.min(1,dt*8);
+  beam.visible=beamA>0.01; beamMats[0].opacity=0.16*beamA; beamMats[1].opacity=0.3*beamA*(0.85+0.15*Math.sin(t*30));
+  beam.scale.set(st.beamScale,1,st.beamScale);
+  pedals[0].position.y += ((st.fire?0.05:0.066)-pedals[0].position.y)*Math.min(1,dt*12);
+
+  danger+=((st.fire?Math.max(0,tubeDir.y,-tubeDir.z):0)-danger)*Math.min(1,dt*4);
+  warnRing.material.opacity=danger*(0.55+0.35*Math.sin(t*6));
+  warnRing.scale.setScalar(1+0.08*Math.sin(t*6));
+
+  // scatter
+  let spawnBudget = st.fire ? Math.ceil(dt*(LITE?170:420)*st.beamScale) : 0;
+  for(let i=0;i<NS;i++){
+    const s=S[i];
+    if(!s.alive && spawnBudget>0){ spawn(s); spawnBudget--; }
+    const o=i*6;
+    if(s.alive){
+      s.age+=dt; if(s.age>=s.life){ s.alive=false; }
+      s.p.addScaledVector(s.v,dt);
+      if(s.p.y<0.01) s.alive=false;
+      const f=s.alive?Math.pow(1-s.age/s.life,1.4):0;
+      tmp.copy(s.p).addScaledVector(s.v,-0.055);
+      sPos[o]=s.p.x; sPos[o+1]=s.p.y; sPos[o+2]=s.p.z; sPos[o+3]=tmp.x; sPos[o+4]=tmp.y; sPos[o+5]=tmp.z;
+      sCol[o]=SC.r*f; sCol[o+1]=SC.g*f; sCol[o+2]=SC.b*f; sCol[o+3]=SC.r*f*0.15; sCol[o+4]=SC.g*f*0.15; sCol[o+5]=SC.b*f*0.15;
+    } else { for(let k=0;k<6;k++) sCol[o+k]=0; }
+  }
+  sGeo.attributes.position.needsUpdate=true; sGeo.attributes.color.needsUpdate=true;
+
+  // highlight the selected part
+  const glow=0.16+0.1*Math.sin(t*4);
+  for(const id in partMeshes) for(const m of partMeshes[id]) if(m.material.emissive)
+    m.material.emissive.copy(id===sel?accent:black).multiplyScalar(id===sel?glow:0);
+
+  renderer.render(scene,camera);
+  governor(dt);
+  diagFrames++;
+  if(!diagEl.hidden && performance.now()-diagT0>1000){
+    const fps=Math.round(diagFrames*1000/(performance.now()-diagT0));
+    diagEl.textContent=`ภาพต่อวินาที  ${fps}
+ลดการเคลื่อนไหว  ${REDUCED?'เปิด (กล้องจะกระโดด)':'ปิด'}
+ความละเอียด  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.width}×${renderer.domElement.height}`;
+    diagFrames=0; diagT0=performance.now();
+  } else if(diagEl.hidden){ diagFrames=0; diagT0=performance.now(); }
+
+  // pin badges
+  const w=stage.clientWidth, h=stage.clientHeight;
+  for(const p of PARTS){
+    anchors[p.id].getWorldPosition(proj); proj.project(camera);
+    const el=tags[p.id], vis=proj.z<1 && Math.abs(proj.x)<1.05 && Math.abs(proj.y)<1.05;
+    el.style.visibility=vis?'visible':'hidden';
+    if(vis) el.style.transform=`translate(${(proj.x*0.5+0.5)*w-15}px,${(-proj.y*0.5+0.5)*h-15}px)`;
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
