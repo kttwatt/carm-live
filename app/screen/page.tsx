@@ -137,7 +137,7 @@ function ScreenView() {
         ) : (
           // the end: the top four on a podium, the rest under it (on the projector it plays even under reduced motion)
           <div className="motion-demo flex flex-1 flex-col justify-end">
-            <Podium rows={board} />
+            <Podium rows={board} muted={preview} />
           </div>
         )}
         <p className="text-[1.1vw] text-mist">แสดงเลขที่และชื่อ · ดูคะแนนและอันดับของตัวเองบนมือถือ</p>

@@ -271,3 +271,10 @@ h3 {
   from { opacity: 0; transform: translateY(1vh); }
   to { opacity: 1; transform: none; }
 }
+
+/* Confetti over the final podium (components/Confetti.tsx): falls from above the screen to below it, drifting
+   sideways by --sway and turning by --spin. */
+@keyframes cf-fall {
+  from { transform: translate(0, -6vh) rotate(0deg); }
+  to { transform: translate(var(--sway), 106vh) rotate(var(--spin)); }
+}

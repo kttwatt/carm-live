@@ -1,8 +1,14 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { LeaderRow } from "@/lib/scoring";
+import { playCeremony } from "@/lib/ceremony";
+import { Confetti } from "@/components/Confetti";
 
 // The final ranking as an Olympic podium for the top four, the rest in a compact list under it.
 // Steps stand 2 · 1 · 3 · 4, so 1st is the tallest in the middle and the line steps down to its right; they rise
-// one after another, 4th first and 1st last (keyframes `pd-*` in globals.css).
+// one after another, 4th first and 1st last (keyframes `pd-*` in globals.css), to a drumroll, a chime as each lands and
+// a fanfare for 1st (lib/ceremony.ts), and then confetti falls.
 
 const STEPS = [
   { place: 2, height: 24, color: "linear-gradient(180deg, #e3e9ef, #a9b6c3)", delay: 0.9 },
@@ -11,7 +17,21 @@ const STEPS = [
   { place: 4, height: 12, color: "linear-gradient(180deg, #2f7fae, #0b6e99)", delay: 0.1 },
 ];
 
-export function Podium({ rows }: { rows: LeaderRow[] | null }) {
+/** how long a step takes to rise (s, as in its animation) */
+const RISE = 0.7;
+const landsAt = (place: number) => STEPS.find((s) => s.place === place)!.delay + RISE;
+
+/** `muted`: no sound, as in the control page's miniature of the screen. */
+export function Podium({ rows, muted }: { rows: LeaderRow[] | null; muted?: boolean }) {
+  const hasScores = !!rows?.some((r) => r.score > 0);
+  // the ceremony plays once, when the podium first goes up (the board refreshes every few seconds after)
+  const played = useRef(false);
+  useEffect(() => {
+    if (!hasScores || played.current || muted) return;
+    played.current = true;
+    playCeremony({ fourth: landsAt(4), third: landsAt(3), second: landsAt(2), first: landsAt(1) });
+  }, [hasScores, muted]);
+
   if (!rows) return <p className="text-[1.6vw] text-mist">กำลังรวมคะแนน…</p>;
   // Only people with points: after "start over" everyone is back at 0 and the board starts empty.
   const scored = rows.filter((r) => r.score > 0);
@@ -19,6 +39,7 @@ export function Podium({ rows }: { rows: LeaderRow[] | null }) {
   const rest = scored.slice(4);
   return (
     <div className="flex flex-col items-center gap-[3vh]">
+      <Confetti start={landsAt(1)} />
       <div className="flex items-end justify-center gap-[1.2vw]">
         {STEPS.map(({ place, height, color, delay }) => {
           const r = scored[place - 1];
@@ -37,7 +58,7 @@ export function Podium({ rows }: { rows: LeaderRow[] | null }) {
               {/* the step, with its place on the front */}
               <div
                 className="relative flex w-full justify-center rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.25)]"
-                style={{ height: `${height}vh`, background: color, transformOrigin: "bottom", animation: `pd-grow 0.7s ease-out ${delay}s both` }}
+                style={{ height: `${height}vh`, background: color, transformOrigin: "bottom", animation: `pd-grow ${RISE}s ease-out ${delay}s both` }}
               >
                 <span className={`mt-[1.4vh] font-display font-bold leading-none ${place === 4 ? "text-paper" : "text-ink"} ${place === 1 ? "text-[6vw]" : "text-[4.4vw]"}`}>
                   {r?.rank ?? place}
