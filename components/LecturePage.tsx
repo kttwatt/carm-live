@@ -37,6 +37,7 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
           ))}
         </ol>
       )}
+      {page.after && <p className="text-[1.7cqw] leading-relaxed">{page.after}</p>}
       {page.table && (
         <table className="w-full border-collapse text-[1.4cqw] leading-snug">
           <thead>
