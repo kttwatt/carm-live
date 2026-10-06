@@ -400,6 +400,7 @@ export const PAGES: Record<string, Page[]> = {
       amber: true,
       top: true,
       topGap: 25,
+      round: true,
       points: [
         {
           th: "บำรุงรักษาตามกำหนด",
