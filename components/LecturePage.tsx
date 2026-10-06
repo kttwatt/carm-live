@@ -10,6 +10,10 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
   const cols = pts.length === 4 ? 2 : Math.min(pts.length, 3);
   const detailed = pts.some((p) => p.desc);
+  const named = pts.some((p) => p.en);
+  // Each card spans one row of the list per line it has (title, English name, description), shared across the
+  // cards, so cards side by side line up line by line even when one wraps more than another.
+  const lines = 1 + (named ? 1 : 0) + (detailed ? 1 : 0);
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
     // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
@@ -30,13 +34,17 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
       {pts.length > 0 && (
         <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
-            <li key={pt.th} className="flex flex-col gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]">
+            <li
+              key={pt.th}
+              className="grid grid-rows-subgrid content-start gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
+              style={{ gridRow: `span ${lines}` }}
+            >
               <span className="flex items-baseline gap-[0.8cqw]">
                 <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
                 <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
               </span>
-              {pt.en && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
-              {pt.desc && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
+              {named && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
+              {detailed && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
             </li>
           ))}
         </ol>

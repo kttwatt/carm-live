@@ -233,7 +233,7 @@ export const PAGES: Record<string, Page[]> = {
       heading: "Dosimeter",
       noTitle: true,
       top: true,
-      scale: 1.3,
+      scale: 1.2,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงานที่ทำงานเกี่ยวกับรังสีต้องมี เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {
