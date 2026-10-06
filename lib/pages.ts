@@ -289,6 +289,7 @@ export const PAGES: Record<string, Page[]> = {
   s11: [
     {
       heading: "Fluoroscopy time",
+      noTitle: true,
       points: [
         {
           th: "การบันทึกข้อมูล",
