@@ -1,9 +1,8 @@
 "use client";
 
 import { createClient, type RealtimeChannel, type SupabaseClient } from "@supabase/supabase-js";
-import { QUESTIONS } from "./questions";
-import { SCENES } from "./scenes";
-import { scoreAnswer, type LeaderRow, type MyResult, type ReportRow } from "./scoring";
+import { type LeaderRow, type MyResult, type ReportRow } from "./scoring";
+import { BASE_PATH } from "./room";
 import { SimSchema, StateSchema, randomKey, randomRoom, uid, type LiveState, type Phase, type Sim } from "./state";
 
 export type Role = "presenter" | "screen" | "participant";
@@ -21,7 +20,7 @@ export interface Transport {
   joinParticipant(nickname: string): Promise<void>;
   submitAnswer(sceneIndex: number, answer: string[]): Promise<void>;
   myAnswer(sceneIndex: number): Promise<string[] | null>;
-  /** counts is null until the presenter key is given or the scene is revealed */
+  /** counts is null until the presenter key is given or the scene's question opens */
   summary(sceneIndex: number, presenterKey?: string): Promise<Summary>;
   leaderboard(limit?: number): Promise<LeaderRow[]>;
   /** presenter only: every participant and answer with points */
@@ -67,9 +66,7 @@ export async function createSession(title: string): Promise<{ room: string; key:
   }
   const room = randomRoom();
   const key = randomKey();
-  localStorage.setItem(`carm-local-key-${room}`, key);
-  const s: LiveState = { sceneIndex: 0, phase: "idle", version: 1, updatedAt: new Date().toISOString() };
-  localStorage.setItem(`carm-local-state-${room}`, JSON.stringify(s));
+  await lan({ op: "create", room, key });
   return { room, key };
 }
 
@@ -194,7 +191,7 @@ class SupabaseTransport implements Transport {
   async report(key: string) {
     const { data, error } = await this.sb.rpc("session_report", { p_room: this.room, p_key: key });
     if (error) throw friendly(error);
-    type Row = { participant_id: string; nickname: string; joined_at: string; scene_index: number | null; answer: string[] | null; points: number | null };
+    type Row = { participant_id: string; nickname: string; joined_at: string; scene_index: number | null; answer: string[] | null; points: number | null; secs: number | null };
     return ((data ?? []) as Row[]).map((r) => ({
       participantId: r.participant_id,
       nickname: r.nickname,
@@ -202,6 +199,7 @@ class SupabaseTransport implements Transport {
       sceneIndex: r.scene_index,
       answer: r.answer,
       points: r.points,
+      secs: r.secs == null ? null : Number(r.secs),
     }));
   }
 
@@ -253,187 +251,104 @@ class SupabaseTransport implements Transport {
   }
 }
 
-/* ---------------- Local: one browser, several tabs (rehearsal without a backend) ---------------- */
+/* ---------------- Local: rooms kept by this computer's dev server (app/api/local), shared over Wi-Fi ---------------- */
 
-type LocalMsg =
-  | { type: "state"; state: unknown }
-  | { type: "hb"; id: string; role: Role };
+async function lan<T>(body: Record<string, unknown>): Promise<T> {
+  const res = await fetch(`${BASE_PATH}/api/local`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  const json = (await res.json()) as { data?: T; error?: string };
+  if (!res.ok || json.error) throw new Error(json.error ?? "เชื่อมต่อเครื่องผู้บรรยายไม่ได้");
+  return json.data as T;
+}
+
+/** One participant per device (kept across reloads, like the Supabase anonymous sign-in). */
+function localPid() {
+  let id = localStorage.getItem("carm-local-pid");
+  if (!id) localStorage.setItem("carm-local-pid", (id = uid()));
+  return id;
+}
 
 class LocalTransport implements Transport {
   mode = "local" as const;
-  private bc: BroadcastChannel;
   private id = uid();
-  private peers = new Map<string, { role: Role; t: number }>();
   private timers: number[] = [];
-  private listeners: Array<() => void> = [];
-  constructor(private room: string) {
-    this.bc = new BroadcastChannel(`carm-${room}`);
-  }
-  private stateKey() {
-    return `carm-local-state-${this.room}`;
+  constructor(private room: string) {}
+  private call<T>(op: string, extra: Record<string, unknown> = {}) {
+    return lan<T>({ op, room: this.room, ...extra });
   }
 
   async fetchState() {
-    const raw = localStorage.getItem(this.stateKey());
-    if (!raw) return null;
-    return StateSchema.parse(JSON.parse(raw));
+    return StateSchema.parse(await this.call("state"));
   }
 
+  // Polls the server; a version change is a new snapshot, a failed request means offline.
   subscribe(onState: (s: LiveState) => void, onStatus: (c: boolean) => void) {
-    const onMsg = (e: MessageEvent<LocalMsg>) => {
-      if (e.data?.type !== "state") return;
-      const p = StateSchema.safeParse(e.data.state);
-      if (p.success) onState(p.data);
+    let last = -1;
+    let up: boolean | null = null;
+    const tick = async () => {
+      try {
+        const s = await this.fetchState();
+        if (up !== true) onStatus((up = true));
+        if (s.version !== last) onState(s);
+        last = s.version;
+      } catch {
+        if (up !== false) onStatus((up = false));
+      }
     };
-    this.bc.addEventListener("message", onMsg);
-    this.listeners.push(() => this.bc.removeEventListener("message", onMsg));
-    onStatus(true);
+    tick();
+    this.timers.push(window.setInterval(tick, 700));
   }
 
   async setState(next: { sceneIndex: number; phase: Phase }, key: string) {
-    if (localStorage.getItem(`carm-local-key-${this.room}`) !== key) throw new Error("ลิงก์ผู้บรรยายไม่ถูกต้อง");
-    const cur = await this.fetchState();
-    // Same fresh-question rule as public.set_session_state (0006_fresh_questions.sql).
-    const firstQuestion = SCENES.findIndex((sc) => QUESTIONS[sc.id]);
-    const moved = cur?.sceneIndex !== next.sceneIndex;
-    if (moved && next.sceneIndex === firstQuestion) {
-      SCENES.forEach((_, i) => localStorage.removeItem(this.answersKey(i)));
-    } else if ((moved && (next.phase === "idle" || next.phase === "open")) || (!moved && next.phase === "idle")) {
-      localStorage.removeItem(this.answersKey(next.sceneIndex));
-    }
-    const s: LiveState = { ...next, sim: cur?.sim ?? null, version: (cur?.version ?? 0) + 1, updatedAt: new Date().toISOString() };
-    localStorage.setItem(this.stateKey(), JSON.stringify(s));
-    this.bc.postMessage({ type: "state", state: s } satisfies LocalMsg);
-    return s;
+    return StateSchema.parse(await this.call("setState", { next, key }));
   }
 
   async setSim(sim: Sim, key: string) {
-    if (localStorage.getItem(`carm-local-key-${this.room}`) !== key) throw new Error("ลิงก์ผู้บรรยายไม่ถูกต้อง");
-    const cur = await this.fetchState();
-    if (!cur) throw new Error("ไม่พบห้องนี้");
-    const s: LiveState = { ...cur, sim, version: cur.version + 1, updatedAt: new Date().toISOString() };
-    localStorage.setItem(this.stateKey(), JSON.stringify(s));
-    this.bc.postMessage({ type: "state", state: s } satisfies LocalMsg);
-    return s;
+    return StateSchema.parse(await this.call("setSim", { sim, key }));
   }
 
   trackPresence(meta: PresenceMeta, onCount: (n: number) => void) {
-    const count = () => {
-      const now = Date.now();
-      for (const [k, v] of this.peers) if (now - v.t > 6000) this.peers.delete(k);
-      const others = [...this.peers.values()].filter((p) => p.role === "participant").length;
-      onCount(others + (meta.role === "participant" ? 1 : 0));
-    };
-    const onMsg = (e: MessageEvent<LocalMsg>) => {
-      if (e.data?.type !== "hb" || e.data.id === this.id) return;
-      this.peers.set(e.data.id, { role: e.data.role, t: Date.now() });
-      count();
-    };
-    this.bc.addEventListener("message", onMsg);
-    this.listeners.push(() => this.bc.removeEventListener("message", onMsg));
-    const beat = () => {
-      this.bc.postMessage({ type: "hb", id: this.id, role: meta.role } satisfies LocalMsg);
-      count();
-    };
+    const beat = () =>
+      this.call<{ participants: number }>("hb", { id: this.id, role: meta.role })
+        .then((r) => onCount(r.participants))
+        .catch(() => {});
     beat();
     this.timers.push(window.setInterval(beat, 2000));
   }
 
   async joinParticipant(nickname: string) {
-    const nicks = this.nicknames();
-    nicks[this.pid()] = nickname;
-    localStorage.setItem(`carm-local-nicks-${this.room}`, JSON.stringify(nicks));
-  }
-  private nicknames(): Record<string, string> {
-    return JSON.parse(localStorage.getItem(`carm-local-nicks-${this.room}`) ?? "{}");
-  }
-  private scores() {
-    const rows = Object.entries(this.nicknames()).map(([pid, nickname]) => ({ pid, nickname, score: 0, correct: 0, answered: 0 }));
-    SCENES.forEach((scene, i) => {
-      const q = QUESTIONS[scene.id];
-      if (!q) return;
-      const all = this.answers(i);
-      for (const r of rows) {
-        const a = all[r.pid];
-        if (!a) continue;
-        const pts = scoreAnswer(a, q);
-        r.score += pts;
-        r.answered += 1;
-        if (pts === 100) r.correct += 1;
-      }
-    });
-    rows.sort((a, b) => b.score - a.score);
-    return rows.map((r) => ({ ...r, rank: rows.findIndex((x) => x.score === r.score) + 1 }));
+    await this.call("join", { pid: localPid(), nickname });
   }
 
   async report(key: string) {
-    if (localStorage.getItem(`carm-local-key-${this.room}`) !== key) throw new Error("ลิงก์ผู้บรรยายไม่ถูกต้อง");
-    const rows: ReportRow[] = [];
-    for (const [pid, nickname] of Object.entries(this.nicknames())) {
-      let any = false;
-      SCENES.forEach((scene, i) => {
-        const a = this.answers(i)[pid];
-        if (!a) return;
-        any = true;
-        const q = QUESTIONS[scene.id];
-        rows.push({ participantId: pid, nickname, joinedAt: "", sceneIndex: i, answer: a, points: q ? scoreAnswer(a, q) : null });
-      });
-      if (!any) rows.push({ participantId: pid, nickname, joinedAt: "", sceneIndex: null, answer: null, points: null });
-    }
-    return rows;
+    return this.call<ReportRow[]>("report", { key });
   }
 
   async leaderboard(limit = 10) {
-    return this.scores().slice(0, limit).map(({ rank, nickname, score }) => ({ rank, nickname, score }));
+    return this.call<LeaderRow[]>("leaderboard", { limit });
   }
 
   async myResult() {
-    const rows = this.scores();
-    const me = rows.find((r) => r.pid === this.pid());
-    if (!me) return null;
-    return { score: me.score, rank: me.rank, of: rows.length, correct: me.correct, answered: me.answered, questions: Object.keys(QUESTIONS).length };
-  }
-
-  // Each tab is its own participant in rehearsal mode.
-  private pid() {
-    let id = sessionStorage.getItem("carm-local-pid");
-    if (!id) sessionStorage.setItem("carm-local-pid", (id = uid()));
-    return id;
-  }
-  private answersKey(sceneIndex: number) {
-    return `carm-local-resp-${this.room}-${sceneIndex}`;
-  }
-  private answers(sceneIndex: number): Record<string, string[]> {
-    return JSON.parse(localStorage.getItem(this.answersKey(sceneIndex)) ?? "{}");
+    return this.call<MyResult | null>("myResult", { pid: localPid() });
   }
 
   async submitAnswer(sceneIndex: number, answer: string[]) {
-    const s = await this.fetchState();
-    if (!s || s.sceneIndex !== sceneIndex || s.phase !== "open") throw new Error("ปิดรับคำตอบแล้ว");
-    const all = this.answers(sceneIndex);
-    if (answer.length) all[this.pid()] = answer;
-    else delete all[this.pid()];
-    localStorage.setItem(this.answersKey(sceneIndex), JSON.stringify(all));
+    await this.call("submit", { pid: localPid(), sceneIndex, answer });
   }
 
   async myAnswer(sceneIndex: number) {
-    return this.answers(sceneIndex)[this.pid()] ?? null;
+    return (await this.call<{ answer: string[] | null }>("myAnswer", { pid: localPid(), sceneIndex })).answer;
   }
 
   async summary(sceneIndex: number, presenterKey?: string) {
-    const all = Object.values(this.answers(sceneIndex));
-    const s = await this.fetchState();
-    const show =
-      (presenterKey && localStorage.getItem(`carm-local-key-${this.room}`) === presenterKey) ||
-      (s?.sceneIndex === sceneIndex && s.phase === "revealed");
-    const counts: Record<string, number> = {};
-    for (const a of all) for (const c of a) counts[c] = (counts[c] ?? 0) + 1;
-    return { respondents: all.length, counts: show ? counts : null };
+    return this.call<Summary>("summary", { sceneIndex, key: presenterKey });
   }
 
   close() {
     this.timers.forEach(clearInterval);
-    this.listeners.forEach((off) => off());
-    this.bc.close();
   }
 }

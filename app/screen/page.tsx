@@ -11,14 +11,42 @@ import { LecturePage } from "@/components/LecturePage";
 import { isTopic, pagesFor } from "@/lib/pages";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
-import { questionFor } from "@/lib/questions";
+import { questionFor, type Question } from "@/lib/questions";
 import { KIND_LABEL, isInteractive, sceneAt } from "@/lib/scenes";
 import { useSummary } from "@/lib/useSummary";
+import type { Summary } from "@/lib/transport";
 import { PHASE_LABEL } from "@/lib/state";
 import { useLive } from "@/lib/useLive";
 import { asset, useRoom } from "@/lib/room";
 
 const PRESENCE = { role: "screen" as const };
+
+// The choices on the projector while the room answers, each with its live count (refreshed every 2 s);
+// the correct one stays hidden until the reveal.
+function ChoiceList({ question, summary, cols = 2 }: { question: Question; summary: Summary | null; cols?: 1 | 2 }) {
+  const counts = summary?.counts ?? {};
+  const total = summary?.respondents ?? 0;
+  return (
+    <>
+      {question.multi && <p className="text-[1.4vw] font-semibold text-amber">เลือกได้หลายข้อ</p>}
+      <ul className={`grid gap-[1.2vh] ${cols === 2 ? "grid-cols-2 gap-x-[1.5vw]" : "grid-cols-1"}`}>
+        {question.choices.map((c) => {
+          const n = counts[c.id] ?? 0;
+          const pct = total ? Math.round((n / total) * 100) : 0;
+          return (
+            <li key={c.id} className="relative overflow-hidden rounded-2xl border border-line text-[1.7vw] leading-snug">
+              <div className="absolute inset-y-0 left-0 bg-sky/25 transition-[width] duration-500" style={{ width: `${pct}%` }} />
+              <div className="relative flex items-baseline justify-between gap-[1vw] px-[1.4vw] py-[1.2vh]">
+                <span>{c.label}</span>
+                <span className="shrink-0 font-semibold tabular-nums text-amber">{n} คน</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
 
 // Projector view: no controls, only what the room should see.
 function ScreenView() {
@@ -191,7 +219,8 @@ function ScreenView() {
           )}
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
-              <p className="text-[2.2vw] leading-snug">{question.prompt}</p>
+              {/* a prompt that only repeats the slide title is not shown twice */}
+              {question.prompt.trim() !== scene.title.trim() && <p className="text-[2.2vw] leading-snug">{question.prompt}</p>}
               {question.map ? (
                 <div className="flex items-start gap-[2.5vw]">
                   {/* sized by height so the whole room fits on the projector */}
@@ -207,10 +236,13 @@ function ScreenView() {
                     {phase === "revealed" ? (
                       <p className="text-[1.3vw] leading-relaxed text-mist">{question.explanation}</p>
                     ) : (
-                      <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
-                        {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
-                        {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
-                      </p>
+                      <>
+                        <ChoiceList question={question} summary={results} cols={1} />
+                        <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
+                          {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
+                          {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
+                        </p>
+                      </>
                     )}
                   </div>
                 </div>
@@ -220,10 +252,13 @@ function ScreenView() {
                   <p className="text-[1.3vw] leading-relaxed text-mist">{question.explanation}</p>
                 </>
               ) : (
-                <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
-                  {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
-                  {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
-                </p>
+                <>
+                  <ChoiceList question={question} summary={results} />
+                  <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
+                    {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
+                    {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
+                  </p>
+                </>
               )}
             </div>
           ) : isInteractive(scene.kind) ? (
