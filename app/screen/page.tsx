@@ -250,6 +250,8 @@ function ScreenView() {
         <>
           {!lecture && (
             <h1 className="font-display text-[4.2vw] font-bold leading-tight">
+              {/* a question's title says it is one */}
+              {question && "คำถาม: "}
               {question?.promptAsTitle ? question.prompt : scene.title}
             </h1>
           )}
