@@ -35,6 +35,18 @@ function Answer({ text }: { text: string }) {
   );
 }
 
+/** A choice named by a letter on the room map ("A · …") shows the letter in an amber circle, so it stands out. */
+function ChoiceLabel({ label }: { label: string }) {
+  const m = /^([A-Z]) · (.+)$/.exec(label);
+  if (!m) return <span>{label}</span>;
+  return (
+    <span className="flex items-center gap-[1vw]">
+      <span className="grid aspect-square w-[2.6vw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.6vw] font-bold text-ink">{m[1]}</span>
+      <span>{m[2]}</span>
+    </span>
+  );
+}
+
 // The choices on the projector while the room answers, in a fixed order, each with its live count (refreshed every 2 s);
 // the correct one stays hidden until the reveal.
 function ChoiceList({ question, summary }: { question: Question; summary: Summary | null }) {
@@ -52,8 +64,8 @@ function ChoiceList({ question, summary }: { question: Question; summary: Summar
           return (
             <li key={c.id} className="relative overflow-hidden rounded-2xl border border-line text-[1.7vw] leading-snug">
               <div className="absolute inset-y-0 left-0 bg-sky/25 transition-[width] duration-500" style={{ width: `${pct}%` }} />
-              <div className="relative flex items-baseline justify-between gap-[1vw] px-[1.4vw] py-[1.2vh]">
-                <span>{c.label}</span>
+              <div className="relative flex items-center justify-between gap-[1vw] px-[1.4vw] py-[1.2vh]">
+                <ChoiceLabel label={c.label} />
                 <span className="shrink-0 font-semibold tabular-nums text-amber">{n} คน</span>
               </div>
             </li>
