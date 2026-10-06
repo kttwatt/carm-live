@@ -181,6 +181,7 @@ export const PAGES: Record<string, Page[]> = {
   s07: [
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมเข้าเคส",
+      noTitle: true,
       lead: "แพทย์ Scrub nurse และผู้ช่วยผ่าตัด",
       points: [
         { th: "ยืนฝั่งเดียวกับตัวรับภาพ", en: "Detector" },
