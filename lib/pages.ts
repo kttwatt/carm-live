@@ -20,6 +20,8 @@ export type Page = {
   /** the page's take-home message, set large and highlighted under everything ("
 " starts a new line) */
   key?: string;
+  /** the key message set smaller, for a page where it should not outweigh the table above it */
+  smallKey?: boolean;
   /** an animated diagram beside the points, which light up step by step with it */
   figure?: "radiation-journey" | "radiation-ap" | "carm-3d";
   /** a picture from the source document, shown as is (file in public/) */
@@ -129,6 +131,7 @@ export const PAGES: Record<string, Page[]> = {
           ["ภาพ", "ลื่นไหล", "อาจกระตุกเมื่อตั้งจำนวนครั้งต่ำ"],
         ],
       },
+      smallKey: true,
       key: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้\nContinuous mode ใช้เมื่อต้องเห็นการเคลื่อนไหวเร็ว",
     },
     {
