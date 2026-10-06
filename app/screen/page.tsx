@@ -144,7 +144,7 @@ function ScreenView() {
   if (scene.kind === "outline" && scene.items && scene.notes) {
     return (
       <main className="flex flex-1 flex-col justify-center gap-[3.5vh] px-[7vw] py-[6vh]">
-        <h1 className="font-display text-[4vw] font-bold leading-tight text-amber">{scene.title}</h1>
+        <h1 className="text-center font-display text-[4vw] font-bold leading-tight text-amber">{scene.title}</h1>
         <ol className="flex flex-col gap-[1.2vh]">
           {scene.items.map((item, i) => (
             <li key={item} className="flex items-center gap-[1.2vw] rounded-2xl border border-line bg-night-2 px-[1.6vw] py-[1.2vh]">
