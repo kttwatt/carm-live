@@ -31,7 +31,11 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
     // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
-    <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]" style={page.scale ? { zoom: page.scale, maxWidth: `${86 / page.scale}cqw` } : undefined}>
+    // A page with a corner picture stretches to the bottom of the screen, so the picture can take the room that is left.
+    <div
+      className={`flex max-w-[86cqw] flex-col gap-[2.4cqh] ${page.corner ? "min-h-0 flex-1" : ""}`}
+      style={page.scale ? { zoom: page.scale, maxWidth: `${86 / page.scale}cqw` } : undefined}
+    >
       {page.heading && (
         // Without the slide's title above, the heading stands in for it and looks like it.
         <p className={`font-display font-bold leading-tight ${page.noTitle ? `text-[3cqw] ${page.amber ? "text-amber" : ""}` : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
@@ -109,17 +113,24 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
         </table>
       )}
       {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
-      {page.key && (
-        <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>
-      )}
-      {page.corner && (
-        // pinned in the bottom-right corner, in the room beside the key message, so it never pushes the page down
-        // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
-        <img
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.corner.src}`}
-          alt={page.corner.alt}
-          className="absolute bottom-[3cqh] right-[7cqw] h-[18cqh] w-auto rounded-xl object-contain"
-        />
+      {page.corner ? (
+        // the key message bottom left, the picture bottom right, sized to the height left on this screen
+        <div className="flex min-h-0 flex-1 items-end gap-[3cqw] pt-[1cqh]">
+          {page.key && <p className="w-fit shrink-0 rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>}
+          {/* the picture is laid over the room this row gets, so it can never make the page taller */}
+          <div className="relative min-w-0 flex-1 self-stretch">
+            {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
+            <img
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.corner.src}`}
+              alt={page.corner.alt}
+              className="absolute bottom-0 right-0 h-full max-h-[26cqh] w-full object-contain object-right-bottom"
+            />
+          </div>
+        </div>
+      ) : (
+        page.key && (
+          <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>
+        )
       )}
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
