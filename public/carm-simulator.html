@@ -498,8 +498,7 @@ let sel=null;
 
 function extra(id){
   if(id==='collimator') return `<label class="range" for="beamSize">ขนาดลำรังสี <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
-    <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>
-    <p class="muted">เลื่อนแล้วกดฉายรังสีเพื่อดูลำรังสีแคบลง</p>`;
+    <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>`;
   if(id==='detector') return `<p class="muted">ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
   if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้ง C Arm ตรง':'เอียง C Arm ให้ดู'}</button>
     <p class="muted">O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</p>`;
