@@ -12,7 +12,7 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
     <div className="flex max-w-[86vw] flex-col gap-[2.4vh]">
-      <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>
+      {page.heading && <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>}
       {page.lead && <p className="text-[1.7vw] leading-relaxed">{page.lead}</p>}
       {pts.length > 0 && (
         <ol className="grid gap-[1.4vw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
