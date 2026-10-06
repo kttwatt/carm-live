@@ -9,7 +9,7 @@ export type Page = {
   heading: string;
   lead?: string;
   points?: Point[];
-  /** a paragraph under the points, set like the lead */
+  /** a paragraph under the points, smaller than the lead */
   after?: string;
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
