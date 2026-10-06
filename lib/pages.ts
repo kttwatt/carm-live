@@ -8,6 +8,8 @@ export type Page = {
   /** the page's title, in amber 15% down the screen (the slide's title is not shown on lecture pages);
    * empty when a picture on the page carries its own */
   heading: string;
+  /** the heading centred above a picture that is centred under it */
+  centerHeading?: boolean;
   lead?: string;
   points?: Point[];
   /** a paragraph under the points, smaller than the lead */
@@ -206,6 +208,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ตำแหน่งยืนที่ปลอดภัย",
+      centerHeading: true,
       image: {
         src: "/pages/standing-zones.webp",
         alt: "จำลองสถานการณ์ C-arm ท่า Lateral มองจากด้านบน: ฝั่งหลอดเอกซเรย์เป็นเขตอันตราย รังสีกระเจิงสูง ฝั่งตัวรับภาพปลอดภัยกว่า พยาบาลส่งเครื่องมือยืนฝั่งตัวรับภาพ พยาบาลหมุนเวียนอยู่ห่างเกิน 2 เมตรหลังฉากกั้นรังสีแบบเคลื่อนที่ ซึ่งปลอดภัยที่สุด",

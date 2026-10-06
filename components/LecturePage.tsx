@@ -10,7 +10,9 @@ import { TeamStepBack } from "@/components/TeamStepBack";
 const GROW = 1.4;
 
 /** The page's heading: the title of the screen, in amber at the top. */
-const Heading = ({ text }: { text: string }) => <p className="font-display text-[4.2cqw] font-bold leading-tight text-amber">{text}</p>;
+const Heading = ({ text, center }: { text: string; center?: boolean }) => (
+  <p className={`font-display text-[4.2cqw] font-bold leading-tight text-amber ${center ? "text-center" : ""}`}>{text}</p>
+);
 
 /** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
  * mean the screen (same as vw/vh); the phone slides view puts each page in a 16:9 frame that is one. */
@@ -102,7 +104,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
   return (
     <>
-      {page.heading && <Heading text={page.heading} />}
+      {page.heading && <Heading text={page.heading} center={page.centerHeading} />}
       {/* everything under the heading grows into the room left, or shrinks until it fits */}
       <FitBox of={page} cap={page.scale ?? GROW} className="flex flex-col gap-[2.4cqh]">
         {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
