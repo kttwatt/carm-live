@@ -24,6 +24,8 @@ export type Page = {
   noTitle?: boolean;
   /** sits at the top of the screen instead of the middle */
   top?: boolean;
+  /** cards per row, when the default (up to 3) would wrap their titles */
+  cols?: number;
   /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
   scale?: number;
 };
@@ -59,6 +61,8 @@ export const PAGES: Record<string, Page[]> = {
       heading: "",
       lead:
         "จากร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2566 ข้อ 9 ระบุว่า ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
+      // two per row so each clause's name stays on one line
+      cols: 2,
       points: [
         { label: "(ก)", th: "ผู้ประกอบวิชาชีพเวชกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพเวชกรรม" },
         { label: "(ข)", th: "ผู้ประกอบวิชาชีพทันตกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพทันตกรรม" },

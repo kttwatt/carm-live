@@ -8,7 +8,7 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   if (isTopic(page)) return <TopicPage page={page} index={index} total={total} />;
   const pts = page.points ?? [];
   // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
-  const cols = pts.length === 4 ? 2 : Math.min(pts.length, 3);
+  const cols = page.cols ?? (pts.length === 4 ? 2 : Math.min(pts.length, 3));
   const detailed = pts.some((p) => p.desc);
   const named = pts.some((p) => p.en);
   // Each card spans one row of the list per line it has (title, English name, description), shared across the
