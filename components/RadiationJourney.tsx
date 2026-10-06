@@ -34,7 +34,7 @@ const SCATTER = [
   return { a, from: at(80), to: at(80 + len) };
 });
 
-const POSITIONS = [
+export const POSITIONS = [
   { name: "AP View", where: "หลอดเอกซเรย์อยู่ใต้เตียงผ่าตัด ตัวรับภาพอยู่ด้านบน", verdict: "แนะนำ: รังสีกระเจิงลงด้านล่าง", color: "#5cc46f" },
   { name: "Lateral", where: "หลอดเอกซเรย์อยู่ด้านซ้าย ตัวรับภาพอยู่ด้านขวา", verdict: "ควรยืนฝั่งตัวรับภาพ ไม่ยืนฝั่งหลอด", color: "#f2b233" },
   { name: "Invert", where: "หลอดเอกซเรย์อยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและดวงตา", color: "#f08a5d" },
@@ -111,10 +111,29 @@ function Nurse({ hurt }: { hurt?: "trunk" | "head" }) {
 // Entrance skin, facing the tube at each position (patient ellipse rx 80, ry 62).
 const SKIN = ["M170 282 Q220 310 270 282", "M159 190 Q121 230 159 270", "M170 178 Q220 150 270 178"];
 
+/** Which position is playing, as large text under the slide; it changes on the diagram's clock. */
+export function JourneyCaption({ className }: { className?: string }) {
+  return (
+    <div className={`grid text-center ${className ?? ""}`}>
+      {POSITIONS.map((p, i) => (
+        <div key={p.name} className="col-start-1 row-start-1 flex flex-col gap-[0.6cqh]" style={{ ...turn(`rj-pos-${i + 1}`), opacity: i ? 0 : 1 }}>
+          <p className="font-display text-[2.4cqw] font-bold leading-tight">
+            {p.name}
+            <span className="ml-[1cqw] font-sans text-[1.8cqw] font-semibold text-mist">{p.where}</span>
+          </p>
+          <p className="font-display text-[1.9cqw] font-bold leading-tight" style={{ color: p.color }}>
+            {p.verdict}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function RadiationJourney({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
-      viewBox="-100 0 540 492"
+      viewBox="-100 0 540 418"
       role="img"
       aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ พยาบาลที่ยืนข้างเตียงเจ็บที่ขาในท่า AP ที่ลำตัวในท่า Lateral และที่ใบหน้าในท่า Invert"
       className={className}
@@ -211,21 +230,6 @@ export function RadiationJourney({ className, style }: { className?: string; sty
         พยาบาล
       </text>
 
-      {/* which position is playing */}
-      {POSITIONS.map((p, i) => (
-        <g key={p.name} opacity={i ? 0 : 1} style={turn(`rj-pos-${i + 1}`)}>
-          {/* set large: read from the back of the room */}
-          <text x="-90" y="444" fill="#f3f6f8" fontSize="26" fontWeight="700">
-            {p.name}
-            <tspan fill="#bccce6" fontSize="19" fontWeight="600" dx="10">
-              {p.where}
-            </tspan>
-          </text>
-          <text x="-90" y="478" fill={p.color} fontSize="20" fontWeight="700">
-            {p.verdict}
-          </text>
-        </g>
-      ))}
     </svg>
   );
 }

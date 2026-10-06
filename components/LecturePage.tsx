@@ -1,5 +1,5 @@
 import { firstCellSpans, isTopic, type Page } from "@/lib/pages";
-import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
+import { JOURNEY_SHOT, JourneyCaption, RadiationJourney } from "@/components/RadiationJourney";
 import { SpinningModel } from "@/components/SpinningModel";
 import { JourneyBeep } from "@/components/JourneyBeep";
 
@@ -144,6 +144,8 @@ function JourneyPage({ page, index, total, lite }: { page: Page; index: number; 
           ))}
         </ol>
       </div>
+      {/* the position playing, large and centred under everything */}
+      <JourneyCaption />
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );
