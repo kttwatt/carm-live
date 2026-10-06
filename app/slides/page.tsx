@@ -115,7 +115,7 @@ for (const s of SLIDES) {
               {s.title}
             </h1>
           )}
-          <LecturePage page={p} index={n} total={pages.length} lite />
+          <LecturePage page={p} lite />
         </main>
       ),
     });
