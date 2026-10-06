@@ -127,9 +127,7 @@ function ScreenView() {
     const midway = scene.kind !== "leaderboard";
     return (
       <main className="flex flex-1 flex-col gap-[3vh] px-[7vw] py-[6vh]">
-        <p className="text-[1.5vw] font-semibold tracking-wide text-amber">
-          {midway ? `คะแนนสะสมหลังข้อ: ${scene.title}` : "สรุปคะแนนจากทุกกิจกรรม"}
-        </p>
+        {!midway && <p className="text-[1.5vw] font-semibold tracking-wide text-amber">สรุปคะแนนจากทุกกิจกรรม</p>}
         <h1 className="font-display text-[4vw] font-bold leading-tight">{midway ? "คะแนน" : "อันดับคะแนน"}</h1>
         <div className="max-w-[70vw]">
           <LeaderList rows={board} size="xl" />
