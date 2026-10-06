@@ -25,6 +25,7 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
       src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.image.src}`}
       alt={page.image.alt}
       className={`mx-auto w-auto max-w-full rounded-2xl bg-white object-contain ${page.imageBelow ? "max-h-[52cqh]" : "max-h-[62cqh]"}`}
+      style={page.imageMax ? { maxHeight: `${page.imageMax}cqh` } : undefined}
     />
   );
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);

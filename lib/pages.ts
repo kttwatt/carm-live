@@ -32,6 +32,8 @@ export type Page = {
   round?: boolean;
   /** the picture goes under the cards instead of above them */
   imageBelow?: boolean;
+  /** the picture's height limit, in % of the screen height, when the page has room for a larger one */
+  imageMax?: number;
   /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
   scale?: number;
 };
@@ -276,6 +278,17 @@ export const PAGES: Record<string, Page[]> = {
         },
       ],
       key: "หน่วยงานส่วนใหญ่ใช้ OSL เป็นหลัก",
+    },
+    {
+      heading: "ตำแหน่งการติด OSL dosimeter",
+      noTitle: true,
+      amber: true,
+      top: true,
+      image: {
+        src: "/pages/osl-placement.webp",
+        alt: "สำหรับเจ้าหน้าที่ที่ใช้แผ่นวัดรังสี 2 แผ่น แผ่นที่ 1 ควรติดด้านนอกปลอกคอกำบังรังสี แผ่นที่ 2 ติดด้านในเสื้อกำบังรังสี",
+      },
+      imageMax: 78,
     },
   ],
 
