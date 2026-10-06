@@ -51,6 +51,11 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
           ))}
         </ol>
       )}
+      {page.figure === "radiation-ap" && (
+        <div className="flex justify-center">
+          <RadiationJourney still style={{ height: "54cqh" }} />
+        </div>
+      )}
       {page.after && <p className="text-[1.35cqw] leading-relaxed text-mist">{page.after}</p>}
       {page.table && (
         <table className="w-full border-collapse text-[1.4cqw] leading-snug">

@@ -130,7 +130,10 @@ export function JourneyCaption({ className }: { className?: string }) {
   );
 }
 
-export function RadiationJourney({ className, style }: { className?: string; style?: React.CSSProperties }) {
+/** `still`: frozen at AP with the beam, scatter and image all showing (the scatter page); the rays still flow. */
+export function RadiationJourney({ className, style, still }: { className?: string; style?: React.CSSProperties; still?: boolean }) {
+  const sh = still ? () => ({}) : shot;
+  const tu = still ? () => ({}) : turn;
   return (
     <svg
       viewBox="-100 0 540 418"
@@ -168,30 +171,30 @@ export function RadiationJourney({ className, style }: { className?: string; sty
 
       {/* monitor */}
       <rect x="356" y="12" width="72" height="48" rx="5" fill="#0b1f45" stroke="#bccce6" strokeWidth="2" />
-      <g style={shot("rj-image")}>
+      <g style={sh("rj-image")}>
         <ellipse cx="392" cy="36" rx="24" ry="14" fill="#bccce6" opacity="0.55" />
         <circle cx="395" cy="39" r="7" fill="#f3f6f8" />
       </g>
       <text x="392" y="76" fill="#bccce6" fontSize="12" textAnchor="middle">จอภาพ</text>
 
       {/* the C-arm with tube, detector and the exposure, turning about the patient */}
-      <g style={{ ...turn("rj-turn"), transformOrigin: `${CX}px ${CY}px`, transformBox: "view-box" }}>
+      <g style={{ ...tu("rj-turn"), transformOrigin: `${CX}px ${CY}px`, transformBox: "view-box" }}>
         <path d={`M${CX} ${CY + 168} A168 168 0 0 0 ${CX} ${CY - 168} L${CX} ${CY - 118}`} fill="none" stroke="#46566a" strokeWidth="14" strokeLinejoin="round" />
 
-        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={shot("rj-beam")} data-rj-beam />
-        <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={shot("rj-rays")}>
+        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={sh("rj-beam")} data-rj-beam />
+        <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={sh("rj-rays")}>
           {RAYS.map((r) => (
             <line key={r.x1} x1={r.x1} y1={CY + 130} x2={r.x2} y2={CY + 58} style={flow} />
           ))}
         </g>
 
-        <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={shot("rj-scatter")}>
+        <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={sh("rj-scatter")}>
           {SCATTER.map((s) => (
             <line key={s.a} x1={s.from.x} y1={s.from.y} x2={s.to.x} y2={s.to.y} markerEnd="url(#rj-arrow)" style={flow} />
           ))}
         </g>
 
-        <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={shot("rj-through")}>
+        <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={sh("rj-through")}>
           {[-24, 0, 24].map((dx) => (
             <line key={dx} x1={CX + dx} y1={CY - 64} x2={CX + dx} y2={CY - 100} style={flow} />
           ))}
@@ -201,12 +204,12 @@ export function RadiationJourney({ className, style }: { className?: string; sty
         <rect x={CX - 40} y={CY + 132} width="80" height="36" rx="8" fill="#132c5c" stroke="#bccce6" strokeWidth="2" />
         <rect x={CX - 30} y={CY + 144} width="10" height="14" rx="2" fill="#bccce6" />
         <polygon points={`${CX + 18},${CY + 140} ${CX + 30},${CY + 140} ${CX + 30},${CY + 160} ${CX + 12},${CY + 160}`} fill="#bccce6" />
-        <circle cx={CX + 18} cy={CY + 142} r="16" fill="url(#rj-hot)" style={shot("rj-tube")} />
-        <line x1={CX - 18} y1={CY + 151} x2={CX + 12} y2={CY + 149} stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 8" style={{ ...shot("rj-electrons"), ...flow }} />
+        <circle cx={CX + 18} cy={CY + 142} r="16" fill="url(#rj-hot)" style={sh("rj-tube")} />
+        <line x1={CX - 18} y1={CY + 151} x2={CX + 12} y2={CY + 149} stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 8" style={{ ...sh("rj-electrons"), ...flow }} />
 
         {/* detector */}
         <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#132c5c" stroke="#5cc3e6" strokeWidth="2" />
-        <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#5cc3e6" style={shot("rj-image")} />
+        <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#5cc3e6" style={sh("rj-image")} />
       </g>
 
       {/* patient on the table, which stay put */}
@@ -214,15 +217,15 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       <ellipse cx={CX} cy={CY} rx="80" ry="62" fill="#e6ecf3" stroke="#bccce6" strokeWidth="2" />
       <circle cx={CX + 8} cy={CY + 10} r="26" fill="none" stroke="#46566a" strokeWidth="2.5" />
       {SKIN.map((d, i) => (
-        <path key={d} d={d} fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" opacity={i ? 0 : 1} style={turn(`rj-skin-${i + 1}`)} />
+        <path key={d} d={d} fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" opacity={i ? 0 : 1} style={tu(`rj-skin-${i + 1}`)} />
       ))}
 
       {/* the nurse beside the table: standing, then hurt where this position's scatter lands */}
-      <g style={turn("rj-calm")}>
+      <g style={tu("rj-calm")}>
         <Nurse />
       </g>
       {(["trunk", "head"] as const).map((part, i) => (
-        <g key={part} opacity="0" style={turn(`rj-hurt-${i + 2}`)}>
+        <g key={part} opacity="0" style={tu(`rj-hurt-${i + 2}`)}>
           <Nurse hurt={part} />
         </g>
       ))}

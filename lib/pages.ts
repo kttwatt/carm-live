@@ -17,7 +17,7 @@ export type Page = {
   /** the page's take-home message, set large and highlighted under everything */
   key?: string;
   /** an animated diagram beside the points, which light up step by step with it */
-  figure?: "radiation-journey" | "carm-3d";
+  figure?: "radiation-journey" | "radiation-ap" | "carm-3d";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
   /** leave out the slide's title above this page: its heading names the page on its own */
@@ -103,6 +103,10 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "รังสีฟุ้งกระจาย (Scatter)",
+      // its own heading stands as the title; the AP diagram, held still, sits centred under the cards
+      noTitle: true,
+      top: true,
+      figure: "radiation-ap",
       points: [
         { th: "ผู้ป่วยคือแหล่งรังสีฟุ้งกระจาย (Scatter) หลักในห้องผ่าตัด" },
         { th: "ฝั่ง X-ray tube มีรังสีฟุ้งกระจายมากกว่าฝั่งตัวรับภาพ" },
