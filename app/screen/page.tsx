@@ -125,7 +125,7 @@ function ScreenView() {
   }
 
   // The 3D C-arm model takes over the projector while the presenter shows it.
-  if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} />;
+  if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} muted={preview} />;
 
   if (scene.kind === "outline" && scene.items) {
     return (

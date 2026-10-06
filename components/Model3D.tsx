@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { asset } from "@/lib/room";
+import { useBeep } from "@/lib/beep";
 import type { Sim } from "@/lib/state";
 
 export type M3 = NonNullable<Sim["m3"]>;
@@ -17,9 +18,13 @@ export const M3_PARTS = [
   { id: "switch", n: 7, name: "Switch" },
 ];
 
-/** The 3D page in a frame, kept in step with the presenter's settings. `lite` is the light phone version. */
-export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
+/**
+ * The 3D page in a frame, kept in step with the presenter's settings. `lite` is the light phone version.
+ * On the projector (not lite, not `muted`) it beeps while the beam is on, like the real machine.
+ */
+export function Model3DStage({ m3, lite, muted }: { m3: M3; lite?: boolean; muted?: boolean }) {
   const ref = useRef<HTMLIFrameElement>(null);
+  useBeep(m3.fire && !lite && !muted);
   const send = useCallback(() => {
     const msg = { type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip, spin: !!m3.spin, lat: !!m3.lat };
     ref.current?.contentWindow?.postMessage(msg, window.location.origin);

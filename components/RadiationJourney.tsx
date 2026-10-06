@@ -176,7 +176,7 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       <g style={{ ...turn("rj-turn"), transformOrigin: `${CX}px ${CY}px`, transformBox: "view-box" }}>
         <path d={`M${CX} ${CY + 168} A168 168 0 0 0 ${CX} ${CY - 168} L${CX} ${CY - 118}`} fill="none" stroke="#46566a" strokeWidth="14" strokeLinejoin="round" />
 
-        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={shot("rj-beam")} />
+        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={shot("rj-beam")} data-rj-beam />
         <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={shot("rj-rays")}>
           {RAYS.map((r) => (
             <line key={r.x1} x1={r.x1} y1={CY + 130} x2={r.x2} y2={CY + 58} style={flow} />
