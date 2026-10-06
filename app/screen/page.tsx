@@ -143,6 +143,29 @@ function ScreenView() {
     );
   }
 
+  // Closing slide: a QR to the self-guided 3D model, which stays open after the seminar.
+  if (scene.kind === "end") {
+    const simUrl = `${base}/simulator`;
+    return (
+      <main className="flex flex-1 items-center gap-[4vw] px-[6vw] py-[6vh]">
+        <div className="flex min-w-0 flex-1 flex-col gap-[3vh]">
+          <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
+          <p className="text-[2.2vw] leading-snug">
+            ทบทวนต่อที่บ้านด้วย <b className="text-amber">C-Arm สามมิติ</b>
+          </p>
+          <p className="text-[1.6vw] leading-relaxed text-mist">
+            ฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วนได้เอง ไม่ต้องใช้รหัสห้อง เข้าได้ทุกเวลาแม้จบสัมมนาแล้ว
+          </p>
+          <p className="break-all text-[1.4vw] text-sky">{simUrl}</p>
+        </div>
+        <div className="flex flex-col items-center gap-[2vh]">
+          <Qr value={simUrl} size={420} label="QR เข้าเล่น C-Arm สามมิติ" className="max-h-[60vh] max-w-[34vw] [&_img]:h-full [&_img]:w-full" />
+          <p className="text-[1.6vw] text-mist">สแกนเพื่อเข้าเล่น</p>
+        </div>
+      </main>
+    );
+  }
+
   // Lecture pages: the presenter's "next" moves pg.n; it only counts while pg.s is this scene.
   const pages = pagesFor(scene.id);
   const pg = state?.sim?.pg;

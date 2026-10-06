@@ -4,12 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>body{margin:0}[hidden]{display:none!important}</style>
-<title>C-Arm สามมิติ</title>
+<title>C-Arm สามมิติ · ทดลองใช้เอง</title>
+<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วนได้เอง">
+<meta name="theme-color" content="#0e1418">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: full-height 3D stage (an OR seen from the anaesthetist's corner) + a rail listing the 7 numbered parts; stacks on phones */
+/* Self-guided copy of carm-3d.html for anyone, any time (no room, no presenter).
+   Layout: 3D stage (an OR seen from the anaesthetist's corner) + toolbar + a rail listing the 7 numbered parts.
+   Side by side on desktop, tablet landscape and phone landscape; stacked on phone and tablet portrait. */
 :root{
   --bg:#0e1418; --stage:#111a1f; --panel:#151e24; --line:#27353d; --ink:#e7eef1; --muted:#90a4ad;
   --accent:#f0b443; --accent-ink:#1b1305; --beam:#e5484d; --scatter:#ff8a3d;
@@ -23,13 +27,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 button{font:inherit;color:inherit}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-.app{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:100%}
-.stage{position:relative;min-width:0;background:radial-gradient(120% 90% at 40% 35%,#18242b 0%,var(--stage) 60%);overflow:hidden}
+.app{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,30vw,380px);height:100%;height:100dvh}
+.view{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0}
+.stage{position:relative;flex:1;min-width:0;min-height:0;background:radial-gradient(120% 90% at 40% 35%,#18242b 0%,var(--stage) 60%);overflow:hidden}
 #c{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
 #c:active{cursor:grabbing}
 
 /* number badges pinned to parts */
-.tags{position:absolute;inset:0;pointer-events:none}
+ter-events:none}
 .tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;pointer-events:auto;cursor:pointer;
   background:rgba(14,20,24,.82);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;
   font-size:13px;white-space:nowrap;transition:background .2s,border-color .2s;will-change:transform}
@@ -45,25 +50,25 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .state.warn{border-color:var(--scatter);color:#ffd2b5}
 .state b{color:var(--scatter);font-weight:600}
 
-.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
+.toolbar>*{pointer-events:auto}
 .tb{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
   background:rgba(21,30,36,.9);border:1px solid var(--line);font-size:14px}
 .tb:hover{border-color:#3d525c}
 .tb[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .tb.fire[aria-pressed="true"]{background:var(--beam);border-color:var(--beam);color:#fff}
 .tb .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.8}
-.hint{margin-left:auto;color:var(--muted);font-size:12.5px}
-
-.notes{position:absolute;right:16px;top:16px;width:min(420px,calc(100% - 32px));max-height:calc(100% - 96px);overflow:auto;
-  background:rgba(21,30,36,.96);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:14px}
-.notes h3{margin:0 0 8px;font-family:var(--f-display);font-size:16px;font-weight:600}
-.notes ol{margin:0;padding-left:20px;display:grid;gap:8px}
-.notes b{color:var(--accent);font-weight:600}
+.hint{margin-left:auto;color:var(--muted);font-size:12.5px;pointer-events:none}
+.tb[hidden]{display:none}
 
 /* rail */
 .rail{display:flex;flex-direction:column;gap:18px;padding:22px 20px;background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-width:0}
 .eyebrow{margin:0;font-size:12px;letter-spacing:.06em;color:var(--muted)}
 .rail h1{margin:4px 0 0;font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.25;text-wrap:balance}
+.home{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;color:var(--muted);font-size:13.5px;text-decoration:none}
+.home:hover{color:var(--ink)}
+.try{margin:0;padding-left:20px;display:grid;gap:6px}
+.try b{color:var(--accent);font-weight:600}
 .parts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .parts button{width:100%;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;text-align:left;cursor:pointer;
   padding:7px 10px;border-radius:9px;background:none;border:1px solid transparent}
@@ -91,39 +96,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .keys{margin-top:auto;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
 kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
 
-/* main screen (projector): model fills the screen, the selected part's description is a card at the bottom centre */
-html.scr,html.scr body{height:100%}
-html.scr .app{grid-template-columns:1fr;height:100%}
-html.scr .stage{height:auto;min-height:0}
-html.scr .rail,html.scr .toolbar,html.scr .act,html.scr .range{display:none}
-html.scr .detail{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);width:min(820px,calc(100% - 32px));
-  padding:clamp(14px,1.6vw,26px) clamp(18px,2vw,32px);border:1px solid var(--line);border-radius:18px;
-  background:rgba(14,20,24,.9);gap:.5em;font-size:clamp(16px,1.6vw,28px);line-height:1.5}
-html.scr .detail h2{font-size:clamp(22px,2.5vw,42px);gap:.4em}
-html.scr .detail h2 .n{width:1.4em;height:1.4em;font-size:.75em}
-html.scr .tag{font-size:clamp(13px,1.1vw,19px)}
-html.scr .tag .n{width:1.7em;height:1.7em}
-html.scr .state{font-size:clamp(14px,1.3vw,22px)}
-
-/* light mode: participants' phones inside the join page; model on top, the part's description below */
-html.lite,html.lite body{height:100%}
-html.lite .app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;height:100%}
-html.lite .stage{height:auto;min-height:0}
-html.lite .rail{max-height:38vh;padding:12px 16px;gap:8px;border-left:0;border-top:1px solid var(--line)}
-html.lite .rail header,html.lite .parts,html.lite .keys,html.lite .act,html.lite .range{display:none}
-html.lite .detail{border-top:0;padding-top:0}
-html.lite .detail h2{font-size:18px}
-html.lite .state{font-size:13px;top:10px}
-html.lite .toolbar{left:10px;right:10px;bottom:10px}
-@media (max-width:860px){
-  html,body{height:auto}
-  .app{grid-template-columns:1fr;height:auto}
-  .stage{height:62vh;min-height:380px}
-  .rail{border-left:0;border-top:1px solid var(--line);padding-inline:16px}
-  .hint,.keys{display:none}
-  .tag .t{display:none}
-  .tag{padding:3px}
-}
 .diag{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:8px;background:rgba(14,20,24,.92);border:1px solid var(--line);font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre}
 @media (prefers-reduced-motion:reduce){.tag{transition:none}}
 .fail{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:6px;padding:16px;text-align:center;text-wrap:balance;background:var(--stage)}
@@ -131,52 +103,101 @@ html.lite .toolbar{left:10px;right:10px;bottom:10px}
 .fail-t{font-family:var(--f-display);font-weight:700;font-size:20px;color:var(--accent)}
 .fail-b{margin-top:6px;cursor:pointer;padding:9px 18px;border-radius:8px;background:none;border:1px solid var(--accent);color:var(--accent)}
 html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important}
+
+/* tablet landscape and small laptops */
+@media (max-width:1180px){
+  .hint{display:none}
+  .rail{padding:18px 16px;gap:14px}
+  .rail h1{font-size:22px}
+  .tb{padding:8px 12px}
+}
+/* short landscape screens (phones turned sideways) */
+@media (max-height:560px) and (orientation:landscape){
+  .app{grid-template-columns:minmax(0,1fr) clamp(240px,34vw,340px)}
+  .toolbar{left:8px;right:8px;bottom:8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
+  .toolbar::-webkit-scrollbar{display:none}
+  .tb{flex:none;padding:6px 10px;font-size:13px;white-space:nowrap}
+  .rail{padding:12px 14px;gap:10px}
+  .rail h1{font-size:18px}
+  .eyebrow,.keys{display:none}
+  .detail h2{font-size:18px}
+  .state{top:8px;font-size:13px;padding:6px 12px}
+  .tag .t{display:none}
+  .tag{padding:3px}
+}
+/* phone and tablet portrait: model on top, buttons under it, then the description and the parts list */
+@media (orientation:portrait) and (max-width:1023px),(max-width:599px){
+  html,body{height:auto}
+  .app{grid-template-columns:1fr;height:auto}
+  .stage{flex:none;height:min(62svh,720px);min-height:320px}
+  .toolbar{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 12px;
+    background:var(--panel);border-top:1px solid var(--line);pointer-events:auto}
+  .tb{justify-content:center;text-align:center;line-height:1.3;padding:10px 6px}
+  .rail{border-left:0;border-top:1px solid var(--line);padding:16px 16px calc(20px + env(safe-area-inset-bottom));overflow:visible}
+  .rail>header{order:0}
+  .detail{order:1;border-top:0;padding-top:0}
+  .parts{order:2;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line);padding-top:14px}
+  .keys{display:none}
+  .state{top:10px;font-size:13.5px}
+}
+@media (orientation:portrait) and (min-width:600px) and (max-width:1023px){
+  .stage{height:min(58svh,760px)}
+  .toolbar{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media (max-width:599px){
+  .tag .t{display:none}
+  .tag{padding:3px}
+  .rail h1{font-size:22px}
+}
+@media (max-width:359px){
+  .parts{grid-template-columns:1fr}
+}
+/* fingers: bigger targets */
+@media (pointer:coarse){
+  .tb{min-height:44px}
+  .parts button{min-height:44px}
+  .tag .n{width:30px;height:30px}
+  .act{padding:10px 14px}
+  .range input{height:32px}
+}
 </style>
 </head>
 <body>
 
 <div class="app" id="app">
-  <section class="stage" id="stage">
-    <canvas id="c" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
-    <div class="tags" id="tags"></div>
-    <div class="state" id="state" hidden></div>
-    <div class="diag" id="diag" hidden></div>
+  <div class="view">
+    <section class="stage" id="stage">
+      <canvas id="c" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
+      <div class="tags" id="tags"></div>
+      <div class="state" id="state" hidden></div>
+      <div class="diag" id="diag" hidden></div>
     <div class="fail" id="fail" role="alert" hidden>
       <p class="fail-t">แสดงภาพสามมิติไม่ได้</p>
       <p data-why>อุปกรณ์นี้แสดงภาพสามมิติไม่ได้</p>
       <p class="muted">ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่</p>
       <button class="fail-b" type="button" onclick="location.reload()">โหลดใหม่</button>
     </div>
-    <aside class="notes" id="notes" hidden>
-      <h3>บทพูดสไลด์ 2.1 (ประมาณ 1.5 นาที)</h3>
-      <ol>
-        <li><b>เปิดด้วยคำถาม</b> "ในห้องผ่าตัดของท่าน ใครเป็นผู้กดฉายรังสี C-Arm" ให้ผู้ฟังตอบสั้นๆ 2–3 คน</li>
-        <li><b>ชี้ตามหมายเลข</b> เริ่มจากหลอดเอกซเรย์ (1) และตัวรับภาพ (3) ก่อน แล้วจึงอธิบายส่วนอื่น ไม่ต้องอ่านทุกบรรทัด</li>
-        <li><b>เน้นประเด็นเดียว</b> หลอดเอกซเรย์ควรอยู่ใต้เตียง กดปุ่ม "กลับด้านหลอด" แล้ว "ฉายรังสี" ให้ผู้ฟังเห็นรังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม</li>
-        <li><b>ปิดด้วย O-Arm</b> มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</li>
-        <li><b>เชื่อมไปสไลด์ถัดไป</b> "แล้วรังสีเดินทางจากหลอดไปถึงจอได้อย่างไร"</li>
-      </ol>
-    </aside>
-    <div class="toolbar">
+    </section>
+    <div class="toolbar" role="toolbar" aria-label="ควบคุมแบบจำลอง">
       <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
       <button class="tb" id="bLat" aria-pressed="false">ท่า AP</button>
       <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
       <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
       <button class="tb" id="bHome">ภาพรวม</button>
-      <button class="tb" id="bNotes" aria-pressed="false">บทพูด</button>
-      <button class="tb" id="bFull">เต็มจอ</button>
+      <button class="tb" id="bFull" aria-pressed="false">เต็มจอ</button>
       <span class="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
     </div>
-  </section>
+  </div>
 
   <aside class="rail">
     <header>
-      <p class="eyebrow">สไลด์ 2.1 · หลักการทำงานของเครื่องและอันตรายจากรังสี</p>
+      <a class="home" href="./" target="_top">‹ หน้าแรก</a>
+      <p class="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
       <h1>ส่วนประกอบของเครื่อง C-Arm</h1>
     </header>
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
-    <footer class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>N</kbd> บทพูด</footer>
+    <footer class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> ท่า AP/LAT · <kbd>R</kbd> หมุนรอบ</footer>
   </aside>
 </div>
 
@@ -208,14 +229,9 @@ if(!C2D.roundRect) C2D.roundRect=function(x,y,w,h,r){
   this.arcTo(x,y+h,x,y,r); this.arcTo(x,y,x+w,y,r); this.closePath();
 };
 const QS = new URLSearchParams(location.search);
-// The projector screen passes ?motion=1: the camera flight and C-arm turn are the demo itself, so it animates
-// even when that computer has Windows animation effects off (which reports reduced motion).
-const REDUCED = !QS.has('motion') && matchMedia('(prefers-reduced-motion: reduce)').matches;
-const LITE = QS.has('lite');            // phones: no shadows, lower resolution, fewer scatter streaks
-if(LITE) document.documentElement.classList.add('lite');
-// main screen: no list and no buttons (the iPad runs them); the chosen part's description sits mid-screen
-const SCREEN = QS.has('embed') && !LITE;
-if(SCREEN) document.documentElement.classList.add('scr');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// small touch screens draw the light version: no shadows, lower resolution, fewer scatter streaks (?lite=1 forces it)
+const LITE = QS.has('lite') || (matchMedia('(pointer:coarse)').matches && Math.min(screen.width,screen.height)<700);
 const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
 
 const PARTS = [
@@ -465,8 +481,7 @@ function spawn(s){
 
 /* ---------- UI ---------- */
 const tagsEl=document.getElementById('tags'), partsEl=document.getElementById('parts'), detailEl=document.getElementById('detail');
-if(SCREEN) stage.appendChild(detailEl);   // the card floats over the model instead of sitting in the side list
-const stateEl=document.getElementById('state'), notesEl=document.getElementById('notes');
+const stateEl=document.getElementById('state');
 const tags={};
 PARTS.forEach(p=>{
   const b=document.createElement('button'); b.className='tag'; b.type='button';
@@ -478,7 +493,7 @@ PARTS.forEach(p=>{
   li.firstChild.onclick=()=>select(sel===p.id?null:p.id); partsEl.appendChild(li);
 });
 
-const st = {fire:false, flip:false, lat:false, tilt:0, beamScale:1, notes:false};
+const st = {fire:false, flip:false, lat:false, tilt:0, beamScale:1};
 let sel=null;
 
 function extra(id){
@@ -494,11 +509,13 @@ function extra(id){
 }
 function renderDetail(){
   if(!sel){
-    detailEl.hidden=SCREEN;
-    detailEl.innerHTML = LITE
-      ? `<p class="muted">แตะหมายเลขบนภาพเพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุนดู</p>`
-      : `<p class="muted">กดหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน</p>
-      <p class="muted">ลำดับที่แนะนำ: เริ่มจากหลอดเอกซเรย์ (1) และตัวรับภาพ (3) ก่อน แล้วจึงอธิบายส่วนอื่น</p>`;
+    detailEl.innerHTML = `<p class="muted">แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม</p>
+      <ol class="try muted">
+        <li><b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง</li>
+        <li><b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม</li>
+        <li><b>ท่า LAT</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ</li>
+        <li>เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง</li>
+      </ol>`;
     return;
   }
   const p=byId[sel];
@@ -528,11 +545,11 @@ function select(id){
   flyTo(t,pos);
 }
 
-const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin'), bNotes=document.getElementById('bNotes');
+const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin');
 function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function flipLabel(){ return st.lat ? (st.flip?'X-ray tube ฝั่งเดียวกับทีม':'X-ray tube ฝั่งตรงข้ามทีม') : (st.flip?'X-ray tube อยู่เหนือเตียง':'X-ray tube อยู่ใต้เตียง'); }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert: '+flipLabel():'Invert'; updateState(); }
+function flipLabel(){ return st.lat ? 'หลอดฝั่งทีม' : 'หลอดเหนือเตียง'; }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
 function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า LAT':'ท่า AP'; setFlip(st.flip); }
 function updateState(){
@@ -556,11 +573,20 @@ const bLat=document.getElementById('bLat');
 bLat.onclick=()=>setLat(!st.lat);
 bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-pressed',controls.autoRotate); };
 document.getElementById('bHome').onclick=()=>select(null);
-bNotes.onclick=()=>{ st.notes=!st.notes; notesEl.hidden=!st.notes; bNotes.setAttribute('aria-pressed',st.notes); };
-document.getElementById('bFull').onclick=()=>{
+// Fullscreen: hidden where the browser has none (iPhone Safari) or the frame doesn't allow it
+const bFull=document.getElementById('bFull');
+bFull.hidden=!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+bFull.onclick=()=>{
   const el=document.getElementById('app');
-  try{ if(document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen().catch(()=>{}); }catch(e){}
+  try{
+    if(document.fullscreenElement||document.webkitFullscreenElement) (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+    else { const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el); if(p&&p.catch) p.catch(()=>{}); }
+  }catch(e){}
 };
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
+  const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?'ออกจากเต็มจอ':'เต็มจอ';
+}));
 addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey) return;
   const i=sel?byId[sel].n-1:-1;
@@ -571,31 +597,8 @@ addEventListener('keydown',e=>{
   else if(e.key==='x'||e.key==='X') bFire.click();
   else if(e.key==='f'||e.key==='F') bFlip.click();
   else if(e.key==='l'||e.key==='L') bLat.click();
-  else if(e.key==='n'||e.key==='N') bNotes.click();
+  else if(e.key==='r'||e.key==='R') bSpin.click();
   else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
-});
-
-/* embedded in the live app's main screen: the presenter's iPad drives it through postMessage */
-let remotePart=null;
-if(QS.has('embed')){
-  ['bNotes','bFull'].forEach(id=>document.getElementById(id).hidden=true);
-  document.querySelectorAll('.hint,.keys').forEach(el=>el.hidden=true);
-}
-if(LITE){
-  // viewers only look around; the presenter runs the beam and the tube
-  ['bFire','bFlip','bLat','bSpin'].forEach(id=>document.getElementById(id).hidden=true);
-  const bHome=document.getElementById('bHome');
-  bHome.textContent='กลับไปมุมของผู้บรรยาย';
-  bHome.onclick=()=>select(remotePart);
-}
-addEventListener('message',e=>{
-  const d=e.data;
-  if(e.source!==window.parent||!d||d.type!=='carm3d') return;
-  if(typeof d.lat==='boolean'&&d.lat!==st.lat) setLat(d.lat);
-  if(typeof d.flip==='boolean'&&d.flip!==st.flip) setFlip(d.flip);
-  if(typeof d.fire==='boolean'&&d.fire!==st.fire) setFire(d.fire);
-  if(typeof d.spin==='boolean'){ controls.autoRotate=d.spin; bSpin.setAttribute('aria-pressed',d.spin); }
-  if(d.part!==undefined&&(d.part===null||byId[d.part])){ remotePart=d.part; if(d.part!==sel) select(d.part); }
 });
 
 /* click on a part in 3D */
@@ -612,7 +615,7 @@ canvas.addEventListener('pointerup',e=>{
 });
 
 /* camera fly */
-let tw=null, vShift=0;
+let tw=null;
 // press D for a readout: frame rate, reduced motion, drawing size (to diagnose a jerky projector)
 const diagEl=document.getElementById('diag'); let diagFrames=0, diagT0=performance.now();
 function flyTo(target,pos){
@@ -654,13 +657,6 @@ function frame(){
   if(tw){ const k=ease(Math.min(1,(performance.now()-tw.t0)/1000/tw.dur));
     controls.target.lerpVectors(tw.fT,tw.tT,k); camera.position.lerpVectors(tw.fP,tw.tP,k); if(k>=1) tw=null; }
   controls.update();
-  if(SCREEN){
-    const want=sel?stage.clientHeight*0.17:0;
-    vShift+=(want-vShift)*Math.min(1,dt*4);
-    if(Math.abs(vShift)>0.5) camera.setViewOffset(stage.clientWidth,stage.clientHeight,0,vShift,stage.clientWidth,stage.clientHeight);
-    else if(camera.view&&camera.view.enabled) camera.clearViewOffset();
-  }
-
   // AP: turn about the arm axis (z) to put the tube over/under; Lateral: orbit about x so the beam runs across the table
   const targetRot=(st.lat?0:(st.flip?Math.PI:0))+st.tilt;
   const targetOrb=st.lat?(st.flip?Math.PI/2:-Math.PI/2):0;
