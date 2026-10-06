@@ -46,7 +46,6 @@ export const SCENES: Scene[] = [
   },
   { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
   { id: "s02", slide: 2, speaker: 1, title: "ใครเป็นผู้ใช้งานเครื่อง Fluoroscopy", kind: "poll", activity: "เลือกบุคลากรที่ใช้เครื่อง Fluoroscopy ได้ แล้วเฉลยตามร่างกฎกระทรวง ข้อ 9" },
-  { id: "s02b", slide: 2, speaker: 1, title: "ใครเป็นคนใช้ Fluoroscopy ในห้องผ่าตัด", kind: "lecture" },
   { id: "s02c", slide: 2, speaker: 1, title: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้", kind: "lecture" },
   { id: "s03", slide: 3, speaker: 2, title: "หลักการทำงานของเครื่องและอันตรายจากรังสี", kind: "lecture" },
   { id: "s04", slide: 4, speaker: 2, title: "รังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
