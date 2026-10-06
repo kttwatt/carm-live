@@ -24,12 +24,23 @@ const SCATTER = "#f08a5d";
 // the Surgeon above the table (detector side), the Assistant and Scrub below it (tube side)
 const SURGEON = { x: 300, y: TABLE.y - 16 };
 const NEAR_Y = TABLE.y + TABLE.h + 16;
-const SHIELD = { x1: 378, x2: 502, y: 300 };
-const BEHIND_Y = 336;
+const TUBE = { x: BEAM_X, y: TUBE_Y + 11 };
+const deg = (dy: number, dx: number) => (Math.atan2(dy, dx) * 180) / Math.PI;
+
+// The lead shield stands at an angle, its face toward the tube.
+const SHIELD_AT = { x: 395, y: 326 };
+const SHIELD_LEN = 104;
+const SHIELD = (() => {
+  const r = ((deg(SHIELD_AT.y - TUBE.y, SHIELD_AT.x - TUBE.x) + 90) * Math.PI) / 180;
+  const d = { x: (Math.cos(r) * SHIELD_LEN) / 2, y: (Math.sin(r) * SHIELD_LEN) / 2 };
+  return { x1: SHIELD_AT.x - d.x, y1: SHIELD_AT.y - d.y, x2: SHIELD_AT.x + d.x, y2: SHIELD_AT.y + d.y };
+})();
+
+// Behind it they turn to face the tube: `turn` is how far round from facing the table (up).
 const ACROSS = [
-  { name: "Assistant", x: 290, hideX: 410 },
-  { name: "Scrub", x: 360, hideX: 478 },
-];
+  { name: "Assistant", x: 290, hide: { x: 440, y: 298 } },
+  { name: "Scrub", x: 360, hide: { x: 478, y: 348 } },
+].map((p) => ({ ...p, turn: deg(TUBE.y - p.hide.y, TUBE.x - p.hide.x) + 90 }));
 
 // Scatter leaves the patient where the beam enters (the tube side, down) most, some toward the detector side.
 const SCATTER_RAYS = [
@@ -48,14 +59,20 @@ const SCATTER_RAYS = [
   return { a, from: at(30), to: at(30 + len) };
 });
 
-/** A person from above: shoulders, head, and a small mark on the side they face. The name sits on the far side. */
-function Person({ x, y, name, face }: { x: number; y: number; name: string; face: "up" | "down" }) {
+/** A person from above: shoulders, head, and a small mark on the side they face. The name sits on the far side.
+ * `turn` (degrees) turns the body that far round while they are clear of the beam (the loop turns them back). */
+function Person({ x, y, name, face, turn }: { x: number; y: number; name: string; face: "up" | "down"; turn?: number }) {
   const f = face === "down" ? 1 : -1;
+  const turning = turn
+    ? ({ "--rot": `${turn}deg`, transform: `rotate(${turn}deg)`, transformOrigin: `${x}px ${y}px`, ...play("ts-turn") } as React.CSSProperties)
+    : undefined;
   return (
     <g>
-      <ellipse cx={x} cy={y} rx={22} ry={12} fill={SCRUBS} />
-      <circle cx={x} cy={y} r={10} fill={SKIN} />
-      <path d={`M${x - 5} ${y + 9 * f} L${x} ${y + 16 * f} L${x + 5} ${y + 9 * f} z`} fill={SKIN} />
+      <g style={turning}>
+        <ellipse cx={x} cy={y} rx={22} ry={12} fill={SCRUBS} />
+        <circle cx={x} cy={y} r={10} fill={SKIN} />
+        <path d={`M${x - 5} ${y + 9 * f} L${x} ${y + 16 * f} L${x + 5} ${y + 9 * f} z`} fill={SKIN} />
+      </g>
       <text x={x} y={face === "down" ? y - 20 : y + 32} textAnchor="middle" fontSize="15" fontWeight="700" fill="#f3f6f8">
         {name}
       </text>
@@ -67,7 +84,7 @@ export function TeamStepBack({ className, style }: { className?: string; style?:
   const cy = TABLE.y + TABLE.h / 2;
   return (
     <svg
-      viewBox="20 40 490 384"
+      viewBox="20 40 490 404"
       role="img"
       aria-label="มองจากด้านบน: เครื่อง C-arm ท่า Lateral เข้ามาจากด้านซ้าย หลอดเอกซเรย์อยู่ใต้เตียง ตัวรับภาพอยู่ด้านบน Surgeon ยืนฝั่งตัวรับภาพ Assistant และ Scrub ยืนฝั่งตรงข้าม ก่อนฉายรังสี Surgeon ถอยหลัง 1–2 ก้าว Assistant และ Scrub หลบหลังฉากกันรังสี หยุดฉายแล้วกลับมาที่เดิม"
       className={className}
@@ -111,9 +128,9 @@ export function TeamStepBack({ className, style }: { className?: string; style?:
         ตัวรับภาพ
       </text>
 
-      {/* the lead shield on the tube side */}
-      <line x1={SHIELD.x1} y1={SHIELD.y} x2={SHIELD.x2} y2={SHIELD.y} stroke="#a3b1ba" strokeWidth="9" strokeLinecap="round" />
-      <text x={SHIELD.x2 + 2} y={SHIELD.y - 12} textAnchor="end" fontSize="14" fontWeight="700" fill="#a3b1ba">
+      {/* the lead shield on the tube side, angled to face the tube */}
+      <line x1={SHIELD.x1} y1={SHIELD.y1} x2={SHIELD.x2} y2={SHIELD.y2} stroke="#a3b1ba" strokeWidth="9" strokeLinecap="round" />
+      <text x={Math.min(SHIELD.x1, SHIELD.x2)} y={Math.max(SHIELD.y1, SHIELD.y2) + 22} textAnchor="middle" fontSize="14" fontWeight="700" fill="#a3b1ba">
         ฉากกันรังสี
       </text>
 
@@ -130,22 +147,24 @@ export function TeamStepBack({ className, style }: { className?: string; style?:
         <Person x={SURGEON.x} y={SURGEON.y} name="Surgeon" face="down" />
       </g>
 
-      {/* the Assistant and Scrub, behind the shield at rest; the loop brings them to the table's edge (they step back
-          first, then along behind the shield, so they never walk through it) */}
+      {/* the Assistant and Scrub, behind the shield facing the tube at rest; the loop brings them to the table's edge
+          (they go along the table first, then back behind the shield, so they never walk through it) */}
       {ACROSS.map((p) => {
-        const move = { "--dx": `${p.hideX - p.x}px`, "--dy": `${BEHIND_Y - NEAR_Y}px` } as React.CSSProperties;
+        const dx = p.hide.x - p.x;
+        const dy = p.hide.y - NEAR_Y;
+        const move = { "--dx": `${dx}px`, "--dy": `${dy}px` } as React.CSSProperties;
         return (
-          <g key={p.name} style={{ ...move, transform: `translate(${p.hideX - p.x}px, ${BEHIND_Y - NEAR_Y}px)`, ...play("ts-hide") }}>
-            <Person x={p.x} y={NEAR_Y} name={p.name} face="up" />
+          <g key={p.name} style={{ ...move, transform: `translate(${dx}px, ${dy}px)`, ...play("ts-hide") }}>
+            <Person x={p.x} y={NEAR_Y} name={p.name} face="up" turn={p.turn} />
           </g>
         );
       })}
 
       {/* what is happening, under the drawing */}
-      <text x="265" y="412" textAnchor="middle" fontSize="18" fontWeight="700" fill="#f3f6f8" style={{ opacity: 0, ...play("ts-off") }}>
+      <text x="265" y="432" textAnchor="middle" fontSize="18" fontWeight="700" fill="#f3f6f8" style={{ opacity: 0, ...play("ts-off") }}>
         ไม่ฉายรังสี: ทีมทำงานชิดเตียง
       </text>
-      <text x="265" y="412" textAnchor="middle" fontSize="18" fontWeight="700" fill={BEAM} style={play("ts-on")}>
+      <text x="265" y="432" textAnchor="middle" fontSize="18" fontWeight="700" fill={BEAM} style={play("ts-on")}>
         ● ฉายรังสี: ถอยห่าง หรือหลบหลังฉาก
       </text>
     </svg>
