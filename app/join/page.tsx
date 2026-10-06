@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { SIMULATOR_URL } from "@/lib/links";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { AnswerPanel } from "@/components/AnswerPanel";
 import { LeaderList, MyScore, usePolled } from "@/components/Leaderboard";
@@ -137,9 +137,9 @@ function JoinView() {
           <>
             <h1 className="font-display text-3xl font-bold">ขอบคุณที่ร่วมกิจกรรม</h1>
             <MyScore result={result} />
-            <Link href="/simulator" className="rounded-xl border-2 border-amber px-4 py-3 text-center font-display font-bold text-amber">
+            <a href={SIMULATOR_URL} className="rounded-xl border-2 border-amber px-4 py-3 text-center font-display font-bold text-amber">
               กดเข้าเล่น C-Arm สามมิติ (เข้าได้ทุกเวลา)
-            </Link>
+            </a>
             <p className="text-mist">หรือปิดหน้านี้ได้เลย</p>
           </>
         ) : question && phase === "scores" ? (
