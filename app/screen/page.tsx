@@ -287,7 +287,7 @@ function ScreenView() {
               <p className="text-[1.4vw] font-semibold">{PHASE_LABEL[phase]}</p>
             </div>
           ) : pages.length > 0 ? (
-            <LecturePage page={pages[pageN]} index={pageN} total={pages.length} />
+            <LecturePage page={pages[pageN]} index={pageN} total={pages.length} lite={preview} />
           ) : null}
         </>
       }

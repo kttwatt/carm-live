@@ -1,10 +1,12 @@
 import { firstCellSpans, isTopic, type Page } from "@/lib/pages";
 import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
+import { SpinningModel } from "@/components/SpinningModel";
 
 /** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
  * mean the screen (same as vw/vh); the phone slides view puts each page in a 16:9 frame that is one. */
-export function LecturePage({ page, index, total }: { page: Page; index: number; total: number }) {
+export function LecturePage({ page, index, total, lite }: { page: Page; index: number; total: number; lite?: boolean }) {
   if (page.figure === "radiation-journey") return <JourneyPage page={page} index={index} total={total} />;
+  if (page.figure === "carm-3d") return <ModelPage page={page} index={index} total={total} lite={lite} />;
   if (isTopic(page)) return <TopicPage page={page} index={index} total={total} />;
   const pts = page.points ?? [];
   // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
@@ -93,6 +95,19 @@ function TopicPage({ page, index, total }: { page: Page; index: number; total: n
   return (
     <div className="flex w-full flex-col items-center justify-center">
       <p className="text-center font-display text-[4.5cqw] font-bold leading-tight text-amber">{page.heading}</p>
+      {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
+    </div>
+  );
+}
+
+/** A heading at the top and the 3D C-arm turning by itself in the space under it. */
+function ModelPage({ page, index, total, lite }: { page: Page; index: number; total: number; lite?: boolean }) {
+  return (
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-[2.5cqh]">
+      <p className="text-center font-display text-[3.6cqw] font-bold leading-tight text-amber">{page.heading}</p>
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-line">
+        <SpinningModel lite={lite} />
+      </div>
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );

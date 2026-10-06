@@ -17,7 +17,7 @@ export type Page = {
   /** the page's take-home message, set large and highlighted under everything */
   key?: string;
   /** an animated diagram beside the points, which light up step by step with it */
-  figure?: "radiation-journey";
+  figure?: "radiation-journey" | "carm-3d";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
   /** leave out the slide's title above this page: its heading names the page on its own */
@@ -86,7 +86,8 @@ export const PAGES: Record<string, Page[]> = {
   s03: [
     // Topic pages (a heading alone): shown as a section title in the middle of the screen.
     { heading: "หลักการทำงานของ Fluoroscopy" },
-    { heading: "ส่วนประกอบของ Fluoroscopy" },
+    // the heading at the top and the 3D C-arm turning under it
+    { heading: "ส่วนประกอบของ Fluoroscopy", figure: "carm-3d", noTitle: true, top: true },
     {
       heading: "การเดินทางของรังสี",
       figure: "radiation-journey",
