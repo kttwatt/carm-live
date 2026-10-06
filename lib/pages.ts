@@ -400,6 +400,9 @@ export const PAGES: Record<string, Page[]> = {
       amber: true,
       top: true,
       topGap: 25,
+      // one card per row, drawn larger for the room
+      cols: 1,
+      scale: 1.4,
       round: true,
       points: [
         {
