@@ -31,7 +31,33 @@ if (COVER) {
 }
 
 /** The topics list (the outline, and the closing summary with a line under each topic). */
-const outlineFrame = (s: (typeof SCENES)[number]) => ({
+const outlineFrame = (s: (typeof SCENES)[number]) =>
+  s.notes ? summaryFrame(s) : listFrame(s);
+
+/** The closing summary: each topic in a card with its take-home line, one under another (as on the main screen). */
+const summaryFrame = (s: (typeof SCENES)[number]) => ({
+  id: s.id,
+  node: (
+    <main className="flex flex-1 flex-col justify-center gap-[3.5cqh] px-[7cqw] py-[6cqh]">
+      <h1 className="font-display text-[4cqw] font-bold leading-tight text-amber">{s.title}</h1>
+      <ol className="flex flex-col gap-[1.2cqh]">
+        {(s.items ?? []).map((item, i) => (
+          <li key={item} className="flex items-center gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[1.2cqh]">
+            <span className="grid aspect-square w-[2.8cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.5cqw] font-bold text-ink">
+              {i + 1}
+            </span>
+            <span className="flex min-w-0 flex-col gap-[0.3cqh]">
+              <span className="font-display text-[1.7cqw] font-bold leading-snug">{item}</span>
+              <span className="text-[1.4cqw] leading-snug text-sky">{s.notes?.[i]}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </main>
+  ),
+});
+
+const listFrame = (s: (typeof SCENES)[number]) => ({
   id: s.id,
   node: (
     <main className="flex flex-1 flex-col justify-center gap-[4cqh] px-[8cqw] py-[7cqh]">

@@ -127,6 +127,28 @@ function ScreenView() {
   // The 3D C-arm model takes over the projector while the presenter shows it.
   if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} muted={preview} />;
 
+  // The closing summary: each topic in a card with its take-home line, one under another.
+  if (scene.kind === "outline" && scene.items && scene.notes) {
+    return (
+      <main className="flex flex-1 flex-col justify-center gap-[3.5vh] px-[7vw] py-[6vh]">
+        <h1 className="font-display text-[4vw] font-bold leading-tight text-amber">{scene.title}</h1>
+        <ol className="flex flex-col gap-[1.2vh]">
+          {scene.items.map((item, i) => (
+            <li key={item} className="flex items-center gap-[1.2vw] rounded-2xl border border-line bg-night-2 px-[1.6vw] py-[1.2vh]">
+              <span className="grid aspect-square w-[2.8vw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.5vw] font-bold text-ink">
+                {i + 1}
+              </span>
+              <span className="flex min-w-0 flex-col gap-[0.3vh]">
+                <span className="font-display text-[1.7vw] font-bold leading-snug">{item}</span>
+                <span className="text-[1.4vw] leading-snug text-sky">{scene.notes?.[i]}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </main>
+    );
+  }
+
   if (scene.kind === "outline" && scene.items) {
     return (
       <main className="flex flex-1 flex-col justify-center gap-[4vh] px-[8vw] py-[7vh]">
