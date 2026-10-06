@@ -9,6 +9,7 @@ import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
 import { LecturePage } from "@/components/LecturePage";
+import { OneLine } from "@/components/OneLine";
 import { isTopic, pagesFor } from "@/lib/pages";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
@@ -248,12 +249,13 @@ function ScreenView() {
     >
       {
         <>
-          {!lecture && (
-            <h1 className="font-display text-[4.2vw] font-bold leading-tight">
-              {/* a question's title says it is one */}
-              {question && "คำถาม: "}
-              {question?.promptAsTitle ? question.prompt : scene.title}
-            </h1>
+          {question ? (
+            // a question's title says it is one, and stays on one line
+            <OneLine size={4.2} className="font-display font-bold leading-tight">
+              คำถาม: {question.promptAsTitle ? question.prompt : scene.title}
+            </OneLine>
+          ) : (
+            !lecture && <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
           )}
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map || phase === "revealed" ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
