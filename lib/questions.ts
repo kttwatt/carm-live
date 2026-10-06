@@ -8,7 +8,7 @@ export type Question = {
   multi?: boolean;
   choices: Choice[];
   correct: string[];
-  /** text between ==…== is highlighted */
+  /** "* " lines become a list; text between ==…== is highlighted (components/Explanation.tsx) */
   explanation: string;
   /** answer by tapping spots A–F on the operating-room map set up like this */
   map?: Geometry;
@@ -30,7 +30,9 @@ export const QUESTIONS: Record<string, Question> = {
     ],
     correct: ["physician", "dentist", "vet", "radtech", "physicist", "radofficer"],
     explanation:
-      "ร่างกฎกระทรวง ข้อ 9 กำหนดผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีไว้ 6 กลุ่ม คือ แพทย์ ทันตแพทย์ สัตวแพทย์ นักรังสีเทคนิค นักฟิสิกส์การแพทย์ และเจ้าพนักงานรังสี ==ส่วนพยาบาลวิชาชีพและผู้ช่วยพยาบาลไม่อยู่ในรายชื่อนี้==",
+      "ร่างกฎกระทรวง ข้อ 9 กำหนดผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีไว้ 6 กลุ่ม คือ\n" +
+      "* แพทย์\n* ทันตแพทย์\n* สัตวแพทย์\n* นักรังสีเทคนิค\n* นักฟิสิกส์การแพทย์\n* เจ้าพนักงานรังสี\n" +
+      "==ส่วนพยาบาลวิชาชีพและผู้ช่วยพยาบาลไม่อยู่ในรายชื่อนี้==",
   },
   s04: {
     prompt: "ขณะฉายรังสี แหล่งรังสีกระเจิงที่สำคัญที่สุดต่อบุคลากรอยู่ที่ไหน",

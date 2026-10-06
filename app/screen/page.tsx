@@ -1,6 +1,6 @@
 "use client";
 
-import { Highlighted } from "@/components/Highlighted";
+import { Explanation } from "@/components/Explanation";
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
 import { Model3DStage } from "@/components/Model3D";
@@ -27,9 +27,9 @@ function Answer({ text }: { text: string }) {
   return (
     <div className="flex flex-col gap-[1vh] rounded-3xl border-2 border-ok bg-night-2 px-[2vw] py-[2vh]">
       <p className="font-display text-[2.6vw] font-extrabold leading-none tracking-wide text-ok">เฉลย</p>
-      <p className="text-[1.9vw] font-medium leading-relaxed text-paper">
-        <Highlighted text={text} />
-      </p>
+      <div className="text-[1.9vw] font-medium leading-relaxed text-paper">
+        <Explanation text={text} />
+      </div>
     </div>
   );
 }
@@ -218,7 +218,7 @@ function ScreenView() {
 
   return (
     <main
-      className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && !isInteractive(scene.kind) && pages[pageN]?.top ? "justify-start py-[6vh]" : "justify-center py-[8vh]"}`}
+      className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && !isInteractive(scene.kind) && pages[pageN]?.top ? "justify-start py-[6vh]" : question && phase === "revealed" ? "justify-center py-[5vh]" : "justify-center py-[8vh]"}`}
     >
       {
         <>
