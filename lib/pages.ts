@@ -273,6 +273,9 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "แนวทางปฏิบัติเมื่อผู้ปฏิบัติงานทางรังสีตั้งครรภ์",
+      noTitle: true,
+      // 1.4 rather than 1.5 like its neighbours, so the long heading stays on one line
+      scale: 1.4,
       points: [
         { th: "แจ้งผู้บังคับบัญชารับทราบ" },
         { th: "ประเมินความเสี่ยงการได้รับรังสี และปรับเปลี่ยนการปฏิบัติงาน" },
