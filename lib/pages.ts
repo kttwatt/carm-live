@@ -205,6 +205,13 @@ export const PAGES: Record<string, Page[]> = {
       ],
     },
     {
+      heading: "ตำแหน่งที่ควรยืน",
+      image: {
+        src: "/pages/standing-zones.webp",
+        alt: "จำลองสถานการณ์ C-arm ท่า Lateral มองจากด้านบน: ฝั่งหลอดเอกซเรย์เป็นเขตอันตราย รังสีกระเจิงสูง ฝั่งตัวรับภาพปลอดภัยกว่า พยาบาลส่งเครื่องมือยืนฝั่งตัวรับภาพ พยาบาลหมุนเวียนอยู่ห่างเกิน 2 เมตรหลังฉากกั้นรังสีแบบเคลื่อนที่ ซึ่งปลอดภัยที่สุด",
+      },
+    },
+    {
       // four cards across the top, the picture centred under them
       heading: "อุปกรณ์ป้องกันรังสีส่วนบุคคล",
       round: true,
