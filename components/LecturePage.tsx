@@ -13,7 +13,10 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
     <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]">
-      {page.heading && <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>}
+      {page.heading && (
+        // Without the slide's title above, the heading stands in for it, as large.
+        <p className={`font-display font-bold leading-tight text-amber ${page.noTitle ? "text-[3.4cqw]" : "text-[2.4cqw]"}`}>{page.heading}</p>
+      )}
       {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
       {page.image && (
         // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer

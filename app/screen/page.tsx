@@ -175,7 +175,9 @@ function ScreenView() {
   const noTitle = topic || (!question && !isInteractive(scene.kind) && !!pages[pageN]?.noTitle);
 
   return (
-    <main className="relative flex flex-1 flex-col justify-center gap-[3vh] px-[7vw] py-[8vh]">
+    <main
+      className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && !isInteractive(scene.kind) && pages[pageN]?.top ? "justify-start py-[6vh]" : "justify-center py-[8vh]"}`}
+    >
       {
         <>
           {!noTitle && (
