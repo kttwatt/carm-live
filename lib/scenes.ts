@@ -80,7 +80,7 @@ export const SCENES: Scene[] = [
     ],
   },
   { id: "board", title: "อันดับคะแนน", kind: "leaderboard" },
-  { id: "refs", title: "ขอบคุณ · เอกสารอ้างอิงหลัก", kind: "end" },
+  { id: "refs", title: "Thank you", kind: "end" },
 ];
 
 export const KIND_LABEL: Record<SceneKind, string> = {
