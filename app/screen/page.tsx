@@ -130,7 +130,7 @@ function ScreenView() {
         <p className="text-[1.5vw] font-semibold tracking-wide text-amber">
           {midway ? `คะแนนสะสมหลังข้อ: ${scene.title}` : "สรุปคะแนนจากทุกกิจกรรม"}
         </p>
-        <h1 className="font-display text-[4vw] font-bold leading-tight">{midway ? "ผู้นำและคะแนน" : "อันดับคะแนน"}</h1>
+        <h1 className="font-display text-[4vw] font-bold leading-tight">{midway ? "คะแนน" : "อันดับคะแนน"}</h1>
         <div className="max-w-[70vw]">
           <LeaderList rows={board} size="xl" />
         </div>
