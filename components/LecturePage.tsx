@@ -34,7 +34,22 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
           className="mx-auto max-h-[62cqh] w-auto max-w-full rounded-2xl bg-white object-contain"
         />
       )}
-      {pts.length > 0 && (
+      {page.figure === "radiation-ap" ? (
+        // the scatter page: a few short facts, each beside a round number and centred in an equal-height card
+        <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          {pts.map((pt, i) => (
+            <li key={pt.th} className="flex items-center gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh]">
+              <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
+                {i + 1}
+              </span>
+              <span className="flex min-w-0 flex-col gap-[0.5cqh]">
+                <span className="font-display text-[1.8cqw] font-bold leading-snug [text-wrap:balance]">{pt.th}</span>
+                {pt.desc && <span className="text-[1.4cqw] leading-snug text-mist">{pt.desc}</span>}
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : pts.length > 0 && (
         <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
             <li
