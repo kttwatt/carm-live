@@ -174,7 +174,9 @@ function ScreenView() {
   const topic = !question && !isInteractive(scene.kind) && isTopic(pages[pageN]);
 
   return (
-    <main className="relative flex flex-1 flex-col justify-center gap-[3vh] px-[7vw] py-[8vh]">
+    <main
+      className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && pages[pageN]?.top ? "justify-start py-[5vh]" : "justify-center py-[8vh]"}`}
+    >
       {
         <>
           {!topic && (

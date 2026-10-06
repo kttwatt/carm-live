@@ -72,7 +72,7 @@ for (const s of SLIDES) {
     frames.push({
       id: n === 0 ? s.id : `${s.id}-${n + 1}`,
       node: (
-        <main className="relative flex flex-1 flex-col justify-center gap-[3cqh] px-[7cqw] py-[8cqh]">
+        <main className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start py-[5cqh]" : "justify-center py-[8cqh]"}`}>
           {!isTopic(p) && <h1 className="font-display text-[3cqw] font-bold leading-tight">{s.title}</h1>}
           <LecturePage page={p} index={n} total={pages.length} />
         </main>

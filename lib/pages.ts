@@ -2,8 +2,7 @@
 // through them before moving on). Text comes from the seminar's Canva deck and speaker 2's script, with
 // typing and PDF-copy errors fixed.
 
-/** label replaces the card's running number, e.g. "(ก)" for a lettered clause */
-export type Point = { th: string; en?: string; desc?: string; label?: string };
+export type Point = { th: string; en?: string; desc?: string };
 export type Page = {
   /** empty when the scene title already says it */
   heading: string;
@@ -16,6 +15,11 @@ export type Page = {
   figure?: "radiation-journey";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
+  /** running text, as written: a string is a paragraph, a string array is paragraphs side by side; a paragraph of
+   * several lines is a list (4 leading spaces indent a line one level) */
+  prose?: (string | string[])[];
+  /** sits at the top of the screen instead of the middle (a page with a lot of text) */
+  top?: boolean;
 };
 
 export const PAGES: Record<string, Page[]> = {
@@ -55,31 +59,26 @@ export const PAGES: Record<string, Page[]> = {
   s02c: [
     {
       heading: "",
-      lead: "9. ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
-      points: [
-        { label: "(ก)", th: "ผู้ประกอบวิชาชีพเวชกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพเวชกรรม" },
-        { label: "(ข)", th: "ผู้ประกอบวิชาชีพทันตกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพทันตกรรม" },
-        { label: "(ค)", th: "ผู้ประกอบวิชาชีพการสัตวแพทย์", en: "ตามกฎหมายว่าด้วยวิชาชีพการสัตวแพทย์" },
-        { label: "(ง)", th: "ผู้ประกอบโรคศิลปะสาขารังสีเทคนิค", en: "ตามกฎหมายว่าด้วยการประกอบโรคศิลปะ" },
-        { label: "(จ)", th: "เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์" },
-        { label: "(ฉ)", th: "เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี" },
-      ],
-    },
-    {
-      heading: "ต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติดังนี้",
-      points: [
-        {
-          th: "เป็นผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
-          desc:
-            "• ผู้ประกอบวิชาชีพเวชกรรมตามกฎหมายว่าด้วยวิชาชีพเวชกรรม\n• ผู้ประกอบวิชาชีพทันตกรรมตามกฎหมายว่าด้วยวิชาชีพทันตกรรม\n• ผู้ประกอบวิชาชีพการสัตวแพทย์ตามกฎหมายว่าด้วยวิชาชีพการสัตวแพทย์\n• ผู้ประกอบโรคศิลปะสาขารังสีเทคนิคตามกฎหมายว่าด้วยการประกอบโรคศิลปะ",
-        },
-        { th: "เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์" },
-      ],
-    },
-    {
-      heading: "",
-      lead:
+      top: true,
+      prose: [
+        "9. ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
+        [
+          "(ก) ผู้ประกอบวิชาชีพเวชกรรมตามกฎหมายว่าด้วยวิชาชีพเวชกรรม\n" +
+            "(ข) ผู้ประกอบวิชาชีพทันตกรรมตามกฎหมายว่าด้วยวิชาชีพทันตกรรม\n" +
+            "(ค) ผู้ประกอบวิชาชีพการสัตวแพทย์ตามกฎหมายว่าด้วยวิชาชีพการสัตวแพทย์\n" +
+            "(ง) ผู้ประกอบโรคศิลปะสาขารังสีเทคนิคตามกฎหมายว่าด้วยการประกอบโรคศิลปะ\n" +
+            "(จ) เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์\n" +
+            "(ฉ) เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี",
+          "ต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติดังนี้\n" +
+            "1. เป็นผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่ง ดังต่อไปนี้\n" +
+            "    • ผู้ประกอบวิชาชีพเวชกรรมตามกฎหมายว่าด้วยวิชาชีพเวชกรรม\n" +
+            "    • ผู้ประกอบวิชาชีพทันตกรรมตามกฎหมายว่าด้วยวิชาชีพทันตกรรม\n" +
+            "    • ผู้ประกอบวิชาชีพการสัตวแพทย์ตามกฎหมายว่าด้วยวิชาชีพการสัตวแพทย์\n" +
+            "    • ผู้ประกอบโรคศิลปะสาขารังสีเทคนิคตามกฎหมายว่าด้วยการประกอบโรคศิลปะ\n" +
+            "2. เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์",
+        ],
         "สำหรับบุคคลที่เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี (ฉ) ต้องปฏิบัติงานตามคู่มือที่สภาวิชาชีพของผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่งกำหนด หรือเป็นผู้ที่ผ่านการอบรมการป้องกันอันตรายจากรังสีตามหลักสูตรที่กรมวิทยาศาสตร์การแพทย์หรือสภาวิชาชีพดังกล่าวรับรอง และต้องมีการกำกับดูแลการปฏิบัติงานโดยบุคคลที่มีคุณสมบัติตาม (ก) - (จ)",
+      ],
       note: "ที่มา: ร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2569 ข้อ 9",
     },
   ],
@@ -337,7 +336,7 @@ export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
 
 /** A heading alone is a topic page: it shows as a section title, without the slide's title above it. */
 export const isTopic = (page: Page | undefined): boolean =>
-  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image;
+  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image && !page.prose;
 
 /** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
 export const firstCellSpans = (rows: string[][]): number[] =>

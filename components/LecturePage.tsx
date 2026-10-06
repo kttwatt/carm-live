@@ -23,16 +23,27 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
           className="mx-auto max-h-[62cqh] w-auto max-w-full rounded-2xl bg-white object-contain"
         />
       )}
+      {page.prose?.map((block, i) =>
+        typeof block === "string" ? (
+          <Prose key={i} text={block} />
+        ) : (
+          <div key={i} className="grid gap-[3cqw]" style={{ gridTemplateColumns: `repeat(${block.length}, minmax(0, 1fr))` }}>
+            {block.map((col, c) => (
+              <Prose key={c} text={col} />
+            ))}
+          </div>
+        ),
+      )}
       {pts.length > 0 && (
         <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
             <li key={pt.th} className="flex flex-col gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]">
               <span className="flex items-baseline gap-[0.8cqw]">
-                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
+                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{i + 1}</span>
                 <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
               </span>
               {pt.en && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
-              {pt.desc && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
+              {pt.desc && <span className="text-[1.4cqw] leading-snug">{pt.desc}</span>}
             </li>
           ))}
         </ol>
@@ -70,6 +81,25 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
       {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
+  );
+}
+
+/** Running text. A text of several lines is a list: each line wraps under its own text, past its "(ก)" or "•",
+ * and leading spaces indent it a level (4 spaces each). */
+function Prose({ text }: { text: string }) {
+  const lines = text.split("\n");
+  if (lines.length === 1) return <p className="text-[1.5cqw] leading-relaxed">{text}</p>;
+  return (
+    <p className="text-[1.5cqw] leading-relaxed">
+      {lines.map((line, i) => {
+        const level = Math.floor((line.length - line.trimStart().length) / 4);
+        return (
+          <span key={i} className="block" style={{ paddingLeft: `${1.6 + level * 1.4}em`, textIndent: "-1.6em" }}>
+            {line.trimStart()}
+          </span>
+        );
+      })}
+    </p>
   );
 }
 
