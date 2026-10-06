@@ -204,6 +204,7 @@ export const PAGES: Record<string, Page[]> = {
         { th: "ชุดป้องกันรังสี", en: "Lead apron", desc: "แบบชิ้นเดียว หรือแบบ 2 ชิ้น" },
         { th: "แว่นตากันรังสี", en: "Lead glasses" },
         { th: "หมวกป้องกันรังสี", en: "Lead caps" },
+        { th: "ฉากป้องกันรังสี", en: "Lead shield" },
       ],
     },
     {
