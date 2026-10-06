@@ -258,7 +258,8 @@ export const PAGES: Record<string, Page[]> = {
 
   s10: [
     {
-      heading: "ค่ากำหนดปริมาณรังสี (Dose limits)",
+      heading: "ค่ากำหนดปริมาณรังสี (Dose Limits)",
+      noTitle: true,
       table: {
         head: ["ประเภทของขีดจำกัด", "ผู้ปฏิบัติงานทางรังสี", "ประชาชนทั่วไป"],
         rows: [
