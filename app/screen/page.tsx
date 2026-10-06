@@ -204,7 +204,10 @@ function ScreenView() {
             alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด"
             className="max-h-[58vh] w-full rounded-2xl object-cover"
           />
-          <h1 className="whitespace-nowrap font-display text-[2.6vw] font-bold leading-tight">{scene.title}</h1>
+          {/* in amber and as large as fits the column on one line */}
+          <OneLine size={3.4} min={2.6} className="font-display font-bold leading-tight text-amber">
+            {scene.title}
+          </OneLine>
           <ol className="list-decimal pl-[2vw] text-[1.5vw] leading-relaxed text-mist">
             <li>สแกน QR ด้วยกล้องมือถือ</li>
             <li>ตั้งเลขที่ ชื่อจริง</li>
