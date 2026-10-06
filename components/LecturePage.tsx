@@ -124,7 +124,7 @@ function JourneyPage({ page, index, total, lite }: { page: Page; index: number; 
     <div className={`flex max-w-[86cqw] flex-col gap-[2cqh] ${lite ? "" : "motion-demo"}`}>
       {/* the exposure beep, on the projector only */}
       {!lite && <JourneyBeep />}
-      <p className={`font-display font-bold leading-tight ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
+      <p className={`font-display font-bold leading-tight text-amber ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw]"}`}>{page.heading}</p>
       {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
       <div className="flex items-center gap-[3cqw]">
         <RadiationJourney className="shrink-0" style={{ width: "min(70cqh, 42cqw)" }} />
