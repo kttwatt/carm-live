@@ -13,7 +13,7 @@ function Section({ page }: { page: Page }) {
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="font-display text-xl font-bold leading-snug text-amber">{page.heading}</h3>
+      {page.heading && <h3 className="font-display text-xl font-bold leading-snug text-amber">{page.heading}</h3>}
       {page.lead && <p className="leading-relaxed">{page.lead}</p>}
       {page.figure === "radiation-journey" && <RadiationJourney className="mx-auto w-full max-w-sm" />}
       {page.points && page.points.length > 0 && (
@@ -104,8 +104,8 @@ export default function Slides() {
               <p className="text-sm font-semibold text-mist">สไลด์ {s.slide}</p>
               <h2 className="font-display text-2xl font-bold leading-snug">{s.title}</h2>
             </header>
-            {pages.map((p) => (
-              <Section key={p.heading} page={p} />
+            {pages.map((p, i) => (
+              <Section key={i} page={p} />
             ))}
             {isInteractive(s.kind) && s.activity && (
               <p className="rounded-xl border border-dashed border-line px-4 py-3 text-mist">กิจกรรม: {s.activity}</p>
