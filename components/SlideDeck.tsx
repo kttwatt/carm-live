@@ -21,16 +21,31 @@ export function SlideDeck({ ids, children }: { ids: string[]; children: ReactNod
   );
 
   // Open at the slide named in the link (#s03), and follow links to other slides inside the deck.
+  // The counter is set here too: the browser may already have scrolled to the slide before the page
+  // came alive, and then no scroll event follows.
   useEffect(() => {
     const jump = (smooth: boolean) => {
       const at = ids.indexOf(decodeURIComponent(location.hash.slice(1)));
-      if (at >= 0) go(at, smooth);
+      if (at < 0) return;
+      go(at, smooth);
+      setIndex(at);
     };
     jump(false);
     const onHash = () => jump(true);
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, [ids, go]);
+
+  // Stay on the same slide when the phone turns sideways or the window resizes.
+  const current = useRef(0);
+  useEffect(() => {
+    current.current = index;
+  }, [index]);
+  useEffect(() => {
+    const onResize = () => go(current.current, false);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [go]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
