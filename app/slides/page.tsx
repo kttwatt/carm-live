@@ -64,7 +64,6 @@ export default function Slides() {
       <header className="flex flex-col gap-3">
         <p className="text-sm font-semibold tracking-widest text-amber">C-ARM RADIATION SAFETY</p>
         <h1 className="font-display text-3xl font-bold leading-tight">{SCENES[0].title}</h1>
-        <p className="text-mist">เนื้อหาสไลด์สำหรับอ่านทบทวน</p>
       </header>
 
       {OUTLINE?.items && (
@@ -93,9 +92,7 @@ export default function Slides() {
         return (
           <article key={s.id} id={s.id} className="flex scroll-mt-4 flex-col gap-6 border-t border-line pt-8">
             <header className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-mist">
-                สไลด์ {s.slide} · วิทยากรคนที่ {s.speaker}
-              </p>
+              <p className="text-sm font-semibold text-mist">สไลด์ {s.slide}</p>
               <h2 className="font-display text-2xl font-bold leading-snug">{s.title}</h2>
             </header>
             {pages.map((p) => (
