@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createSession, liveMode } from "@/lib/transport";
@@ -68,6 +69,10 @@ export default function Home() {
           <button className="rounded-xl border border-sky px-6 py-3 font-semibold text-sky">เข้าร่วม</button>
         </div>
       </form>
+
+      <Link href="/slides" className="w-fit text-sky underline-offset-4 hover:underline">
+        อ่านเนื้อหาสไลด์
+      </Link>
 
       {error && <p className="text-warn" role="alert">{error}</p>}
       {liveMode === "local" && (
