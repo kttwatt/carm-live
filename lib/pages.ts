@@ -247,7 +247,7 @@ export const PAGES: Record<string, Page[]> = {
           en: "เกรดตะกั่วบริสุทธิ์ดั้งเดิม",
           desc: "ป้องกันรังสีได้สูงสุดในราคาประหยัดที่สุด แต่น้ำหนักมากที่สุด (ประมาณ 4–5 กก. ต่อชุด)",
         },
-        { th: "Lightweight lead", en: "เกรดตะกั่วผสมน้ำหนักเบา", desc: "เบากว่าเกรด Standard ประมาณ 20–30% โดยยังคงค่า Lead equivalent เท่าเดิม" },
+        { th: "Lightweight lead", en: "เกรดตะกั่วผสมโลหะหนักชนิดอื่น เช่น Bismuth", desc: "เบากว่าเกรด Standard ประมาณ 10–15% โดยยังคงค่า Lead equivalent เท่าเดิม" },
         {
           th: "Lead-free",
           en: "เกรดไร้ตะกั่ว / Eco-friendly",
