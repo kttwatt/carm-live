@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { firstCellSpans, isTopic, type Page } from "@/lib/pages";
 import { JOURNEY_SHOT, JourneyCaption, RadiationJourney } from "@/components/RadiationJourney";
 import { SpinningModel } from "@/components/SpinningModel";
@@ -141,6 +142,18 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
               ))}
             </tbody>
           </table>
+        )}
+        {page.units && (
+          // what the units in the table mean: the unit, what it measures, where it is used
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1.3fr)] gap-x-[1.6cqw] gap-y-[1cqh] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[1.6cqh] text-[1.3cqw] leading-snug">
+            {page.units.map(([unit, measures, use]) => (
+              <Fragment key={unit}>
+                <span className="font-display font-bold text-amber">{unit}</span>
+                <span>{measures}</span>
+                <span className="text-mist">{use}</span>
+              </Fragment>
+            ))}
+          </div>
         )}
         {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
         {!page.side && keyMessage && <div className="mt-[3cqh]">{keyMessage}</div>}

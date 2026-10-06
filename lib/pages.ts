@@ -15,6 +15,8 @@ export type Page = {
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
   note?: string;
+  /** what the units mean, under the table: [unit, what it measures, where it is used] */
+  units?: [string, string, string][];
   /** the page's take-home message, set large and highlighted under everything ("
 " starts a new line) */
   key?: string;
@@ -144,6 +146,10 @@ export const PAGES: Record<string, Page[]> = {
           ["ทั่วร่างกาย", "Acute radiation sickness", "1,000"],
         ],
       },
+      units: [
+        ["mGy", "รังสีที่อวัยวะหรือเนื้อเยื่อตรงนั้นได้รับจริง", "ผลที่เกิดเมื่อได้รับเกินค่าหนึ่ง เช่น ผิวหนังแดง ต้อกระจก เป็นหมัน"],
+        ["mSv", "ความเสี่ยงต่อร่างกาย คิดจากชนิดรังสีและความไวของแต่ละอวัยวะ", "ค่ากำหนดปริมาณรังสี (Dose Limits) ผลวัดจากแผ่น OSL และความเสี่ยงมะเร็งระยะยาว"],
+      ],
       note: "ที่มา: ICRP, Radiation and your patient: A guide for medical practitioners (icrp.org/docs/rad_for_gp_for_web.pdf)",
     },
     {
