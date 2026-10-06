@@ -14,8 +14,8 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   return (
     <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]">
       {page.heading && (
-        // Without the slide's title above, the heading stands in for it, as large.
-        <p className={`font-display font-bold leading-tight text-amber ${page.noTitle ? "text-[3.4cqw]" : "text-[2.4cqw]"}`}>{page.heading}</p>
+        // Without the slide's title above, the heading stands in for it and looks like it.
+        <p className={`font-display font-bold leading-tight ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
       )}
       {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
       {page.image && (
