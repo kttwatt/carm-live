@@ -135,7 +135,7 @@ function JoinView() {
             <h1 className="font-display text-3xl font-bold">ขอบคุณที่ร่วมกิจกรรม</h1>
             <MyScore result={result} />
             <Link href="/sim" className="rounded-xl border-2 border-amber px-4 py-3 text-center font-display font-bold text-amber">
-              ทบทวนด้วย C-Arm สามมิติ (เข้าได้ทุกเวลา)
+              กดเข้าเล่น C-Arm สามมิติ (เข้าได้ทุกเวลา)
             </Link>
             <p className="text-mist">หรือปิดหน้านี้ได้เลย</p>
           </>
