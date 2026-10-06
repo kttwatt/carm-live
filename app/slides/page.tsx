@@ -1,129 +1,86 @@
 import type { Metadata } from "next";
-import { firstCellSpans, pagesFor, type Page } from "@/lib/pages";
-import { SCENES, isInteractive } from "@/lib/scenes";
-import { RadiationJourney } from "@/components/RadiationJourney";
+import { Fragment, type ReactNode } from "react";
+import { isTopic, pagesFor } from "@/lib/pages";
+import { KIND_LABEL, SCENES, isInteractive } from "@/lib/scenes";
+import { LecturePage } from "@/components/LecturePage";
 import { SlideDeck } from "@/components/SlideDeck";
 
-// Read-only copy of the lecture for phones: one slide per page, swiped left/right in deck order, no room code needed.
+// Read-only copy of the lecture for phones, no room code needed: the same pages the main screen shows,
+// one per frame, swiped left/right in deck order.
 export const metadata: Metadata = { title: "เนื้อหาสไลด์ · C-Arm Radiation Safety" };
 
+const COVER = SCENES.find((s) => s.kind === "cover");
 const OUTLINE = SCENES.find((s) => s.kind === "outline");
 const SLIDES = SCENES.filter((s) => s.slide != null);
 
-function Section({ page }: { page: Page }) {
-  const spans = firstCellSpans(page.table?.rows ?? []);
-  return (
-    <section className="flex flex-col gap-3">
-      {page.heading && <h3 className="font-display text-xl font-bold leading-snug text-amber">{page.heading}</h3>}
-      {page.lead && <p className="leading-relaxed">{page.lead}</p>}
-      {page.figure === "radiation-journey" && <RadiationJourney className="mx-auto w-full max-w-sm" />}
-      {page.image && (
-        // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
-        <img
-          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.image.src}`}
-          alt={page.image.alt}
-          className="w-full rounded-xl bg-white"
-        />
-      )}
-      {page.points && page.points.length > 0 && (
-        <ol className="flex flex-col gap-2">
-          {page.points.map((pt, i) => (
-            <li key={pt.th} className="flex gap-3 rounded-xl border border-line bg-night-2 px-4 py-3">
-              <span className="font-display font-bold tabular-nums text-amber">{i + 1}</span>
-              <span className="flex flex-col gap-1">
-                <span className="font-semibold">{pt.th}</span>
-                {pt.en && <span className="text-sm text-mist">{pt.en}</span>}
-                {pt.desc && <span className="leading-snug">{pt.desc}</span>}
-              </span>
+// Frames in deck order. Units are cqw/cqh of the 16:9 frame, matching the main screen's vw/vh.
+const frames: { id: string; node: ReactNode }[] = [];
+
+if (COVER) {
+  frames.push({
+    id: COVER.id,
+    node: (
+      // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
+      <img
+        src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/cover.webp`}
+        alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด แลกเปลี่ยนความรู้เรื่องรังสีที่ใช้ในห้องผ่าตัดกับการป้องกันรังสี"
+        className="h-full w-full object-contain"
+      />
+    ),
+  });
+}
+
+if (OUTLINE?.items) {
+  frames.push({
+    id: OUTLINE.id,
+    node: (
+      <main className="flex flex-1 flex-col justify-center gap-[4cqh] px-[8cqw] py-[7cqh]">
+        <h1 className="font-display text-[4cqw] font-bold leading-tight">{OUTLINE.title}</h1>
+        <ol className="flex flex-col gap-[2.2cqh]">
+          {OUTLINE.items.map((item, i) => (
+            <li key={item} className="flex items-baseline gap-[1.4cqw] text-[2.4cqw] leading-snug">
+              <span className="w-[2.6cqw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
+              <span>{item}</span>
             </li>
           ))}
         </ol>
-      )}
-      {page.table && (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm leading-snug">
-            <thead>
-              <tr>
-                {page.table.head.map((h, i) => (
-                  <th key={i} className="border-b-2 border-amber px-2 py-2 text-left font-display font-bold text-amber">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {page.table.rows.map((row, r) => (
-                <tr key={r} className="border-b border-line">
-                  {row.map((cell, c) =>
-                    c === 0 && spans[r] === 0 ? null : (
-                      <td
-                        key={c}
-                        rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
-                        className={`px-2 py-2 align-top ${c === 0 ? "border-b border-line font-semibold" : ""}`}
-                      >
-                        {cell}
-                      </td>
-                    ),
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      {page.note && <p className="text-sm font-semibold text-sky">{page.note}</p>}
-    </section>
-  );
+      </main>
+    ),
+  });
+}
+
+for (const s of SLIDES) {
+  const pages = pagesFor(s.id);
+  if (isInteractive(s.kind) || pages.length === 0) {
+    frames.push({
+      id: s.id,
+      node: (
+        <main className="relative flex flex-1 flex-col justify-center gap-[3cqh] px-[7cqw] py-[8cqh]">
+          <h1 className="font-display text-[4.2cqw] font-bold leading-tight">{s.title}</h1>
+          {isInteractive(s.kind) && s.activity && (
+            <div className="mt-[2cqh] flex max-w-[60cqw] flex-col gap-[1cqh] rounded-3xl bg-amber p-[2.5cqw] text-ink">
+              <p className="text-[1.3cqw] font-semibold tracking-wide">กิจกรรมบนมือถือ · {KIND_LABEL[s.kind]}</p>
+              <p className="text-[2cqw] leading-snug">{s.activity}</p>
+            </div>
+          )}
+        </main>
+      ),
+    });
+    continue;
+  }
+  pages.forEach((p, n) => {
+    frames.push({
+      id: n === 0 ? s.id : `${s.id}-${n + 1}`,
+      node: (
+        <main className="relative flex flex-1 flex-col justify-center gap-[3cqh] px-[7cqw] py-[8cqh]">
+          {!isTopic(p) && <h1 className="font-display text-[3cqw] font-bold leading-tight">{s.title}</h1>}
+          <LecturePage page={p} index={n} total={pages.length} />
+        </main>
+      ),
+    });
+  });
 }
 
 export default function Slides() {
-  return (
-    <main>
-      <SlideDeck ids={["intro", ...SLIDES.map((s) => s.id)]}>
-        <div className="flex flex-col gap-8">
-          <header className="flex flex-col gap-3">
-            <p className="text-sm font-semibold tracking-widest text-amber">C-ARM RADIATION SAFETY</p>
-            <h1 className="font-display text-3xl font-bold leading-tight">{SCENES[0].title}</h1>
-            <p className="text-sm text-mist">ปัดซ้าย–ขวาเพื่อเปลี่ยนสไลด์</p>
-          </header>
-
-          {OUTLINE?.items && (
-            <nav className="flex flex-col gap-3 rounded-2xl border border-line p-5">
-              <h2 className="font-display text-xl font-bold">{OUTLINE.title}</h2>
-              <ol className="list-decimal space-y-1 pl-6">
-                {OUTLINE.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ol>
-              <h2 className="mt-3 font-display text-lg font-bold">สไลด์</h2>
-              <ol className="space-y-1">
-                {SLIDES.map((s) => (
-                  <li key={s.id}>
-                    <a href={`#${s.id}`} className="text-sky underline-offset-4 hover:underline">
-                      {s.slide}. {s.title}
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          )}
-        </div>
-
-        {SLIDES.map((s) => (
-          <article key={s.id} className="flex flex-col gap-6">
-            <header className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-mist">สไลด์ {s.slide}</p>
-              <h2 className="font-display text-2xl font-bold leading-snug">{s.title}</h2>
-            </header>
-            {pagesFor(s.id).map((p, i) => (
-              <Section key={i} page={p} />
-            ))}
-            {isInteractive(s.kind) && s.activity && (
-              <p className="rounded-xl border border-dashed border-line px-4 py-3 text-mist">กิจกรรม: {s.activity}</p>
-            )}
-          </article>
-        ))}
-      </SlideDeck>
-    </main>
-  );
+  return <SlideDeck ids={frames.map((f) => f.id)}>{frames.map((f) => <Fragment key={f.id}>{f.node}</Fragment>)}</SlideDeck>;
 }

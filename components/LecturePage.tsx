@@ -1,7 +1,8 @@
 import { firstCellSpans, isTopic, type Page } from "@/lib/pages";
 import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
 
-/** One lecture page on the projector, sized in vw like the rest of the main screen. */
+/** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
+ * mean the screen (same as vw/vh); the phone slides view puts each page in a 16:9 frame that is one. */
 export function LecturePage({ page, index, total }: { page: Page; index: number; total: number }) {
   if (page.figure === "radiation-journey") return <JourneyPage page={page} index={index} total={total} />;
   if (isTopic(page)) return <TopicPage page={page} index={index} total={total} />;
@@ -11,37 +12,37 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   const detailed = pts.some((p) => p.desc);
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
-    <div className="flex max-w-[86vw] flex-col gap-[2.4vh]">
-      {page.heading && <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>}
-      {page.lead && <p className="text-[1.7vw] leading-relaxed">{page.lead}</p>}
+    <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]">
+      {page.heading && <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>}
+      {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
       {page.image && (
         // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
         <img
           src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.image.src}`}
           alt={page.image.alt}
-          className="mx-auto max-h-[62vh] w-auto max-w-full rounded-2xl bg-white object-contain"
+          className="mx-auto max-h-[62cqh] w-auto max-w-full rounded-2xl bg-white object-contain"
         />
       )}
       {pts.length > 0 && (
-        <ol className="grid gap-[1.4vw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
-            <li key={pt.th} className="flex flex-col gap-[0.6vh] rounded-2xl border border-line bg-night-2 px-[1.5vw] py-[1.8vh]">
-              <span className="flex items-baseline gap-[0.8vw]">
-                <span className="font-display text-[1.5vw] font-bold tabular-nums text-amber">{i + 1}</span>
-                <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8vw]" : "text-[2vw]"}`}>{pt.th}</span>
+            <li key={pt.th} className="flex flex-col gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]">
+              <span className="flex items-baseline gap-[0.8cqw]">
+                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{i + 1}</span>
+                <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
               </span>
-              {pt.en && <span className="text-[1.25vw] text-mist">{pt.en}</span>}
-              {pt.desc && <span className="text-[1.4vw] leading-snug">{pt.desc}</span>}
+              {pt.en && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
+              {pt.desc && <span className="text-[1.4cqw] leading-snug">{pt.desc}</span>}
             </li>
           ))}
         </ol>
       )}
       {page.table && (
-        <table className="w-full border-collapse text-[1.4vw] leading-snug">
+        <table className="w-full border-collapse text-[1.4cqw] leading-snug">
           <thead>
             <tr>
               {page.table.head.map((h, i) => (
-                <th key={i} className="border-b-2 border-amber px-[1vw] py-[1vh] text-left font-display font-bold text-amber">
+                <th key={i} className="border-b-2 border-amber px-[1cqw] py-[1cqh] text-left font-display font-bold text-amber">
                   {h}
                 </th>
               ))}
@@ -55,7 +56,7 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
                     <td
                       key={c}
                       rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
-                      className={`px-[1vw] py-[1.2vh] align-top ${c === 0 ? "border-b border-line font-semibold" : ""}`}
+                      className={`px-[1cqw] py-[1.2cqh] align-top ${c === 0 ? "border-b border-line font-semibold" : ""}`}
                     >
                       {cell}
                     </td>
@@ -66,8 +67,8 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
           </tbody>
         </table>
       )}
-      {page.note && <p className="text-[1.4vw] font-semibold text-sky">{page.note}</p>}
-      {total > 1 && <p className="absolute bottom-[3vh] right-[3vw] font-display text-[1.2vw] tabular-nums text-mist">{index + 1} / {total}</p>}
+      {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
+      {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );
 }
@@ -76,8 +77,8 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
 function TopicPage({ page, index, total }: { page: Page; index: number; total: number }) {
   return (
     <div className="flex w-full flex-col items-center justify-center">
-      <p className="text-center font-display text-[4.5vw] font-bold leading-tight text-amber">{page.heading}</p>
-      {total > 1 && <p className="absolute bottom-[3vh] right-[3vw] font-display text-[1.2vw] tabular-nums text-mist">{index + 1} / {total}</p>}
+      <p className="text-center font-display text-[4.5cqw] font-bold leading-tight text-amber">{page.heading}</p>
+      {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );
 }
@@ -88,28 +89,28 @@ function JourneyPage({ page, index, total }: { page: Page; index: number; total:
   // Steps start 12.5% into each exposure (after the C-arm turns) and last 19.5% of it.
   const start = (i: number) => JOURNEY_SHOT * (0.125 + i * 0.195) - JOURNEY_SHOT;
   return (
-    <div className="flex max-w-[86vw] flex-col gap-[2vh]">
-      <p className="font-display text-[2.4vw] font-bold leading-tight text-amber">{page.heading}</p>
-      {page.lead && <p className="text-[1.4vw] leading-relaxed text-mist">{page.lead}</p>}
-      <div className="flex items-center gap-[3vw]">
-        <RadiationJourney className="shrink-0" style={{ width: "min(60vh, 36vw)" }} />
-        <ol className="flex min-w-0 flex-1 flex-col gap-[1.2vh]">
+    <div className="flex max-w-[86cqw] flex-col gap-[2cqh]">
+      <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>
+      {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
+      <div className="flex items-center gap-[3cqw]">
+        <RadiationJourney className="shrink-0" style={{ width: "min(60cqh, 36cqw)" }} />
+        <ol className="flex min-w-0 flex-1 flex-col gap-[1.2cqh]">
           {pts.map((pt, i) => (
             <li
               key={pt.th}
-              className="flex items-baseline gap-[1vw] rounded-2xl border border-line bg-night-2 px-[1.3vw] py-[1.2vh]"
+              className="flex items-baseline gap-[1cqw] rounded-2xl border border-line bg-night-2 px-[1.3cqw] py-[1.2cqh]"
               style={{ animation: `rj-step ${JOURNEY_SHOT}s linear infinite`, animationDelay: `${start(i)}s` }}
             >
-              <span className="font-display text-[1.5vw] font-bold tabular-nums text-amber">{i + 1}</span>
-              <span className="flex flex-col gap-[0.3vh]">
-                <span className="font-display text-[1.6vw] font-bold leading-tight">{pt.th}</span>
-                {pt.desc && <span className="text-[1.25vw] leading-snug">{pt.desc}</span>}
+              <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{i + 1}</span>
+              <span className="flex flex-col gap-[0.3cqh]">
+                <span className="font-display text-[1.6cqw] font-bold leading-tight">{pt.th}</span>
+                {pt.desc && <span className="text-[1.25cqw] leading-snug">{pt.desc}</span>}
               </span>
             </li>
           ))}
         </ol>
       </div>
-      {total > 1 && <p className="absolute bottom-[3vh] right-[3vw] font-display text-[1.2vw] tabular-nums text-mist">{index + 1} / {total}</p>}
+      {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );
 }

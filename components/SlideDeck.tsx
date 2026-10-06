@@ -3,7 +3,7 @@
 import { Children, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 // One page per child, swiped left/right (scroll snap does the swiping; buttons and arrow keys step too).
-// Each page scrolls up/down on its own when its content is taller than the screen.
+// Each page sits in a 16:9 frame sized like the main screen, so pages written for the projector show the same.
 export function SlideDeck({ ids, children }: { ids: string[]; children: ReactNode }) {
   const track = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -74,8 +74,16 @@ export function SlideDeck({ ids, children }: { ids: string[]; children: ReactNod
         className="flex flex-1 snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none]"
       >
         {pages.map((page, i) => (
-          <div key={ids[i]} id={ids[i]} className="h-full w-full shrink-0 snap-start snap-always overflow-y-auto">
-            <div className="mx-auto w-full max-w-3xl px-4 py-8">{page}</div>
+          <div key={ids[i]} id={ids[i]} className="flex h-full w-full shrink-0 snap-start snap-always flex-col p-2">
+            {/* the frame is as large as fits, 16:9 like the main screen */}
+            <div className="flex min-h-0 flex-1 items-center justify-center [container-type:size]">
+              <div
+                className="relative flex aspect-video overflow-hidden rounded-lg border border-line bg-night [container-type:size]"
+                style={{ width: "min(100cqw, 100cqh * 16 / 9)" }}
+              >
+                {page}
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -90,8 +98,9 @@ export function SlideDeck({ ids, children }: { ids: string[]; children: ReactNod
         >
           ‹
         </button>
-        <span className="text-sm tabular-nums text-mist">
+        <span className="flex flex-col items-center text-sm tabular-nums text-mist">
           {index + 1} / {total}
+          <span className="text-xs landscape:hidden">หมุนมือถือแนวนอนเพื่อดูภาพใหญ่ขึ้น</span>
         </span>
         <button
           type="button"
