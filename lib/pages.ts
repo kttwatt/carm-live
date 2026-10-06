@@ -37,6 +37,9 @@ export const PAGES: Record<string, Page[]> = {
         { th: "เครื่องเอกซเรย์ฟัน", en: "Dental X-ray" },
       ],
     },
+  ],
+
+  s02b: [
     {
       heading: "ใครเป็นคนใช้ Fluoroscopy ในห้องผ่าตัด?",
       lead:
