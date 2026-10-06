@@ -249,6 +249,7 @@ export const PAGES: Record<string, Page[]> = {
       amber: true,
       top: true,
       topGap: 12,
+      round: true,
       // two set lines; the word joiner keeps "97–99%" from breaking at the dash
       key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
       points: [

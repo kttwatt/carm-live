@@ -14,6 +14,8 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
   const cols = page.cols ?? (pts.length === 4 ? 2 : Math.min(pts.length, 3));
   const detailed = pts.some((p) => p.desc);
   const named = pts.some((p) => p.en);
+  // round cards whose items carry a paragraph (not a one-line note) read from the top
+  const long = pts.some((p) => (p.desc?.length ?? 0) > 60);
   // Each card spans one row of the list per line it has (title, English name, description), shared across the
   // cards, so cards side by side line up line by line even when one wraps more than another.
   const lines = 1 + (named ? 1 : 0) + (detailed ? 1 : 0);
@@ -43,17 +45,17 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
       {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
       {!page.imageBelow && image}
       {page.round || page.figure === "radiation-ap" ? (
-        // a few short items, each beside a round number and centred in an equal-height card
+        // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
         <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
-            <li key={pt.th} className="flex items-center gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh]">
+            <li key={pt.th} className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[2cqh] ${long ? "items-start" : "items-center"}`}>
               <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
                 {i + 1}
               </span>
               <span className="flex min-w-0 flex-col gap-[0.5cqh]">
                 <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
                 {pt.en && <span className="text-[1.3cqw] leading-snug text-sky">{pt.en}</span>}
-                {pt.desc && <span className="text-[1.4cqw] leading-snug text-mist">{pt.desc}</span>}
+                {pt.desc && <span className={`text-[1.4cqw] leading-snug ${long ? "mt-[0.6cqh] text-paper" : "text-mist"}`}>{pt.desc}</span>}
               </span>
             </li>
           ))}
