@@ -395,8 +395,10 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การดูแลรักษาเครื่อง C-arm",
-      // its own heading stands as the title
+      // its own heading, in amber, stands as the title at the top
       noTitle: true,
+      amber: true,
+      top: true,
       points: [
         {
           th: "บำรุงรักษาตามกำหนด",
