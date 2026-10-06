@@ -34,21 +34,111 @@ const SCATTER = [
   return { a, from: at(80), to: at(80 + len) };
 });
 
-const POSITIONS = [
+export const POSITIONS = [
   { name: "AP View", where: "หลอดเอกซเรย์อยู่ใต้เตียงผ่าตัด ตัวรับภาพอยู่ด้านบน", verdict: "แนะนำ: รังสีกระเจิงลงด้านล่าง", color: "#5cc46f" },
   { name: "Lateral", where: "หลอดเอกซเรย์อยู่ด้านซ้าย ตัวรับภาพอยู่ด้านขวา", verdict: "ควรยืนฝั่งตัวรับภาพ ไม่ยืนฝั่งหลอด", color: "#f2b233" },
   { name: "Invert", where: "หลอดเอกซเรย์อยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและดวงตา", color: "#f08a5d" },
 ];
 
+// A nurse standing left of the table (the side the tube swings to at lateral). While the scatter plays, the nurse
+// clutches the part that takes the most of it, drawn orange: the trunk at lateral (the tube is on the nurse's
+// side), the face at invert (scatter goes up). At AP, the recommended position, the nurse stands as usual.
+const NX = -50; // the nurse's centre line
+const SKIN_TONE = "#e8c4a0";
+const SCRUBS = "#4f9da6";
+const PANTS = "#2f5b78";
+const SLEEVES = "#2f7880"; // darker than the top, so the arms read against it
+const HURT = "#f08a5d";
+
+function Nurse({ hurt }: { hurt?: "trunk" | "head" }) {
+    // a few short strokes beside the part that hurts
+  const ouch = (x: number, y: number) => (
+    <g stroke={HURT} strokeWidth="3" strokeLinecap="round">
+      <line x1={x} y1={y - 12} x2={x + 6} y2={y - 20} />
+      <line x1={x + 4} y1={y} x2={x + 14} y2={y} />
+      <line x1={x} y1={y + 12} x2={x + 6} y2={y + 20} />
+    </g>
+  );
+  const legs = (
+    <g stroke={PANTS} strokeWidth="12" strokeLinecap="round">
+      <line x1={NX - 8} y1="296" x2={NX - 10} y2="386" />
+      <line x1={NX + 8} y1="296" x2={NX + 10} y2="386" />
+    </g>
+  );
+  if (hurt === "trunk")
+    // leaning back from the table, arms wrapped round the middle
+    return (
+      <g transform={`rotate(-10 ${NX} 386)`}>
+        {legs}
+        <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={HURT} />
+        <circle cx={NX} cy="196" r="15" fill={SKIN_TONE} />
+        <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+          <line x1={NX - 14} y1="226" x2={NX + 10} y2="262" />
+          <line x1={NX + 14} y1="226" x2={NX - 10} y2="266" />
+        </g>
+        {ouch(NX + 26, 250)}
+      </g>
+    );
+  if (hurt === "head")
+    // hunched, hands over the face
+    return (
+      <g transform={`rotate(8 ${NX} 386)`}>
+        {legs}
+        <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={SCRUBS} />
+        <circle cx={NX} cy="196" r="15" fill={HURT} />
+        <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+          <line x1={NX - 14} y1="226" x2={NX - 4} y2="198" />
+          <line x1={NX + 14} y1="226" x2={NX + 6} y2="200" />
+        </g>
+        <circle cx={NX - 3} cy="196" r="5" fill={SKIN_TONE} />
+        <circle cx={NX + 6} cy="198" r="5" fill={SKIN_TONE} />
+        {ouch(NX + 22, 186)}
+      </g>
+    );
+  return (
+    <g>
+      {legs}
+      <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={SCRUBS} />
+      <circle cx={NX} cy="196" r="15" fill={SKIN_TONE} />
+      <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+        <line x1={NX - 14} y1="224" x2={NX - 20} y2="290" />
+        <line x1={NX + 14} y1="224" x2={NX + 20} y2="290" />
+      </g>
+    </g>
+  );
+}
+
 // Entrance skin, facing the tube at each position (patient ellipse rx 80, ry 62).
 const SKIN = ["M170 282 Q220 310 270 282", "M159 190 Q121 230 159 270", "M170 178 Q220 150 270 178"];
 
-export function RadiationJourney({ className, style }: { className?: string; style?: React.CSSProperties }) {
+/** Which position is playing, as large text under the slide; it changes on the diagram's clock. */
+export function JourneyCaption({ className }: { className?: string }) {
+  return (
+    <div className={`grid text-center ${className ?? ""}`}>
+      {POSITIONS.map((p, i) => (
+        <div key={p.name} className="col-start-1 row-start-1 flex flex-col gap-[0.6cqh]" style={{ ...turn(`rj-pos-${i + 1}`), opacity: i ? 0 : 1 }}>
+          <p className="font-display text-[2.4cqw] font-bold leading-tight">
+            {p.name}
+            <span className="ml-[1cqw] font-sans text-[1.8cqw] font-semibold text-mist">{p.where}</span>
+          </p>
+          <p className="font-display text-[1.9cqw] font-bold leading-tight" style={{ color: p.color }}>
+            {p.verdict}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** `still`: frozen at AP with the beam, scatter and image all showing (the scatter page); the rays still flow. */
+export function RadiationJourney({ className, style, still }: { className?: string; style?: React.CSSProperties; still?: boolean }) {
+  const sh = still ? () => ({}) : shot;
+  const tu = still ? () => ({}) : turn;
   return (
     <svg
-      viewBox="0 0 440 460"
+      viewBox="-100 0 540 418"
       role="img"
-      aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ"
+      aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ พยาบาลที่ยืนข้างเตียงเจ็บที่ขาในท่า AP ที่ลำตัวในท่า Lateral และที่ใบหน้าในท่า Invert"
       className={className}
       style={style}
     >
@@ -81,30 +171,30 @@ export function RadiationJourney({ className, style }: { className?: string; sty
 
       {/* monitor */}
       <rect x="356" y="12" width="72" height="48" rx="5" fill="#0b1f45" stroke="#bccce6" strokeWidth="2" />
-      <g style={shot("rj-image")}>
+      <g style={sh("rj-image")}>
         <ellipse cx="392" cy="36" rx="24" ry="14" fill="#bccce6" opacity="0.55" />
         <circle cx="395" cy="39" r="7" fill="#f3f6f8" />
       </g>
       <text x="392" y="76" fill="#bccce6" fontSize="12" textAnchor="middle">จอภาพ</text>
 
       {/* the C-arm with tube, detector and the exposure, turning about the patient */}
-      <g style={{ ...turn("rj-turn"), transformOrigin: `${CX}px ${CY}px`, transformBox: "view-box" }}>
+      <g style={{ ...tu("rj-turn"), transformOrigin: `${CX}px ${CY}px`, transformBox: "view-box" }}>
         <path d={`M${CX} ${CY + 168} A168 168 0 0 0 ${CX} ${CY - 168} L${CX} ${CY - 118}`} fill="none" stroke="#46566a" strokeWidth="14" strokeLinejoin="round" />
 
-        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={shot("rj-beam")} />
-        <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={shot("rj-rays")}>
+        <polygon points={`${CX - 12},${CY + 132} ${CX + 12},${CY + 132} ${CX + 60},${CY + 56} ${CX - 60},${CY + 56}`} fill="url(#rj-cone)" style={sh("rj-beam")} data-rj-beam />
+        <g stroke="#ffd36b" strokeWidth="2.2" strokeLinecap="round" strokeDasharray="7 13" style={sh("rj-rays")}>
           {RAYS.map((r) => (
             <line key={r.x1} x1={r.x1} y1={CY + 130} x2={r.x2} y2={CY + 58} style={flow} />
           ))}
         </g>
 
-        <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={shot("rj-scatter")}>
+        <g stroke="#f08a5d" strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 7" fill="none" style={sh("rj-scatter")}>
           {SCATTER.map((s) => (
             <line key={s.a} x1={s.from.x} y1={s.from.y} x2={s.to.x} y2={s.to.y} markerEnd="url(#rj-arrow)" style={flow} />
           ))}
         </g>
 
-        <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={shot("rj-through")}>
+        <g stroke="#5cc3e6" strokeWidth="2" strokeLinecap="round" strokeDasharray="5 12" style={sh("rj-through")}>
           {[-24, 0, 24].map((dx) => (
             <line key={dx} x1={CX + dx} y1={CY - 64} x2={CX + dx} y2={CY - 100} style={flow} />
           ))}
@@ -114,12 +204,12 @@ export function RadiationJourney({ className, style }: { className?: string; sty
         <rect x={CX - 40} y={CY + 132} width="80" height="36" rx="8" fill="#132c5c" stroke="#bccce6" strokeWidth="2" />
         <rect x={CX - 30} y={CY + 144} width="10" height="14" rx="2" fill="#bccce6" />
         <polygon points={`${CX + 18},${CY + 140} ${CX + 30},${CY + 140} ${CX + 30},${CY + 160} ${CX + 12},${CY + 160}`} fill="#bccce6" />
-        <circle cx={CX + 18} cy={CY + 142} r="16" fill="url(#rj-hot)" style={shot("rj-tube")} />
-        <line x1={CX - 18} y1={CY + 151} x2={CX + 12} y2={CY + 149} stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 8" style={{ ...shot("rj-electrons"), ...flow }} />
+        <circle cx={CX + 18} cy={CY + 142} r="16" fill="url(#rj-hot)" style={sh("rj-tube")} />
+        <line x1={CX - 18} y1={CY + 151} x2={CX + 12} y2={CY + 149} stroke="#5cc3e6" strokeWidth="3" strokeLinecap="round" strokeDasharray="4 8" style={{ ...sh("rj-electrons"), ...flow }} />
 
         {/* detector */}
         <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#132c5c" stroke="#5cc3e6" strokeWidth="2" />
-        <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#5cc3e6" style={shot("rj-image")} />
+        <rect x={CX - 62} y={CY - 118} width="124" height="16" rx="3" fill="#5cc3e6" style={sh("rj-image")} />
       </g>
 
       {/* patient on the table, which stay put */}
@@ -127,23 +217,22 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       <ellipse cx={CX} cy={CY} rx="80" ry="62" fill="#e6ecf3" stroke="#bccce6" strokeWidth="2" />
       <circle cx={CX + 8} cy={CY + 10} r="26" fill="none" stroke="#46566a" strokeWidth="2.5" />
       {SKIN.map((d, i) => (
-        <path key={d} d={d} fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" opacity={i ? 0 : 1} style={turn(`rj-skin-${i + 1}`)} />
+        <path key={d} d={d} fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" opacity={i ? 0 : 1} style={tu(`rj-skin-${i + 1}`)} />
       ))}
 
-      {/* which position is playing */}
-      {POSITIONS.map((p, i) => (
-        <g key={p.name} opacity={i ? 0 : 1} style={turn(`rj-pos-${i + 1}`)}>
-          <text x="12" y="432" fill="#f3f6f8" fontSize="17" fontWeight="700">
-            {p.name}
-            <tspan fill="#bccce6" fontSize="13" fontWeight="600" dx="8">
-              {p.where}
-            </tspan>
-          </text>
-          <text x="12" y="452" fill={p.color} fontSize="13" fontWeight="700">
-            {p.verdict}
-          </text>
+      {/* the nurse beside the table: standing, then hurt where this position's scatter lands */}
+      <g style={tu("rj-calm")}>
+        <Nurse />
+      </g>
+      {(["trunk", "head"] as const).map((part, i) => (
+        <g key={part} opacity="0" style={tu(`rj-hurt-${i + 2}`)}>
+          <Nurse hurt={part} />
         </g>
       ))}
+      <text x={NX} y="408" fill="#bccce6" fontSize="13" fontWeight="600" textAnchor="middle">
+        พยาบาล
+      </text>
+
     </svg>
   );
 }

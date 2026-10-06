@@ -30,26 +30,60 @@ if (COVER) {
   });
 }
 
-if (OUTLINE?.items) {
-  frames.push({
-    id: OUTLINE.id,
-    node: (
-      <main className="flex flex-1 flex-col justify-center gap-[4cqh] px-[8cqw] py-[7cqh]">
-        <h1 className="font-display text-[4cqw] font-bold leading-tight">{OUTLINE.title}</h1>
-        <ol className="flex flex-col gap-[2.2cqh]">
-          {OUTLINE.items.map((item, i) => (
-            <li key={item} className="flex items-baseline gap-[1.4cqw] text-[2.4cqw] leading-snug">
-              <span className="w-[2.6cqw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ol>
-      </main>
-    ),
-  });
-}
+/** The topics list (the outline, and the closing summary with a line under each topic). */
+const outlineFrame = (s: (typeof SCENES)[number]) =>
+  s.notes ? summaryFrame(s) : listFrame(s);
+
+/** The closing summary: each topic in a card with its take-home line, one under another (as on the main screen). */
+const summaryFrame = (s: (typeof SCENES)[number]) => ({
+  id: s.id,
+  node: (
+    <main className="flex flex-1 flex-col justify-center gap-[3.5cqh] px-[7cqw] py-[6cqh]">
+      <h1 className="font-display text-[4cqw] font-bold leading-tight text-amber">{s.title}</h1>
+      <ol className="flex flex-col gap-[1.2cqh]">
+        {(s.items ?? []).map((item, i) => (
+          <li key={item} className="flex items-center gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] py-[1.2cqh]">
+            <span className="grid aspect-square w-[2.8cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.5cqw] font-bold text-ink">
+              {i + 1}
+            </span>
+            <span className="flex min-w-0 flex-col gap-[0.3cqh]">
+              <span className="font-display text-[1.7cqw] font-bold leading-snug">{item}</span>
+              <span className="text-[1.4cqw] leading-snug text-sky">{s.notes?.[i]}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </main>
+  ),
+});
+
+const listFrame = (s: (typeof SCENES)[number]) => ({
+  id: s.id,
+  node: (
+    <main className="flex flex-1 flex-col justify-center gap-[4cqh] px-[8cqw] py-[7cqh]">
+      <h1 className="font-display text-[4cqw] font-bold leading-tight">{s.title}</h1>
+      <ol className={`flex flex-col ${s.notes ? "gap-[1.6cqh]" : "gap-[2.2cqh]"}`}>
+        {(s.items ?? []).map((item, i) => (
+          <li key={item} className="flex items-baseline gap-[1.4cqw] text-[2.4cqw] leading-snug">
+            <span className="w-[2.6cqw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
+            <span className="flex min-w-0 flex-col">
+              <span className={s.notes ? "font-semibold" : ""}>{item}</span>
+              {s.notes?.[i] && <span className="text-[1.6cqw] leading-snug text-sky">{s.notes[i]}</span>}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </main>
+  ),
+});
+
+if (OUTLINE?.items) frames.push(outlineFrame(OUTLINE));
 
 for (const s of SLIDES) {
+  if (s.kind === "outline" && s.items) {
+    frames.push(outlineFrame(s));
+    continue;
+  }
   const pages = pagesFor(s.id);
   if (isInteractive(s.kind) || pages.length === 0) {
     frames.push({
@@ -72,13 +106,11 @@ for (const s of SLIDES) {
     frames.push({
       id: n === 0 ? s.id : `${s.id}-${n + 1}`,
       node: (
-        <main className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start py-[6cqh]" : "justify-center py-[8cqh]"}`}>
-          {!isTopic(p) && !p.noTitle && (
-            <h1 className="font-display text-[3cqw] font-bold leading-tight" style={p.scale ? { zoom: p.scale } : undefined}>
-              {s.title}
-            </h1>
-          )}
-          <LecturePage page={p} index={n} total={pages.length} />
+        <main
+          // the page's heading is its title: a topic page in the middle, the others from 15% down
+          className={`relative flex min-h-0 flex-1 flex-col gap-[3cqh] px-[7cqw] ${isTopic(p) ? "justify-center py-[8cqh]" : "justify-start pt-[15cqh] pb-[6cqh]"}`}
+        >
+          <LecturePage page={p} lite />
         </main>
       ),
     });

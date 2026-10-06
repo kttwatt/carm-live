@@ -18,7 +18,7 @@ export function StatusPill({ status, mode }: { status: LiveStatus; mode?: "supab
     <span className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-1 text-sm text-mist">
       <span className={`h-2.5 w-2.5 rounded-full ${DOT[status]}`} aria-hidden />
       {LABEL[status]}
-      {mode === "local" && <span className="text-amber">· โหมดทดลองในเครื่องเดียว</span>}
+      {mode === "local" && <span className="text-amber">· โหมดในเครื่อง ไม่ใช้อินเทอร์เน็ต</span>}
     </span>
   );
 }

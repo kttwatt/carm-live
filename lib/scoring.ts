@@ -22,7 +22,28 @@ export type ReportRow = {
   sceneIndex: number | null;
   answer: string[] | null;
   points: number | null;
+  /** seconds after the room's first answer to this question */
+  secs: number | null;
 };
+
+/**
+ * Tie-break for equal scores: the faster one ranks higher. Speed = total seconds after the room's
+ * first answer to each question; a question left unanswered counts as its slowest answer.
+ * Must stay identical to participant_scores.secs in supabase/migrations/0013_speed_tiebreak.sql.
+ */
+export function totalSeconds(answers: { pid: string; sceneIndex: number; secs: number }[], pids: string[]) {
+  const slowest = new Map<number, number>();
+  for (const a of answers) slowest.set(a.sceneIndex, Math.max(slowest.get(a.sceneIndex) ?? 0, a.secs));
+  const total = new Map(pids.map((p) => [p, [...slowest.values()].reduce((s, v) => s + v, 0)]));
+  for (const a of answers) if (total.has(a.pid)) total.set(a.pid, total.get(a.pid)! - slowest.get(a.sceneIndex)! + a.secs);
+  return total;
+}
+
+/** Sorts by score (high first), then time (fast first); only an exact tie on both shares a rank. */
+export function rankRows<T extends { score: number; secs: number }>(rows: T[]): (T & { rank: number })[] {
+  rows.sort((a, b) => b.score - a.score || a.secs - b.secs);
+  return rows.map((row) => ({ ...row, rank: rows.findIndex((x) => x.score === row.score && x.secs === row.secs) + 1 }));
+}
 
 export type LeaderRow = { rank: number; nickname: string; score: number };
 export type MyResult = { score: number; rank: number; of: number; correct: number; answered: number; questions: number };

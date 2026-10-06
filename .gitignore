@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# rehearsal rooms saved by the dev server (app/api/local)
+/.local-rooms.json

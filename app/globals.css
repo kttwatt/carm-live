@@ -62,10 +62,12 @@ h3 {
   }
 }
 
+/* .motion-demo: a teaching animation on the projector, which keeps moving even when that computer has
+   Windows animation effects off (reported as reduced motion), like the 3D model's ?motion=1. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not(.motion-demo, .motion-demo *),
+  *:not(.motion-demo, .motion-demo *)::before,
+  *:not(.motion-demo, .motion-demo *)::after {
     animation: none !important;
     transition: none !important;
   }
@@ -155,6 +157,24 @@ h3 {
   79%, 92% { opacity: 1; }
   97%, 100% { opacity: 0; }
 }
+/* the nurse: hurt while the lateral and invert scatter plays (51-90% of those 8 s shots), standing otherwise */
+@keyframes rj-hurt-2 {
+  0%, 49.5% { opacity: 0; }
+  51.5%, 63.3% { opacity: 1; }
+  65.3%, 100% { opacity: 0; }
+}
+@keyframes rj-hurt-3 {
+  0%, 83% { opacity: 0; }
+  85%, 96.7% { opacity: 1; }
+  98.7%, 100% { opacity: 0; }
+}
+@keyframes rj-calm {
+  0%, 49.5% { opacity: 1; }
+  51.5%, 63.3% { opacity: 0; }
+  65.3%, 83% { opacity: 1; }
+  85%, 96.7% { opacity: 0; }
+  98.7%, 100% { opacity: 1; }
+}
 /* the point card of the step that is playing; each card is delayed one step */
 @keyframes rj-step {
   0%, 19% {
@@ -168,4 +188,93 @@ h3 {
     transform: none;
     opacity: 0.55;
   }
+}
+
+/* "ตำแหน่งที่ควรยืน: ทีมเข้าเคส" diagram (components/TeamStepBack.tsx), one 8 s loop: everyone at the table's edge;
+   the Surgeon steps back and the Assistant and Scrub go along the table then back behind the shield, turning to face the tube (20-32%); the beam fires
+   (33-75%) with scatter, stops, and they all come back in (80-92%). Each element's resting style is the moment of
+   exposure, which is what reduced motion leaves. ts-hide moves by --dx/--dy and ts-turn turns by --rot, set on each person. */
+@keyframes ts-back {
+  0%, 20% { transform: translateY(0); }
+  30%, 80% { transform: translateY(-58px); }
+  92%, 100% { transform: translateY(0); }
+}
+@keyframes ts-hide {
+  0%, 20% { transform: translate(0, 0); }
+  26% { transform: translate(var(--dx), 0); }
+  32%, 80% { transform: translate(var(--dx), var(--dy)); }
+  86% { transform: translate(var(--dx), 0); }
+  92%, 100% { transform: translate(0, 0); }
+}
+@keyframes ts-turn {
+  0%, 26% { transform: rotate(0deg); }
+  32%, 80% { transform: rotate(var(--rot)); }
+  86%, 100% { transform: rotate(0deg); }
+}
+@keyframes ts-beam {
+  0%, 31% { opacity: 0; }
+  34%, 74% { opacity: 0.6; }
+  77%, 100% { opacity: 0; }
+}
+@keyframes ts-scatter {
+  0%, 36% { opacity: 0; }
+  41%, 74% { opacity: 1; }
+  77%, 100% { opacity: 0; }
+}
+@keyframes ts-on {
+  0%, 18% { opacity: 0; }
+  22%, 80% { opacity: 1; }
+  84%, 100% { opacity: 0; }
+}
+@keyframes ts-off {
+  0%, 18% { opacity: 1; }
+  22%, 80% { opacity: 0; }
+  84%, 100% { opacity: 1; }
+}
+
+/* "หลัก ALARA" icons (components/AlaraIcons.tsx): the clock hand sweeping, rays pulsing, the person walking away and
+   back with swinging legs, rays flowing in to the lead apron. */
+@keyframes al-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes al-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes al-walk {
+  0%, 10% { transform: translateX(-14px); }
+  50%, 60% { transform: translateX(16px); }
+  100% { transform: translateX(-14px); }
+}
+@keyframes al-step {
+  0%, 100% { transform: rotate(-16deg); }
+  50% { transform: rotate(16deg); }
+}
+@keyframes al-step-b {
+  0%, 100% { transform: rotate(16deg); }
+  50% { transform: rotate(-16deg); }
+}
+@keyframes al-flow {
+  to { stroke-dashoffset: -12; }
+}
+@keyframes al-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Final ranking podium (components/Podium.tsx): each step rises from the floor, then its name fades in. */
+@keyframes pd-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes pd-fade {
+  from { opacity: 0; transform: translateY(1vh); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Confetti over the final podium (components/Confetti.tsx): falls from above the screen to below it, drifting
+   sideways by --sway and turning by --spin. */
+@keyframes cf-fall {
+  from { transform: translate(0, -6vh) rotate(0deg); }
+  to { transform: translate(var(--sway), 106vh) rotate(var(--spin)); }
 }

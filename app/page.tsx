@@ -82,7 +82,7 @@ export default function Home() {
       {error && <p className="text-warn" role="alert">{error}</p>}
       {liveMode === "local" && (
         <p className="text-sm text-mist">
-          ตอนนี้ยังไม่ได้ต่อฐานข้อมูล ระบบทำงานแบบทดลองในเบราว์เซอร์เดียว (เปิดหลายแท็บได้) ใส่ค่า Supabase ในไฟล์ .env.local เพื่อใช้กับมือถือจริง
+          ตอนนี้ยังไม่ได้ต่อฐานข้อมูล ห้องเก็บไว้ในคอมพิวเตอร์เครื่องนี้ iPad และมือถือที่ต่อ wifi เดียวกันเข้าห้องได้โดยไม่ต้องใช้อินเทอร์เน็ต
         </p>
       )}
     </main>

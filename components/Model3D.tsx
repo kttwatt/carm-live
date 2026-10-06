@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { asset } from "@/lib/room";
+import { useBeep } from "@/lib/beep";
 import type { Sim } from "@/lib/state";
 
 export type M3 = NonNullable<Sim["m3"]>;
@@ -17,9 +18,13 @@ export const M3_PARTS = [
   { id: "switch", n: 7, name: "Switch" },
 ];
 
-/** The 3D page in a frame, kept in step with the presenter's settings. `lite` is the light phone version. */
-export function Model3DStage({ m3, lite }: { m3: M3; lite?: boolean }) {
+/**
+ * The 3D page in a frame, kept in step with the presenter's settings. `lite` is the light phone version.
+ * On the projector (not lite, not `muted`) it beeps while the beam is on, like the real machine.
+ */
+export function Model3DStage({ m3, lite, muted }: { m3: M3; lite?: boolean; muted?: boolean }) {
   const ref = useRef<HTMLIFrameElement>(null);
+  useBeep(m3.fire && !lite && !muted);
   const send = useCallback(() => {
     const msg = { type: "carm3d", part: m3.part, fire: m3.fire, flip: m3.flip, spin: !!m3.spin, lat: !!m3.lat };
     ref.current?.contentWindow?.postMessage(msg, window.location.origin);
@@ -49,8 +54,19 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
   const m3 = sim.m3 ?? DEFAULT_M3;
   const set = (patch: Partial<M3>) => onChange({ ...sim, m3: { ...m3, ...patch } });
   const btn = "rounded-lg border px-3 py-2 text-sm disabled:opacity-40";
+  // Folded to one button while the model is off; the controls rise in once it is on the main screen.
+  if (!m3.on)
+    return (
+      <button
+        onClick={() => set({ on: true })}
+        disabled={busy}
+        className="flex w-fit items-center gap-2 rounded-xl border-2 border-sky px-5 py-2.5 font-display font-bold text-sky disabled:opacity-40"
+      >
+        <span aria-hidden>▸</span> C-Arm 3D
+      </button>
+    );
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-line p-5">
+    <section className="flex animate-[rise_0.35s_ease-out] flex-col gap-3 rounded-2xl border border-line p-5">
       <div className="flex flex-wrap items-center gap-3">
         <p className="font-semibold">แบบจำลองสามมิติของเครื่อง C-Arm</p>
         <button

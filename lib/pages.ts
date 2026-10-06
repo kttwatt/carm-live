@@ -1,30 +1,46 @@
-// What the main screen shows under a lecture slide's title, one page at a time (the presenter's "next" steps
+// What the main screen shows for a lecture slide, one page at a time (the presenter's "next" steps
 // through them before moving on). Text comes from the seminar's Canva deck and speaker 2's script, with
 // typing and PDF-copy errors fixed.
 
 /** label replaces the card's running number, e.g. "(ก)" for a lettered clause */
 export type Point = { th: string; en?: string; desc?: string; label?: string };
 export type Page = {
-  /** empty when the scene title already says it */
+  /** the page's title, in amber 15% down the screen (the slide's title is not shown on lecture pages);
+   * empty when a picture on the page carries its own */
   heading: string;
+  /** the heading centred above a picture that is centred under it */
+  centerHeading?: boolean;
   lead?: string;
   points?: Point[];
-  /** a paragraph under the points, set like the lead */
+  /** a paragraph under the points, smaller than the lead */
   after?: string;
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
   note?: string;
-  /** the page's take-home message, set large and highlighted under everything */
+  /** what the units mean, under the table: [unit, what it measures, where it is used] */
+  units?: [string, string, string][];
+  /** the page's take-home message, set large and highlighted under everything ("
+" starts a new line) */
   key?: string;
+  /** each line of the key message in its own smaller box, for a page where one big box would outweigh the table */
+  keyApart?: boolean;
   /** an animated diagram beside the points, which light up step by step with it */
-  figure?: "radiation-journey";
+  figure?: "radiation-journey" | "radiation-ap" | "carm-3d" | "team-step" | "alara-icons";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
-  /** leave out the slide's title above this page: its heading names the page on its own */
-  noTitle?: boolean;
-  /** sits at the top of the screen instead of the middle */
-  top?: boolean;
-  /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
+  /** cards per row; the default is one card per row, across the screen, with a round number */
+  cols?: number;
+  /** with cols above 1: cards with a round number, text centred, all the same height */
+  round?: boolean;
+  /** the picture goes under the cards instead of above them */
+  imageBelow?: boolean;
+  /** the picture's height limit, in % of the screen height, when the page has room for a larger one */
+  imageMax?: number;
+  /** a picture to the right of the cards, with the key message under it */
+  side?: { src: string; alt: string };
+  /** an acronym set large with its words under it; the heading then sits beside the lead instead of above */
+  acronym?: { word: string; full: string };
+  /** the most the page may grow into spare room (default 1.4); it shrinks below 1 by itself when it would not fit */
   scale?: number;
 };
 
@@ -42,32 +58,24 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "รังสีวินิจฉัย (Diagnostic radiology)",
-      noTitle: true,
       lead: "การนำรังสีเอกซ์มาช่วยสร้างภาพอวัยวะ เพื่อการตรวจรักษาและวินิจฉัย รวมถึงการตรวจคัดกรองโรค เช่น",
       points: [
         { th: "เครื่องเอกซเรย์ทั่วไป", en: "General X-ray" },
-        { th: "Fluoroscopy", en: "ภาพเอกซเรย์ต่อเนื่อง เช่น C-arm" },
-        { th: "เครื่องเอกซเรย์คอมพิวเตอร์", en: "CT" },
+        { th: "Fluoroscopy", en: "ภาพเอกซเรย์ต่อเนื่อง เช่น C-arm / O-arm" },
+        { th: "เครื่องเอกซเรย์คอมพิวเตอร์", en: "CT scan" },
         { th: "เครื่องเอกซเรย์เต้านม", en: "Mammography" },
         { th: "เครื่องเอกซเรย์ฟัน", en: "Dental X-ray" },
       ],
     },
   ],
 
-  s02b: [
-    {
-      heading: "",
-      lead:
-        "ตามพระราชบัญญัติพลังงานนิวเคลียร์เพื่อสันติ (ฉบับที่ 2) พ.ศ. 2562 กำหนดให้ผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสีที่ทำหน้าที่ควบคุมการใช้งานเครื่องกำเนิดรังสี ต้องผ่านการอบรมการป้องกันอันตรายจากรังสีตามหลักสูตรที่กรมวิทยาศาสตร์การแพทย์หรือสภาวิชาชีพรับรอง และจัดให้มีการอบรม แนะนำ และให้คำปรึกษาแก่ผู้ปฏิบัติงานทางรังสี ให้มีความรู้ความเข้าใจเกี่ยวกับอันตรายจากรังสีและการป้องกันรังสี",
-      note: "ที่มา: การป้องกันอันตรายจากเครื่องกำเนิดรังสีเอกซ์ทางการแพทย์ สำนักรังสีและเครื่องมือแพทย์ กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข พ.ศ. 2566",
-    },
-  ],
-
   s02c: [
     {
-      heading: "",
+      heading: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้",
       lead:
         "จากร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2566 ข้อ 9 ระบุว่า ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
+      // two per row so each clause's name stays on one line
+      cols: 2,
       points: [
         { label: "(ก)", th: "ผู้ประกอบวิชาชีพเวชกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพเวชกรรม" },
         { label: "(ข)", th: "ผู้ประกอบวิชาชีพทันตกรรม", en: "ตามกฎหมายว่าด้วยวิชาชีพทันตกรรม" },
@@ -80,39 +88,39 @@ export const PAGES: Record<string, Page[]> = {
         "สำหรับบุคคลที่เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี (ฉ) ต้องปฏิบัติงานตามคู่มือที่สภาวิชาชีพของผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่งกำหนด หรือเป็นผู้ที่ผ่านการอบรมการป้องกันอันตรายจากรังสีตามหลักสูตรที่กรมวิทยาศาสตร์การแพทย์หรือสภาวิชาชีพดังกล่าวรับรอง และต้องมีการกำกับดูแลการปฏิบัติงานโดยบุคคลที่มีคุณสมบัติตาม (ก) - (จ)",
     },
     {
-      heading: "ต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติดังนี้",
-      points: [
-        {
-          th: "เป็นผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
-          desc:
-            "• ผู้ประกอบวิชาชีพเวชกรรมตามกฎหมายว่าด้วยวิชาชีพเวชกรรม\n• ผู้ประกอบวิชาชีพทันตกรรมตามกฎหมายว่าด้วยวิชาชีพทันตกรรม\n• ผู้ประกอบวิชาชีพการสัตวแพทย์ตามกฎหมายว่าด้วยวิชาชีพการสัตวแพทย์\n• ผู้ประกอบโรคศิลปะสาขารังสีเทคนิคตามกฎหมายว่าด้วยการประกอบโรคศิลปะ",
-        },
-        { th: "เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์" },
-      ],
+      heading: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้",
+      image: {
+        src: "/pages/s02c-controllers.webp",
+        alt: "ผู้ควบคุมการใช้งานเครื่องกำเนิดรังสี: 1 ผู้ประกอบวิชาชีพเวชกรรม ทันตกรรม การสัตวแพทย์ หรือโรคศิลปะสาขารังสีเทคนิค ตามกฎหมายว่าด้วยวิชาชีพนั้น 2 ผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์",
+      },
     },
   ],
 
   s03: [
     // Topic pages (a heading alone): shown as a section title in the middle of the screen.
-    { heading: "การทำงานของ Fluoroscopy" },
-    { heading: "ส่วนประกอบของ Fluoroscopy" },
+    { heading: "หลักการทำงานของ Fluoroscopy" },
+    // the 3D C-arm turning under the heading
+    { heading: "ส่วนประกอบของ Fluoroscopy", figure: "carm-3d" },
     {
       heading: "การเดินทางของรังสี",
       figure: "radiation-journey",
       lead: "X-ray tube → ผู้ป่วย → ตัวรับภาพ → จอภาพ",
       points: [
-        { th: "ผลิต", desc: "ไส้หลอดที่ร้อนปล่อยอิเล็กตรอน วิ่งไปชนเป้าโลหะ (ทังสเตน) เกิดรังสีเอกซ์ พลังงานส่วนใหญ่กลายเป็นความร้อน" },
+        { th: "ปล่อยรังสี", desc: "ไส้หลอดที่ร้อนปล่อยอิเล็กตรอน วิ่งไปชนเป้าโลหะ (ทังสเตน) เกิดรังสีเอกซ์ พลังงานส่วนใหญ่กลายเป็นความร้อน" },
         { th: "เข้าสู่ผู้ป่วย", desc: "ผิวด้านที่รังสีเข้าได้รับรังสีมากที่สุด" },
         { th: "ในตัวผู้ป่วย", desc: "ถูกดูดกลืน กระเจิงออกนอกตัว หรือทะลุผ่าน มีเพียงส่วนน้อยที่ทะลุถึงตัวรับภาพ" },
         { th: "สร้างภาพ", desc: "รังสีที่ทะลุผ่านถึงตัวรับภาพ แปลงเป็นภาพบนจอ" },
       ],
     },
     {
-      heading: "รังสีฟุ้งกระจาย (Scatter)",
+      heading: "รังสีฟุ้งกระจายหรือรังสีกระเจิง (Scatter)",
+      // the AP diagram, held still, sits centred under the three cards
+      figure: "radiation-ap",
+      cols: 3,
       points: [
         { th: "ผู้ป่วยคือแหล่งรังสีฟุ้งกระจาย (Scatter) หลักในห้องผ่าตัด" },
         { th: "ฝั่ง X-ray tube มีรังสีฟุ้งกระจายมากกว่าฝั่งตัวรับภาพ" },
-        { th: "ผู้ป่วยตัวหนา เครื่องเพิ่มกำลังรังสีอัตโนมัติ", desc: "ผู้ป่วยและทีมได้รับรังสีมากขึ้น" },
+        { th: "ผู้ป่วยที่มีตัวหนา เครื่องเพิ่มกำลังรังสีอัตโนมัติ", desc: "ผู้ป่วยและทีมได้รับรังสีมากขึ้น" },
       ],
     },
     {
@@ -125,10 +133,11 @@ export const PAGES: Record<string, Page[]> = {
           ["ภาพ", "ลื่นไหล", "อาจกระตุกเมื่อตั้งจำนวนครั้งต่ำ"],
         ],
       },
-      note: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้ ส่วน Continuous mode ใช้เมื่อต้องการเห็นการเคลื่อนไหวรวดเร็ว ต่อเนื่อง",
+      keyApart: true,
+      key: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้\nContinuous mode ใช้เมื่อต้องเห็นการเคลื่อนไหวเร็วและต่อเนื่อง",
     },
     {
-      heading: "ผลของรังสีต่อมนุษย์แบบ Deterministic effect",
+      heading: "ผลของรังสีต่อมนุษย์",
       table: {
         head: ["อวัยวะ", "ผลของรังสี", "Threshold (mGy)"],
         rows: [
@@ -140,21 +149,11 @@ export const PAGES: Record<string, Page[]> = {
           ["ทั่วร่างกาย", "Acute radiation sickness", "1,000"],
         ],
       },
+      units: [
+        ["mGy", "รังสีที่อวัยวะหรือเนื้อเยื่อตรงนั้นได้รับจริง", "ผลที่เกิดเมื่อได้รับเกินค่าหนึ่ง เช่น ผิวหนังแดง ต้อกระจก เป็นหมัน"],
+        ["mSv", "ความเสี่ยงต่อร่างกาย คิดจากชนิดรังสีและความไวของแต่ละอวัยวะ", "ค่ากำหนดปริมาณรังสี (Dose Limits) ผลวัดจากแผ่น OSL และความเสี่ยงมะเร็งระยะยาว"],
+      ],
       note: "ที่มา: ICRP, Radiation and your patient: A guide for medical practitioners (icrp.org/docs/rad_for_gp_for_web.pdf)",
-    },
-    {
-      heading: "ปริมาณรังสีกับอาการ (ICRP) · 2.2–500 mSv",
-      lead: "คณะกรรมาธิการว่าด้วยการป้องกันอันตรายจากรังสีระหว่างประเทศ (ICRP)",
-      table: {
-        head: ["ปริมาณรังสี (mSv)", "อาการ"],
-        rows: [
-          ["2.2", "เป็นระดับรังสีปกติในธรรมชาติที่มนุษย์แต่ละคนได้รับใน 1 ปี"],
-          ["5", "เกณฑ์สูงสุดที่อนุญาตให้สาธารณชนได้รับใน 1 ปี"],
-          ["50", "เกณฑ์สูงสุดที่อนุญาตให้ผู้ปฏิบัติงานทางรังสีได้รับใน 1 ปี"],
-          ["250", "ไม่ปรากฏอาการผิดปกติใด ๆ ทั้งระยะสั้นและระยะยาว"],
-          ["500", "เม็ดเลือดขาวลดลงเล็กน้อย"],
-        ],
-      },
     },
     {
       heading: "ปริมาณรังสีกับอาการ (ICRP) · 1,000–10,000 mSv",
@@ -172,11 +171,14 @@ export const PAGES: Record<string, Page[]> = {
 
   s05: [
     {
-      heading: "เป้าหมาย: ALARA (As Low As Reasonably Achievable)",
-      lead: "การป้องกันและลดปริมาณรังสีที่ผู้ปฏิบัติงาน ผู้ป่วย และบุคคลทั่วไปจะได้รับให้น้อยที่สุดเท่าที่จะทำได้ โดยยังคงได้รับประโยชน์จากรังสีนั้นอยู่",
+      heading: "เป้าหมาย",
+      acronym: { word: "ALARA", full: "As Low As Reasonably Achievable" },
+      lead: "การป้องกันและลดปริมาณรังสีที่ผู้ปฏิบัติงาน ผู้⁠ป่วย และบุคคลทั่วไปจะได้รับให้น้อยที่สุดเท่าที่จะทำได้ โดยยังคงได้รับประโยชน์จากรังสีนั้นอยู่",
     },
     {
       heading: "หลัก ALARA",
+      // a moving icon for each principle under the cards
+      figure: "alara-icons",
       points: [
         { th: "Time", en: "เวลา", desc: "ใช้เวลาในการปฏิบัติงานให้น้อยที่สุด ยิ่งใช้เวลาน้อย รังสีจะยิ่งน้อย" },
         { th: "Distance", en: "ระยะห่าง", desc: "อยู่ห่างจากแหล่งกำเนิดรังสีให้มากที่สุดเท่าที่จะทำได้" },
@@ -188,8 +190,9 @@ export const PAGES: Record<string, Page[]> = {
   s07: [
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมเข้าเคส",
-      noTitle: true,
-      lead: "แพทย์ Scrub nurse และผู้ช่วยผ่าตัด",
+      lead: "Surgeon Assistant Scrub",
+      // the team steps back while the beam fires, beside the three cards
+      figure: "team-step",
       points: [
         { th: "ยืนฝั่งเดียวกับตัวรับภาพ", en: "Detector" },
         { th: "ถอยหลัง 1–2 ก้าว" },
@@ -198,18 +201,33 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมรอบนอก",
-      noTitle: true,
       lead: "ทีมส่งของ และทีมดูแลนอกเขตปลอดเชื้อ",
       points: [
-        { th: "รักษาระยะห่างอย่างน้อย 2 เมตร (6 ฟุต)" },
-        { th: "หลบหลังฉากกั้นตะกั่ว", en: "Lead shield" },
+        { th: "รักษาระยะห่างอย่างน้อย 2 เมตร หรือ 6 ฟุต" },
+        { th: "หลบหลังฉากกั้นตะกั่ว" },
         { th: "ใช้ผู้สวมชุดตะกั่วเป็นโล่บัง" },
       ],
     },
     {
-      heading: "อุปกรณ์ป้องกันรังสี",
+      heading: "ตำแหน่งยืนที่ปลอดภัย",
+      centerHeading: true,
+      image: {
+        src: "/pages/standing-zones.webp",
+        alt: "จำลองสถานการณ์ C-arm ท่า Lateral มองจากด้านบน: ฝั่งหลอดเอกซเรย์เป็นเขตอันตราย รังสีกระเจิงสูง ฝั่งตัวรับภาพปลอดภัยกว่า พยาบาลส่งเครื่องมือยืนฝั่งตัวรับภาพ พยาบาลหมุนเวียนอยู่ห่างเกิน 2 เมตรหลังฉากกั้นรังสีแบบเคลื่อนที่ ซึ่งปลอดภัยที่สุด",
+      },
+    },
+    {
+      // four cards across the top, the picture centred under them
+      heading: "อุปกรณ์ป้องกันรังสีส่วนบุคคล",
+      round: true,
+      cols: 4,
+      image: {
+        src: "/pages/ppe.webp",
+        alt: "ผู้สวมอุปกรณ์ป้องกันรังสี: หมวก แว่นตา ปลอกคอ เสื้อ กระโปรง และถุงมือกันรังสี และฉากกั้นรังสีแบบตั้งพื้นมีช่องมอง",
+      },
+      imageBelow: true,
       points: [
-        { th: "ชุดป้องกันรังสี", en: "Lead apron", desc: "แบบชิ้นเดียว หรือแบบ 2 ชิ้น" },
+        { th: "ชุดป้องกันรังสี", en: "Lead apron" },
         { th: "แว่นตากันรังสี", en: "Lead glasses" },
         { th: "หมวกป้องกันรังสี", en: "Lead caps" },
         { th: "ฉากป้องกันรังสี", en: "Lead shield" },
@@ -217,26 +235,25 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ชุดป้องกันรังสี",
+      // two set lines; the word joiner keeps "97–99%" from breaking at the dash
+      key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
       points: [
         {
           th: "Standard lead",
           en: "เกรดตะกั่วบริสุทธิ์ดั้งเดิม",
-          desc: "ป้องกันรังสีได้สูงสุดในราคาประหยัดที่สุด แต่น้ำหนักมากที่สุด (ประมาณ 4–5 กก. ต่อชุด)",
+          desc: "ป้องกันรังสีได้สูงสุดในราคาประหยัดที่สุด แต่น้ำหนักมากที่สุด (ประมาณ 5–7 กก. ต่อชุด)",
         },
-        { th: "Lightweight lead", en: "เกรดตะกั่วผสมน้ำหนักเบา", desc: "เบากว่าเกรด Standard ประมาณ 20–30% โดยยังคงค่า Lead equivalent เท่าเดิม" },
+        { th: "Lightweight lead", en: "เกรดตะกั่วผสมโลหะหนักชนิดอื่น เช่น Bismuth", desc: "เบากว่าเกรด Standard ประมาณ 10–15% โดยยังคงค่า Lead equivalent เท่าเดิม" },
         {
           th: "Lead-free",
           en: "เกรดไร้ตะกั่ว / Eco-friendly",
-          desc: "เบากว่าเกรดดั้งเดิม 30–40% ปลอดภัยต่อสุขภาพผู้สวมใส่ (ไม่มีพิษจากสารตะกั่ว) และย่อยสลายหรือกำจัดได้ง่ายกว่าตามมาตรฐานสิ่งแวดล้อม",
+          desc: "ไม่มีตะกั่วเลย แต่จะใช้โลหะหนักอื่นๆ แทน เช่น Bismuth Antimony Tungsten เป็นต้น น้ำหนักเบาที่สุด ลดน้ำหนักได้ถึง 20–⁠30% เป็นมิตรต่อสิ่งแวดล้อม และกำจัดได้ง่ายกว่าเมื่อหมดอายุใช้งาน",
         },
       ],
     },
     {
       heading: "Dosimeter",
-      noTitle: true,
-      top: true,
-      scale: 1.2,
-      lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงานที่ทำงานเกี่ยวกับรังสีต้องมี เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
+      lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงาน เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {
           th: "Electronic dosimeter",
@@ -254,14 +271,26 @@ export const PAGES: Record<string, Page[]> = {
           desc: "แผ่นติดเสื้อ ประเมินปริมาณรังสีสะสมระยะยาว เครื่องอ่านใช้แสงสีเขียวหรือเลเซอร์กระตุ้นผลึก ให้ปล่อยแสงสีน้ำเงินตามปริมาณรังสีที่ได้รับ อ่านค่าซ้ำได้",
         },
       ],
-      key: "หน่วยงานส่วนใหญ่ใช้ OSL เป็นหลัก",
+      key: "หน่วยงานส่วนใหญ่ใช้\nOSL เป็นหลัก",
+      side: {
+        src: "/pages/dosimeters.webp",
+        alt: "ตัวอย่างเครื่องวัดรังสีส่วนบุคคล: TLD แผ่นวัดรังสีแบบติดเสื้อ และเครื่องวัดรังสีแบบอิเล็กทรอนิกส์สีฟ้าและสีชมพู",
+      },
+    },
+    {
+      heading: "ตำแหน่งการติด OSL dosimeter",
+      image: {
+        src: "/pages/osl-placement.webp",
+        alt: "สำหรับเจ้าหน้าที่ที่ใช้แผ่นวัดรังสี 2 แผ่น แผ่นที่ 1 ควรติดด้านนอกปลอกคอกำบังรังสี แผ่นที่ 2 ติดด้านในเสื้อกำบังรังสี",
+      },
+      imageMax: 70,
     },
   ],
 
-  s10: [
+  // the limits, just before the question on a pregnant colleague
+  s09a: [
     {
       heading: "ค่ากำหนดปริมาณรังสี (Dose Limits)",
-      noTitle: true,
       scale: 1.5,
       table: {
         head: ["ประเภทของขีดจำกัด", "ผู้ปฏิบัติงานทางรังสี", "ประชาชนทั่วไป"],
@@ -273,10 +302,11 @@ export const PAGES: Record<string, Page[]> = {
         ],
       },
     },
+  ],
+
+  s10: [
     {
       heading: "แนวทางปฏิบัติเมื่อผู้ปฏิบัติงานทางรังสีตั้งครรภ์",
-      noTitle: true,
-      // 1.4 rather than 1.5 like its neighbours, so the long heading stays on one line
       scale: 1.4,
       points: [
         { th: "แจ้งผู้บังคับบัญชารับทราบ" },
@@ -286,15 +316,21 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "มาตรฐานของห้องปฏิบัติการทางรังสี",
-      scale: 1.5,
+      // four cards across the top, the cut-away room centred under them
+      cols: 4,
+      round: true,
       points: [{ th: "ประตูห้อง" }, { th: "เพดานห้อง" }, { th: "ฉากกำบังรังสี" }, { th: "สัญญาณไฟสีแดง และป้ายเตือน" }],
+      image: {
+        src: "/pages/xray-room.webp",
+        alt: "ภาพตัดห้องเอกซเรย์: ผนัง ประตู และเพดานบุแผ่นตะกั่วหนา 1.5–2.0 มม. รอยต่อซ้อนกันอย่างน้อย 1.5 ซม. ห้องควบคุมมีกระจกตะกั่วดูภายในห้อง หน้าห้องมีไฟสีแดงและป้ายเตือนรังสีและหญิงตั้งครรภ์"
+      },
+      imageBelow: true,
     },
   ],
 
   s11: [
     {
       heading: "Fluoroscopy time",
-      noTitle: true,
       points: [
         {
           th: "การบันทึกข้อมูล",
@@ -315,9 +351,8 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การจัดเก็บอุปกรณ์ป้องกันรังสีอย่างถูกวิธี",
-      noTitle: true,
       points: [
-        { th: "ใช้ที่แขวนเฉพาะ", en: "Lead apron racks", desc: "แขวนเสื้อตะกั่วและฉากป้องกันบนที่แขวนที่ออกแบบมาโดยเฉพาะซึ่งมีความแข็งแรง" },
+        { th: "ใช้ที่แขวนเฉพาะ", desc: "แขวนเสื้อตะกั่วและฉากป้องกันบนที่แขวนที่ออกแบบมาโดยเฉพาะซึ่งมีความแข็งแรง" },
         {
           th: "ห้ามพับหรือพับทบ",
           desc: "ห้ามพับ หักงอ หรือกองไว้กับพื้นหรือโต๊ะ แผ่นตะกั่วด้านในจะแตกร้าว (Cracking) หรือปริขาด ทำให้รังสีรั่วผ่านรอยแตกได้",
@@ -327,7 +362,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การทำความสะอาดและฆ่าเชื้อ",
-      noTitle: true,
       points: [
         { th: "น้ำสบู่เจือจาง หรือสารทำความสะอาดชนิดอ่อน", en: "Mild detergent", desc: "เช็ดคราบสกปรก คราบเหงื่อ หรือฝุ่นทั่วไปประจำวัน" },
         {
@@ -343,8 +377,7 @@ export const PAGES: Record<string, Page[]> = {
       points: [
         {
           th: "บำรุงรักษาตามกำหนด",
-          en: "Planned maintenance programme",
-          desc: "บำรุงรักษาตามกำหนดการโดยวิศวกรผู้เชี่ยวชาญ หรือผู้ที่ได้รับอนุญาตจาก Philips Healthcare",
+          desc: "บำรุงรักษาตามกำหนดการโดยวิศวกรผู้เชี่ยวชาญ\nผู้ที่ได้รับอนุญาตจาก Philips Healthcare หรือผู้ผลิต",
         },
         {
           th: "งดใช้งานเมื่อพบความผิดปกติ",

@@ -26,6 +26,9 @@ type Props = {
 const VIEW = { x: -225, y: -235, w: 455, h: 465 };
 
 /** Top-view operating room: table and patient in the middle, C-arm, staff, and standing spots A–F. */
+/** the X-ray beam, in red */
+const BEAM = "#ff4d4d";
+
 export function ORMap({ geometry, selected, onPick, reveal, correct = [], counts, className, style, fluoro, onFloorTap }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -121,7 +124,7 @@ export function ORMap({ geometry, selected, onPick, reveal, correct = [], counts
         {proj === "AP" ? (
           <>
             <line x1={35} y1={140} x2={35} y2={34} stroke="#6b7d8f" strokeWidth={12} strokeLinecap="round" opacity={0.6} />
-            <rect x={ISO.x - 18} y={-18} width={36} height={36} rx={3} fill="#7f9bff" opacity={lit ? 0.6 : 0.25} className={fluoro ? "animate-pulse" : undefined} />
+            <rect x={ISO.x - 18} y={-18} width={36} height={36} rx={3} fill={BEAM} opacity={lit ? 0.7 : 0.45} className={fluoro ? "animate-pulse" : undefined} />
             <rect x={ISO.x - 24} y={-24} width={48} height={48} rx={4} fill={apTube === "under" ? "#f3f6f8" : "none"} fillOpacity={0.55} stroke="#f3f6f8" strokeWidth={2} strokeDasharray={apTube === "under" ? undefined : "4 4"} />
             <circle cx={ISO.x} cy={0} r={16} fill={apTube === "over" ? "#f3f6f8" : "none"} fillOpacity={0.7} stroke="#f3f6f8" strokeWidth={2} strokeDasharray={apTube === "over" ? undefined : "4 4"} />
             <text x={ISO.x + 30} y={-30} fontSize={12.5} fill="#f3f6f8">
@@ -138,8 +141,8 @@ export function ORMap({ geometry, selected, onPick, reveal, correct = [], counts
             )}
             <polygon
               points={`${ISO.x - 9},${tubeY} ${ISO.x + 9},${tubeY} ${ISO.x + 16},${detY} ${ISO.x - 16},${detY}`}
-              fill="#7f9bff"
-              opacity={lit ? 0.6 : 0.25} className={fluoro ? "animate-pulse" : undefined}
+              fill={BEAM}
+              opacity={lit ? 0.7 : 0.45} className={fluoro ? "animate-pulse" : undefined}
             />
             {/* labels sit inside the devices: the space around them is crowded with staff and spots */}
             <rect x={ISO.x - 34} y={tubeY - 13} width={68} height={26} rx={4} fill="#f2b233" stroke="#0e1a2b" strokeWidth={2} />

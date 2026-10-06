@@ -8,14 +8,19 @@ export type Question = {
   multi?: boolean;
   choices: Choice[];
   correct: string[];
+  /** "* " lines become a list; text between ==…== is highlighted (components/Explanation.tsx) */
   explanation: string;
+  /** on the projector the question itself takes the title's place, at the title's size */
+  promptAsTitle?: boolean;
   /** answer by tapping spots A–F on the operating-room map set up like this */
   map?: Geometry;
+  /** on the projector at the reveal, this diagram stands large beside the answer and the result bars */
+  figure?: "radiation-ap";
 };
 
 export const QUESTIONS: Record<string, Question> = {
   s02: {
-    prompt: "ใครเป็นคนใช้เครื่อง Fluoroscopy",
+    prompt: "ใครเป็นผู้ใช้งานเครื่อง Fluoroscopy",
     multi: true,
     choices: [
       { id: "physician", label: "แพทย์" },
@@ -29,10 +34,15 @@ export const QUESTIONS: Record<string, Question> = {
     ],
     correct: ["physician", "dentist", "vet", "radtech", "physicist", "radofficer"],
     explanation:
-      "ร่างกฎกระทรวง ข้อ 9 กำหนดผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีไว้ 6 กลุ่ม คือ แพทย์ ทันตแพทย์ สัตวแพทย์ นักรังสีเทคนิค นักฟิสิกส์การแพทย์ และเจ้าพนักงานรังสี พยาบาลวิชาชีพและผู้ช่วยพยาบาลไม่อยู่ในรายชื่อนี้",
+      "ร่างกฎกระทรวง ข้อ 9 กำหนดผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีไว้ 6 กลุ่ม คือ\n" +
+      "* แพทย์\n* ทันตแพทย์\n* สัตวแพทย์\n* นักรังสีเทคนิค\n* นักฟิสิกส์การแพทย์\n* เจ้าพนักงานรังสี\n" +
+      "==ส่วนพยาบาลวิชาชีพและผู้ช่วยพยาบาลไม่อยู่ในรายชื่อนี้==",
   },
   s04: {
-    prompt: "ขณะฉายรังสี แหล่งรังสีกระเจิงที่สำคัญที่สุดต่อบุคลากรอยู่ที่ไหน",
+    prompt: "ขณะฉายรังสี รังสีกระเจิงที่บุคลากรได้รับมากที่สุดมาจากอะไร?",
+    promptAsTitle: true,
+    // the AP diagram: primary beam into the patient, scatter leaving it
+    figure: "radiation-ap",
     choices: [
       { id: "tube", label: "หลอดเอกซเรย์" },
       { id: "patient", label: "ร่างกายผู้ป่วย" },
@@ -41,10 +51,16 @@ export const QUESTIONS: Record<string, Question> = {
     ],
     correct: ["patient"],
     explanation:
-      "รังสีกระเจิงเกิดเมื่อลำรังสีกระทบร่างกายผู้ป่วย มากที่สุดด้านที่ลำรังสีเข้า (ฝั่งหลอดเอกซเรย์) ที่ระยะ 1 เมตรได้ราว 0.1% ของรังสีที่เข้าผิวผู้ป่วย และลดลงตามระยะยกกำลังสอง",
+      "==ร่างกายผู้ป่วยคือแหล่งรังสีกระเจิงหลัก==\n" +
+      "* เกิดเมื่อลำรังสีกระทบตัวผู้ป่วย\n" +
+      "* กระเจิงมากที่สุดด้านที่รังสีเข้า (ฝั่งหลอดเอกซเรย์)\n" +
+      "* ห่าง 1 เมตร ได้ราว 0.1% ของรังสีที่ผิวผู้ป่วย\n" +
+      "* ถอยห่างเป็น 2 เท่า รังสีลดเหลือ 1 ใน 4",
   },
   s06: {
-    prompt: "ท่าถ่ายด้านข้าง หลอดเอกซเรย์อยู่ฝั่งตรงข้ามศัลยแพทย์ คุณเป็นพยาบาลช่วยรอบนอก จะยืนจุดไหนเพื่อรับรังสีกระเจิงน้อยที่สุด",
+    // the line break sets the projector title in two lines (elsewhere it reads as a space)
+    prompt: "Lateral view หลอดเอกซเรย์อยู่ฝั่งตรงข้ามศัลยแพทย์\nคุณเป็นพยาบาลช่วยรอบนอก จะยืนจุดไหนเพื่อรับรังสีกระเจิงน้อยที่สุด?",
+    promptAsTitle: true,
     choices: [
       { id: "A", label: "A · ฝั่งศัลยแพทย์ ใกล้ศีรษะ" },
       { id: "B", label: "B · ฝั่งศัลยแพทย์ ปลายเตียง" },
@@ -59,19 +75,23 @@ export const QUESTIONS: Record<string, Question> = {
       "จุด C อยู่ฝั่งแผ่นรับภาพและห่างที่สุด ฝั่งหลอดเอกซเรย์ได้รับรังสีกระเจิงมากกว่าฝั่งแผ่นรับภาพราว 2–3 เท่า อย่าจำซ้ายหรือขวา ให้ดูว่าหลอดอยู่ฝั่งไหน แล้วถอยห่างเท่าที่งานอนุญาต",
   },
   s08: {
-    prompt: "ถ้ามีแผ่นวัดรังสีประจำตัวเพียงแผ่นเดียว ควรติดที่ไหน",
+    prompt: "ถ้ามีแผ่นวัดรังสีประจำตัว (OSL) เพียงตัวเดียว ควรติดที่ใด?",
+    promptAsTitle: true,
     choices: [
       { id: "collar_out", label: "ที่คอเสื้อ นอกเสื้อตะกั่ว" },
       { id: "waist_in", label: "ที่เอว ใต้เสื้อตะกั่ว" },
       { id: "chest_in", label: "ที่หน้าอก ใต้เสื้อตะกั่ว" },
       { id: "pocket", label: "ในกระเป๋าชุดผ่าตัด" },
     ],
-    correct: ["collar_out"],
+    correct: ["chest_in"],
     explanation:
-      "NCRP 122: มีแผ่นเดียวให้ติดที่คอเสื้อนอกเสื้อตะกั่ว เพื่อประเมินรังสีที่ศีรษะ คอ และเลนส์ตา มีสองแผ่นให้เพิ่มอีกแผ่นที่เอวใต้เสื้อตะกั่ว แผ่นวัดรังสีไม่ได้ป้องกันรังสี [ยืนยันตามระเบียบของหน่วยงาน]",
+      "==มีแผ่นเดียว ให้ติดที่หน้าอก ใต้เสื้อตะกั่ว== เพื่อวัดปริมาณรังสีที่ร่างกายได้รับจริง\n" +
+      "ถ้ามี 2 แผ่น แผ่นที่ 1 ติดด้านนอกปลอกคอกำบังรังสี แผ่นที่ 2 ติดด้านในเสื้อกำบังรังสี แผ่นวัดรังสีไม่ได้ป้องกันรังสี",
   },
   s09: {
-    prompt: "เพื่อนพยาบาลแจ้งว่าตั้งครรภ์ และถูกจัดเข้าเคสที่ใช้ C-arm ทีมควรทำอย่างไรก่อน",
+    // the word joiner keeps "ตั้งครรภ์" from breaking in two when the title wraps
+    prompt: "เมื่อมีเพื่อนร่วมงานหญิงตั้ง⁠ครรภ์ ควรทำอย่างไรเป็นอันดับแรก?",
+    promptAsTitle: true,
     choices: [
       { id: "ban", label: "ห้ามเข้าห้องที่มีรังสีทุกกรณี" },
       { id: "assess", label: "แจ้งหัวหน้าและผู้รับผิดชอบความปลอดภัยทางรังสี เพื่อประเมินงานและติดตามปริมาณรังสี" },

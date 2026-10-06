@@ -1,24 +1,82 @@
 "use client";
 
+import { Explanation } from "@/components/Explanation";
 import { Qr, joinUrl, usePublicBase } from "@/components/Qr";
 import { LeaderList, usePolled } from "@/components/Leaderboard";
+import { Podium } from "@/components/Podium";
 import { Model3DStage } from "@/components/Model3D";
 import { VideoScene } from "@/components/VideoScene";
 import { SoundHint } from "@/components/SoundHint";
 import { useSearchParams } from "next/navigation";
 import { ORMap } from "@/components/ORMap";
 import { LecturePage } from "@/components/LecturePage";
+import { OneLine } from "@/components/OneLine";
+import { RadiationJourney } from "@/components/RadiationJourney";
 import { isTopic, pagesFor } from "@/lib/pages";
 import { ResultBars } from "@/components/ResultBars";
 import { Suspense, useCallback } from "react";
-import { questionFor } from "@/lib/questions";
+import { questionFor, type Question } from "@/lib/questions";
 import { KIND_LABEL, isInteractive, sceneAt } from "@/lib/scenes";
 import { useSummary } from "@/lib/useSummary";
+import type { Summary } from "@/lib/transport";
 import { PHASE_LABEL } from "@/lib/state";
 import { useLive } from "@/lib/useLive";
 import { asset, useRoom } from "@/lib/room";
 
 const PRESENCE = { role: "screen" as const };
+
+// The explanation after the reveal, boxed and large enough to read from the back of the room.
+function Answer({ text }: { text: string }) {
+  return (
+    <div className="flex flex-col gap-[1vh] rounded-3xl border-2 border-ok bg-night-2 px-[2vw] py-[2vh]">
+      <p className="font-display text-[2.6vw] font-extrabold leading-none tracking-wide text-ok">เฉลย</p>
+      <div className="text-[1.9vw] font-medium leading-relaxed text-paper">
+        <Explanation text={text} />
+      </div>
+    </div>
+  );
+}
+
+/** A choice named by a letter on the room map ("A · …") shows the letter in an amber circle, so it stands out. */
+function ChoiceLabel({ label }: { label: string }) {
+  const m = /^([A-Z]) · (.+)$/.exec(label);
+  if (!m) return <span>{label}</span>;
+  return (
+    <span className="flex items-center gap-[1vw]">
+      <span className="grid aspect-square w-[2.6vw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.6vw] font-bold text-ink">{m[1]}</span>
+      <span>{m[2]}</span>
+    </span>
+  );
+}
+
+// The choices on the projector while the room answers, in a fixed order, each with its live count (refreshed every 2 s);
+// the correct one stays hidden until the reveal.
+function ChoiceList({ question, summary }: { question: Question; summary: Summary | null }) {
+  const counts = summary?.counts ?? {};
+  // Bars are scaled to the most-picked choice, so differences show even with few answers.
+  const most = Math.max(0, ...question.choices.map((c) => counts[c.id] ?? 0));
+  return (
+    <>
+      {question.multi && <p className="text-[1.4vw] font-semibold text-amber">เลือกได้หลายข้อ</p>}
+      {/* one choice per row */}
+      <ul className="grid grid-cols-1 gap-[1.2vh]">
+        {question.choices.map((c) => {
+          const n = counts[c.id] ?? 0;
+          const pct = most ? Math.round((n / most) * 100) : 0;
+          return (
+            <li key={c.id} className="relative overflow-hidden rounded-2xl border border-line text-[1.7vw] leading-snug">
+              <div className="absolute inset-y-0 left-0 bg-sky/25 transition-[width] duration-500" style={{ width: `${pct}%` }} />
+              <div className="relative flex items-center justify-between gap-[1vw] px-[1.4vw] py-[1.2vh]">
+                <ChoiceLabel label={c.label} />
+                <span className="shrink-0 font-semibold tabular-nums text-amber">{n} คน</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
 
 // Projector view: no controls, only what the room should see.
 function ScreenView() {
@@ -70,30 +128,60 @@ function ScreenView() {
     const midway = scene.kind !== "leaderboard";
     return (
       <main className="flex flex-1 flex-col gap-[3vh] px-[7vw] py-[6vh]">
-        <p className="text-[1.5vw] font-semibold tracking-wide text-amber">
-          {midway ? `คะแนนสะสมหลังข้อ: ${scene.title}` : "สรุปคะแนนจากทุกกิจกรรม"}
-        </p>
-        <h1 className="font-display text-[4vw] font-bold leading-tight">{midway ? "ผู้นำและคะแนน" : "อันดับคะแนน"}</h1>
-        <div className="max-w-[70vw]">
-          <LeaderList rows={board} size="xl" />
-        </div>
+        {!midway && <p className="text-[1.5vw] font-semibold tracking-wide text-amber">สรุปคะแนนจากทุกกิจกรรม</p>}
+        <h1 className="w-fit rounded-2xl bg-amber px-[2vw] py-[0.6vh] font-display text-[4vw] font-bold leading-tight text-ink">{midway ? "คะแนน" : "อันดับคะแนน"}</h1>
+        {midway ? (
+          <div className="max-w-[70vw]">
+            <LeaderList rows={board} size="xl" />
+          </div>
+        ) : (
+          // the end: the top four on a podium, the rest under it (on the projector it plays even under reduced motion)
+          <div className="motion-demo flex flex-1 flex-col justify-end">
+            <Podium rows={board} muted={preview} />
+          </div>
+        )}
         <p className="text-[1.1vw] text-mist">แสดงเลขที่และชื่อ · ดูคะแนนและอันดับของตัวเองบนมือถือ</p>
       </main>
     );
   }
 
   // The 3D C-arm model takes over the projector while the presenter shows it.
-  if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} />;
+  if (state?.sim?.m3?.on) return <Model3DStage m3={state.sim.m3} muted={preview} />;
+
+  // The closing summary: each topic in a card with its take-home line, one under another.
+  if (scene.kind === "outline" && scene.items && scene.notes) {
+    return (
+      <main className="flex flex-1 flex-col justify-center gap-[3.5vh] px-[7vw] py-[6vh]">
+        <h1 className="text-center font-display text-[4vw] font-bold leading-tight text-amber">{scene.title}</h1>
+        <ol className="flex flex-col gap-[1.2vh]">
+          {scene.items.map((item, i) => (
+            <li key={item} className="flex items-center gap-[1.2vw] rounded-2xl border border-line bg-night-2 px-[1.6vw] py-[1.2vh]">
+              <span className="grid aspect-square w-[2.8vw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.5vw] font-bold text-ink">
+                {i + 1}
+              </span>
+              <span className="flex min-w-0 flex-col gap-[0.3vh]">
+                <span className="font-display text-[1.7vw] font-bold leading-snug">{item}</span>
+                <span className="text-[1.4vw] leading-snug text-sky">{scene.notes?.[i]}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </main>
+    );
+  }
 
   if (scene.kind === "outline" && scene.items) {
     return (
-      <main className="flex flex-1 flex-col justify-center gap-[4vh] px-[8vw] py-[7vh]">
-        <h1 className="font-display text-[4vw] font-bold leading-tight">{scene.title}</h1>
-        <ol className="flex flex-col gap-[2.2vh]">
+      // the topics one card per row, each with a round number, like the closing summary
+      <main className="flex flex-1 flex-col justify-center gap-[3.5vh] px-[7vw] py-[6vh]">
+        <h1 className="font-display text-[4vw] font-bold leading-tight text-amber">{scene.title}</h1>
+        <ol className="flex flex-col gap-[1.4vh]">
           {scene.items.map((item, i) => (
-            <li key={item} className="flex items-baseline gap-[1.4vw] text-[2.4vw] leading-snug">
-              <span className="w-[2.6vw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
-              <span>{item}</span>
+            <li key={item} className="flex items-center gap-[1.4vw] rounded-2xl border border-line bg-night-2 px-[1.8vw] py-[1.4vh]">
+              <span className="grid aspect-square w-[3vw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.6vw] font-bold text-ink">
+                {i + 1}
+              </span>
+              <span className="min-w-0 font-display text-[2vw] font-bold leading-snug">{item}</span>
             </li>
           ))}
         </ol>
@@ -122,7 +210,10 @@ function ScreenView() {
             alt="การสัมมนา ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด"
             className="max-h-[58vh] w-full rounded-2xl object-cover"
           />
-          <h1 className="whitespace-nowrap font-display text-[2.6vw] font-bold leading-tight">{scene.title}</h1>
+          {/* in amber and as large as fits the column on one line */}
+          <OneLine size={3.4} min={2.6} className="font-display font-bold leading-tight text-amber">
+            {scene.title}
+          </OneLine>
           <ol className="list-decimal pl-[2vw] text-[1.5vw] leading-relaxed text-mist">
             <li>สแกน QR ด้วยกล้องมือถือ</li>
             <li>ตั้งเลขที่ ชื่อจริง</li>
@@ -170,28 +261,29 @@ function ScreenView() {
   const pages = pagesFor(scene.id);
   const pg = state?.sim?.pg;
   const pageN = pg && pg.s === sceneIndex ? Math.min(pg.n, Math.max(pages.length - 1, 0)) : 0;
-  // A topic page stands alone, centred, without the slide's title.
-  const topic = !question && !isInteractive(scene.kind) && isTopic(pages[pageN]);
-  const noTitle = topic || (!question && !isInteractive(scene.kind) && !!pages[pageN]?.noTitle);
+  // A lecture page carries its own title (its heading), so the slide's title is left off. A topic page stands
+  // alone in the middle; the others start 15% down the screen.
+  const lecture = !question && !isInteractive(scene.kind) && pages.length > 0;
+  const top = lecture && !isTopic(pages[pageN]);
 
   return (
     <main
-      className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && !isInteractive(scene.kind) && pages[pageN]?.top ? "justify-start py-[6vh]" : "justify-center py-[8vh]"}`}
+      className={`relative flex min-h-0 flex-1 flex-col gap-[3vh] px-[7vw] ${top ? "justify-start pt-[15vh] pb-[6vh]" : question && phase === "revealed" ? "justify-center py-[5vh]" : "justify-center py-[8vh]"}`}
     >
       {
         <>
-          {!noTitle && (
-            // A scaled page's title grows with it, so it stays larger than the page's own heading.
-            <h1
-              className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}
-              style={!question && pages[pageN]?.scale ? { zoom: pages[pageN].scale } : undefined}
-            >
-              {scene.title}
-            </h1>
+          {question ? (
+            // a question's title says it is one, and stays on one line unless that would make it too small
+            <OneLine size={4.2} min={2.6} className="font-display font-bold leading-tight">
+              คำถาม: {question.promptAsTitle ? question.prompt : scene.title}
+            </OneLine>
+          ) : (
+            !lecture && <h1 className="font-display text-[4.2vw] font-bold leading-tight">{scene.title}</h1>
           )}
           {question ? (
-            <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
-              <p className="text-[2.2vw] leading-snug">{question.prompt}</p>
+            <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map || phase === "revealed" ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
+              {/* a prompt that only repeats the slide title is not shown twice */}
+              {!question.promptAsTitle && question.prompt.trim() !== scene.title.trim() && <p className="text-[2.2vw] leading-snug">{question.prompt}</p>}
               {question.map ? (
                 <div className="flex items-start gap-[2.5vw]">
                   {/* sized by height so the whole room fits on the projector */}
@@ -205,25 +297,45 @@ function ScreenView() {
                   />
                   <div className="flex min-w-0 flex-1 flex-col gap-[2vh]">
                     {phase === "revealed" ? (
-                      <p className="text-[1.3vw] leading-relaxed text-mist">{question.explanation}</p>
+                      <Answer text={question.explanation} />
                     ) : (
-                      <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
-                        {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
-                        {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
-                      </p>
+                      <>
+                        <ChoiceList question={question} summary={results} />
+                        <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
+                          {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
+                          {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
+                        </p>
+                      </>
                     )}
                   </div>
                 </div>
+              ) : phase === "revealed" && question.figure === "radiation-ap" ? (
+                // the diagram the answer explains (primary beam and scatter) large on the left; the answer, then the bars, beside it
+                <div className="flex items-start gap-[3vw]">
+                  <RadiationJourney still className="w-[min(36vw,64vh)] shrink-0" />
+                  <div className="flex min-w-0 flex-1 flex-col gap-[2.5vh]">
+                    <Answer text={question.explanation} />
+                    <ResultBars question={question} summary={results} showCorrect size="xl" />
+                  </div>
+                </div>
               ) : phase === "revealed" ? (
-                <>
-                  <ResultBars question={question} summary={results} showCorrect size="xl" />
-                  <p className="text-[1.3vw] leading-relaxed text-mist">{question.explanation}</p>
-                </>
+                // bars and the answer side by side, so eight choices and the answer fit one screen
+                <div className="flex items-start gap-[3vw]">
+                  <div className="min-w-0 flex-1">
+                    <ResultBars question={question} summary={results} showCorrect size="xl" />
+                  </div>
+                  <div className="w-[36%] shrink-0">
+                    <Answer text={question.explanation} />
+                  </div>
+                </div>
               ) : (
-                <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
-                  {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
-                  {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
-                </p>
+                <>
+                  <ChoiceList question={question} summary={results} />
+                  <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
+                    {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
+                    {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
+                  </p>
+                </>
               )}
             </div>
           ) : isInteractive(scene.kind) ? (
@@ -233,7 +345,7 @@ function ScreenView() {
               <p className="text-[1.4vw] font-semibold">{PHASE_LABEL[phase]}</p>
             </div>
           ) : pages.length > 0 ? (
-            <LecturePage page={pages[pageN]} index={pageN} total={pages.length} />
+            <LecturePage page={pages[pageN]} lite={preview} />
           ) : null}
         </>
       }

@@ -22,10 +22,22 @@ export type Scene = {
   video?: string;
   /** outline scenes: the talk's topics, in order */
   items?: string[];
+  /** outline scenes: one short line under each topic (the closing summary) */
+  notes?: string[];
   slide?: number;
   speaker?: number;
   activity?: string;
 };
+
+// The talk's topics: listed at the start, and again with a take-home line at the end.
+const TOPICS = [
+  "รังสีที่ใช้ในห้องผ่าตัดและผู้ใช้งาน Fluoroscopy",
+  "การทำงานของ Fluoroscopy และอันตรายจากรังสีที่ใช้ในห้องผ่าตัด",
+  "หลัก ALARA: เวลา ระยะห่าง การป้องกัน",
+  "อุปกรณ์ป้องกันรังสี และเครื่องตรวจวัดรังสี",
+  "ค่ากำหนดปริมาณรังสี (Dose Limits)",
+  "ระยะเวลาการได้รับรังสีและการดูแลรักษาอุปกรณ์ทางรังสี",
+];
 
 export const SCENES: Scene[] = [
   { id: "join", title: "ความปลอดภัยทางรังสีของพยาบาลห้องผ่าตัด", kind: "join" },
@@ -35,18 +47,10 @@ export const SCENES: Scene[] = [
     id: "outline",
     title: "หัวข้อการบรรยาย",
     kind: "outline",
-    items: [
-      "รังสีที่ใช้ในห้องผ่าตัดและผู้ใช้งาน Fluoroscopy",
-      "การทำงานของ Fluoroscopy และอันตรายจากรังสีที่ใช้ในห้องผ่าตัด",
-      "หลัก ALARA: เวลา ระยะห่าง การป้องกัน",
-      "อุปกรณ์ป้องกันรังสี และเครื่องตรวจวัดรังสี",
-      "ค่ากำหนดปริมาณรังสี (Dose Limits)",
-      "ระยะเวลาการได้รับรังสีและการดูแลรักษาอุปกรณ์ทางรังสี",
-    ],
+    items: TOPICS,
   },
   { id: "s01", slide: 1, speaker: 1, title: "ทำไมพยาบาลห้องผ่าตัดต้องรู้เรื่องรังสี", kind: "lecture" },
-  { id: "s02", slide: 2, speaker: 1, title: "ใครเป็นคนใช้เครื่อง Fluoroscopy", kind: "poll", activity: "เลือกบุคลากรที่ใช้เครื่อง Fluoroscopy ได้ แล้วเฉลยตามร่างกฎกระทรวง ข้อ 9" },
-  { id: "s02b", slide: 2, speaker: 1, title: "ใครเป็นคนใช้ Fluoroscopy ในห้องผ่าตัด", kind: "lecture" },
+  { id: "s02", slide: 2, speaker: 1, title: "ใครเป็นผู้ใช้งานเครื่อง Fluoroscopy", kind: "poll", activity: "เลือกบุคลากรที่ใช้เครื่อง Fluoroscopy ได้ แล้วเฉลยตามร่างกฎกระทรวง ข้อ 9" },
   { id: "s02c", slide: 2, speaker: 1, title: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้", kind: "lecture" },
   { id: "s03", slide: 3, speaker: 2, title: "หลักการทำงานของเครื่องและอันตรายจากรังสี", kind: "lecture" },
   { id: "s04", slide: 4, speaker: 2, title: "รังสีหลักกับรังสีกระเจิง", kind: "predict", activity: "ทายว่ารังสีกระเจิงไปทางไหน แล้วดูภาพจากแบบจำลอง" },
@@ -54,10 +58,27 @@ export const SCENES: Scene[] = [
   { id: "s06", slide: 6, speaker: 3, title: "ควรยืนตรงไหนในห้องผ่าตัด", kind: "position", activity: "แตะตำแหน่ง A–F รอบเตียง แล้วเฉลยดัชนีรังสีกระเจิง" },
   { id: "s07", slide: 7, speaker: 4, title: "อุปกรณ์ป้องกันรังสีส่วนบุคคล", kind: "lecture" },
   { id: "s08", slide: 8, speaker: 4, title: "แผ่นวัดรังสีประจำตัว: ติดด้านนอกหรือด้านใน", kind: "quiz", activity: "เลือกอุปกรณ์ป้องกันและตำแหน่งติดแผ่นวัดรังสี" },
+  { id: "s09a", slide: 9, speaker: 5, title: "ค่ากำหนดปริมาณรังสี (Dose Limits)", kind: "lecture" },
   { id: "s09", slide: 9, speaker: 5, title: "เกณฑ์ปริมาณรังสีและผู้ปฏิบัติงานตั้งครรภ์", kind: "decision", activity: "เพื่อนร่วมทีมแจ้งว่าตั้งครรภ์ ทีมควรทำอย่างไร" },
   { id: "s10", slide: 10, speaker: 5, title: "ห้องเอกซเรย์และการป้องกันเชิงโครงสร้าง", kind: "lecture" },
   { id: "s11", slide: 11, speaker: 6, title: "การดูแลเครื่องและเวลาการฉายรังสี", kind: "lecture" },
-  { id: "s12", slide: 12, speaker: 6, title: "ภารกิจสุดท้ายและสรุป", kind: "simulation", activity: "ผ่าตัดยึดตรึงกระดูก: ตั้งท่าเครื่อง เลือกที่ยืน ฉายให้ได้ 4 ภาพ" },
+  // the closing summary: the same topics, each with its one-line take-home point
+  {
+    id: "s12",
+    slide: 12,
+    speaker: 6,
+    title: "สรุป",
+    kind: "outline",
+    items: TOPICS,
+    notes: [
+      "ผู้ควบคุมเครื่องตามกฎหมาย: แพทย์ ทันตแพทย์ สัตวแพทย์ นักรังสีเทคนิค นักฟิสิกส์การแพทย์ เจ้าพนักงานรังสี",
+      "X-ray tube → ผู้ป่วย → ตัวรับภาพ → จอภาพ รังสีกระเจิงออกจากตัวผู้ป่วยมากที่สุดด้านฝั่งหลอดเอกซเรย์",
+      "ฉายให้สั้น ถอยให้ห่าง และใช้เครื่องกำบัง",
+      "สวมชุดตะกั่ว ปลอกคอ แว่นตากันรังสี และติด OSL ทุกครั้งที่เข้าเคสที่ใช้รังสี",
+      "ไม่เกิน 20 mSv/ปี ดูผล OSL ของตนเองทุกรอบ ตั้งครรภ์แจ้งหัวหน้าทันที",
+      "ใช้ Pulsed mode บันทึกเวลา แขวนชุดตะกั่วไม่พับ บำรุงรักษาเครื่องตามกำหนด",
+    ],
+  },
   { id: "board", title: "อันดับคะแนน", kind: "leaderboard" },
   { id: "refs", title: "ขอบคุณ · เอกสารอ้างอิงหลัก", kind: "end" },
 ];

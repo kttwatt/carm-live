@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ResultBars } from "@/components/ResultBars";
 import { QUESTIONS } from "@/lib/questions";
 import { SCENES } from "@/lib/scenes";
-import { POINTS, type ReportRow } from "@/lib/scoring";
+import { POINTS, rankRows, totalSeconds, type ReportRow } from "@/lib/scoring";
 import { useLive } from "@/lib/useLive";
 import { roomHref, useRoom } from "@/lib/room";
 
@@ -13,22 +13,25 @@ import { roomHref, useRoom } from "@/lib/room";
 const QUESTION_SCENES = SCENES.flatMap((s, i) => (QUESTIONS[s.id] ? [{ index: i, scene: s, q: QUESTIONS[s.id] }] : []));
 const MAX = QUESTION_SCENES.length * POINTS;
 
-type Person = { id: string; nickname: string; points: Map<number, number>; total: number; answered: number; full: number; rank: number };
+type Person = { id: string; nickname: string; points: Map<number, number>; score: number; secs: number; answered: number; full: number; rank: number };
 
 function build(rows: ReportRow[]) {
   const people = new Map<string, Person>();
   for (const r of rows) {
-    const p = people.get(r.participantId) ?? { id: r.participantId, nickname: r.nickname, points: new Map(), total: 0, answered: 0, full: 0, rank: 0 };
+    const p = people.get(r.participantId) ?? { id: r.participantId, nickname: r.nickname, points: new Map(), score: 0, secs: 0, answered: 0, full: 0, rank: 0 };
     if (r.sceneIndex != null && r.points != null) {
       p.points.set(r.sceneIndex, r.points);
-      p.total += r.points;
+      p.score += r.points;
       p.answered += 1;
       if (r.points === POINTS) p.full += 1;
     }
     people.set(r.participantId, p);
   }
-  const list = [...people.values()].sort((a, b) => b.total - a.total);
-  list.forEach((p) => (p.rank = list.findIndex((x) => x.total === p.total) + 1));
+  // Same ranking as the leaderboard: score first, then speed.
+  const timed = rows.flatMap((r) => (r.sceneIndex != null && r.points != null && r.secs != null ? [{ pid: r.participantId, sceneIndex: r.sceneIndex, secs: r.secs }] : []));
+  const secs = totalSeconds(timed, [...people.keys()]);
+  for (const p of people.values()) p.secs = secs.get(p.id) ?? 0;
+  const list = rankRows([...people.values()]);
   const perQuestion = QUESTION_SCENES.map(({ index, scene, q }) => {
     const answers = rows.filter((r) => r.sceneIndex === index && r.answer);
     const counts: Record<string, number> = {};
@@ -40,9 +43,9 @@ function build(rows: ReportRow[]) {
 }
 
 function toCsv(list: Person[]) {
-  const head = ["อันดับ", "เลขที่ ชื่อ", ...QUESTION_SCENES.map(({ scene }) => `สไลด์ ${scene.slide}`), "รวม", "ตอบ (ข้อ)", "ได้เต็ม (ข้อ)"];
+  const head = ["อันดับ", "เลขที่ ชื่อ", ...QUESTION_SCENES.map(({ scene }) => `สไลด์ ${scene.slide}`), "รวม", "เวลารวม (วินาที)", "ตอบ (ข้อ)", "ได้เต็ม (ข้อ)"];
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
-  const lines = list.map((p) => [p.rank, p.nickname, ...QUESTION_SCENES.map(({ index }) => p.points.get(index) ?? ""), p.total, p.answered, p.full]);
+  const lines = list.map((p) => [p.rank, p.nickname, ...QUESTION_SCENES.map(({ index }) => p.points.get(index) ?? ""), p.score, p.secs.toFixed(1), p.answered, p.full]);
   // BOM so Excel opens Thai text correctly
   return "﻿" + [head, ...lines].map((l) => l.map(esc).join(",")).join("\r\n");
 }
@@ -102,8 +105,8 @@ function SummaryView() {
 
   const list = data?.list ?? [];
   const answeredAny = list.filter((p) => p.answered > 0);
-  const avg = answeredAny.length ? Math.round(answeredAny.reduce((s, p) => s + p.total, 0) / answeredAny.length) : 0;
-  const best = list[0]?.total ?? 0;
+  const avg = answeredAny.length ? Math.round(answeredAny.reduce((s, p) => s + p.score, 0) / answeredAny.length) : 0;
+  const best = list[0]?.score ?? 0;
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8">
@@ -187,6 +190,7 @@ function SummaryView() {
                   </th>
                 ))}
                 <th className="px-3 py-2 text-right font-semibold">รวม</th>
+                <th className="px-3 py-2 text-right font-semibold">เวลารวม</th>
               </tr>
             </thead>
             <tbody>
@@ -202,12 +206,13 @@ function SummaryView() {
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-right font-semibold tabular-nums">{p.total}</td>
+                  <td className="px-3 py-2 text-right font-semibold tabular-nums">{p.score}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-mist">{p.secs.toFixed(1)} วิ</td>
                 </tr>
               ))}
               {!list.length && (
                 <tr>
-                  <td colSpan={QUESTION_SCENES.length + 3} className="px-3 py-6 text-center text-mist">
+                  <td colSpan={QUESTION_SCENES.length + 4} className="px-3 py-6 text-center text-mist">
                     ยังไม่มีผู้เข้าร่วม
                   </td>
                 </tr>
