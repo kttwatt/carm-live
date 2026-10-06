@@ -60,7 +60,7 @@ export const PAGES: Record<string, Page[]> = {
       points: [
         { th: "เครื่องเอกซเรย์ทั่วไป", en: "General X-ray" },
         { th: "Fluoroscopy", en: "ภาพเอกซเรย์ต่อเนื่อง เช่น C-arm" },
-        { th: "เครื่องเอกซเรย์คอมพิวเตอร์", en: "CT" },
+        { th: "เครื่องเอกซเรย์คอมพิวเตอร์", en: "CT scan" },
         { th: "เครื่องเอกซเรย์เต้านม", en: "Mammography" },
         { th: "เครื่องเอกซเรย์ฟัน", en: "Dental X-ray" },
       ],
