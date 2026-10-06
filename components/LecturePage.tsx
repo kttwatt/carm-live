@@ -10,10 +10,18 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
   // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
   const cols = pts.length === 4 ? 2 : Math.min(pts.length, 3);
   const detailed = pts.some((p) => p.desc);
+  const named = pts.some((p) => p.en);
+  // Each card spans one row of the list per line it has (title, English name, description), shared across the
+  // cards, so cards side by side line up line by line even when one wraps more than another.
+  const lines = 1 + (named ? 1 : 0) + (detailed ? 1 : 0);
   const spans = firstCellSpans(page.table?.rows ?? []);
   return (
-    <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]">
-      {page.heading && <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>}
+    // A scaled page zooms as a whole; its width limit shrinks to match so it still fits across.
+    <div className="flex max-w-[86cqw] flex-col gap-[2.4cqh]" style={page.scale ? { zoom: page.scale, maxWidth: `${86 / page.scale}cqw` } : undefined}>
+      {page.heading && (
+        // Without the slide's title above, the heading stands in for it and looks like it.
+        <p className={`font-display font-bold leading-tight ${page.noTitle ? "text-[3cqw]" : "text-[2.4cqw] text-amber"}`}>{page.heading}</p>
+      )}
       {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
       {page.image && (
         // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
@@ -26,13 +34,17 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
       {pts.length > 0 && (
         <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
           {pts.map((pt, i) => (
-            <li key={pt.th} className="flex flex-col gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]">
+            <li
+              key={pt.th}
+              className="grid grid-rows-subgrid content-start gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
+              style={{ gridRow: `span ${lines}` }}
+            >
               <span className="flex items-baseline gap-[0.8cqw]">
                 <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
                 <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
               </span>
-              {pt.en && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
-              {pt.desc && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
+              {named && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
+              {detailed && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
             </li>
           ))}
         </ol>

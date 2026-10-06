@@ -22,6 +22,10 @@ export type Page = {
   image?: { src: string; alt: string };
   /** leave out the slide's title above this page: its heading names the page on its own */
   noTitle?: boolean;
+  /** sits at the top of the screen instead of the middle */
+  top?: boolean;
+  /** everything on the page drawn this many times larger, for a page with room to spare (e.g. 1.3) */
+  scale?: number;
 };
 
 export const PAGES: Record<string, Page[]> = {
@@ -228,6 +232,8 @@ export const PAGES: Record<string, Page[]> = {
     {
       heading: "Dosimeter",
       noTitle: true,
+      top: true,
+      scale: 1.2,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงานที่ทำงานเกี่ยวกับรังสีต้องมี เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {
@@ -252,7 +258,8 @@ export const PAGES: Record<string, Page[]> = {
 
   s10: [
     {
-      heading: "ค่ากำหนดปริมาณรังสี (Dose limits)",
+      heading: "ค่ากำหนดปริมาณรังสี (Dose Limits)",
+      noTitle: true,
       table: {
         head: ["ประเภทของขีดจำกัด", "ผู้ปฏิบัติงานทางรังสี", "ประชาชนทั่วไป"],
         rows: [
