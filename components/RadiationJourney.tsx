@@ -40,15 +40,100 @@ const POSITIONS = [
   { name: "Invert", where: "หลอดเอกซเรย์อยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและดวงตา", color: "#f08a5d" },
 ];
 
+// A nurse standing left of the table (the side the tube swings to at lateral). While the scatter of each position
+// plays, the nurse clutches the part that takes the most of it, drawn orange: legs at AP (scatter goes down),
+// the trunk at lateral (the tube is on the nurse's side), the face at invert (scatter goes up).
+const NX = -50; // the nurse's centre line
+const SKIN_TONE = "#e8c4a0";
+const SCRUBS = "#4f9da6";
+const PANTS = "#2f5b78";
+const SLEEVES = "#2f7880"; // darker than the top, so the arms read against it
+const HURT = "#f08a5d";
+
+function Nurse({ hurt }: { hurt?: "legs" | "trunk" | "head" }) {
+  const c = (part: "legs" | "trunk" | "head", base: string) => (hurt === part ? HURT : base);
+  // a few short strokes beside the part that hurts
+  const ouch = (x: number, y: number) => (
+    <g stroke={HURT} strokeWidth="3" strokeLinecap="round">
+      <line x1={x} y1={y - 12} x2={x + 6} y2={y - 20} />
+      <line x1={x + 4} y1={y} x2={x + 14} y2={y} />
+      <line x1={x} y1={y + 12} x2={x + 6} y2={y + 20} />
+    </g>
+  );
+  const legs = (
+    <g stroke={c("legs", PANTS)} strokeWidth="12" strokeLinecap="round">
+      <line x1={NX - 8} y1="296" x2={NX - 10} y2="386" />
+      <line x1={NX + 8} y1="296" x2={NX + 10} y2="386" />
+    </g>
+  );
+  if (hurt === "legs")
+    // bent over at the hips, hands on the knees
+    return (
+      <g>
+        {legs}
+        <g transform={`rotate(28 ${NX} 298)`}>
+          <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={SCRUBS} />
+          <circle cx={NX} cy="196" r="15" fill={SKIN_TONE} />
+        </g>
+        <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+          <line x1={NX + 22} y1="228" x2={NX - 6} y2="338" />
+          <line x1={NX + 46} y1="240" x2={NX + 12} y2="340" />
+        </g>
+        {ouch(NX + 20, 352)}
+      </g>
+    );
+  if (hurt === "trunk")
+    // leaning back from the table, arms wrapped round the middle
+    return (
+      <g transform={`rotate(-10 ${NX} 386)`}>
+        {legs}
+        <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={HURT} />
+        <circle cx={NX} cy="196" r="15" fill={SKIN_TONE} />
+        <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+          <line x1={NX - 14} y1="226" x2={NX + 10} y2="262" />
+          <line x1={NX + 14} y1="226" x2={NX - 10} y2="266" />
+        </g>
+        {ouch(NX + 26, 250)}
+      </g>
+    );
+  if (hurt === "head")
+    // hunched, hands over the face
+    return (
+      <g transform={`rotate(8 ${NX} 386)`}>
+        {legs}
+        <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={SCRUBS} />
+        <circle cx={NX} cy="196" r="15" fill={HURT} />
+        <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+          <line x1={NX - 14} y1="226" x2={NX - 4} y2="198" />
+          <line x1={NX + 14} y1="226" x2={NX + 6} y2="200" />
+        </g>
+        <circle cx={NX - 3} cy="196" r="5" fill={SKIN_TONE} />
+        <circle cx={NX + 6} cy="198" r="5" fill={SKIN_TONE} />
+        {ouch(NX + 22, 186)}
+      </g>
+    );
+  return (
+    <g>
+      {legs}
+      <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={SCRUBS} />
+      <circle cx={NX} cy="196" r="15" fill={SKIN_TONE} />
+      <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
+        <line x1={NX - 14} y1="224" x2={NX - 20} y2="290" />
+        <line x1={NX + 14} y1="224" x2={NX + 20} y2="290" />
+      </g>
+    </g>
+  );
+}
+
 // Entrance skin, facing the tube at each position (patient ellipse rx 80, ry 62).
 const SKIN = ["M170 282 Q220 310 270 282", "M159 190 Q121 230 159 270", "M170 178 Q220 150 270 178"];
 
 export function RadiationJourney({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
-      viewBox="0 0 440 460"
+      viewBox="-100 0 540 460"
       role="img"
-      aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ"
+      aria-label="เครื่อง C-arm หมุนท่า AP, Lateral และ Invert รังสีเอกซ์จากหลอดเข้าสู่ผู้ป่วย กระเจิงออกทางฝั่งหลอดมากที่สุด และส่วนน้อยทะลุถึงตัวรับภาพ พยาบาลที่ยืนข้างเตียงเจ็บที่ขาในท่า AP ที่ลำตัวในท่า Lateral และที่ใบหน้าในท่า Invert"
       className={className}
       style={style}
     >
@@ -129,6 +214,19 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       {SKIN.map((d, i) => (
         <path key={d} d={d} fill="none" stroke="#f08a5d" strokeWidth="7" strokeLinecap="round" opacity={i ? 0 : 1} style={turn(`rj-skin-${i + 1}`)} />
       ))}
+
+      {/* the nurse beside the table: standing, then hurt where this position's scatter lands */}
+      <g style={turn("rj-calm")}>
+        <Nurse />
+      </g>
+      {(["legs", "trunk", "head"] as const).map((part, i) => (
+        <g key={part} opacity="0" style={turn(`rj-hurt-${i + 1}`)}>
+          <Nurse hurt={part} />
+        </g>
+      ))}
+      <text x={NX} y="408" fill="#bccce6" fontSize="13" fontWeight="600" textAnchor="middle">
+        พยาบาล
+      </text>
 
       {/* which position is playing */}
       {POSITIONS.map((p, i) => (

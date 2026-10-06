@@ -124,7 +124,7 @@ function JourneyPage({ page, index, total, lite }: { page: Page; index: number; 
       <p className="font-display text-[2.4cqw] font-bold leading-tight text-amber">{page.heading}</p>
       {page.lead && <p className="text-[1.4cqw] leading-relaxed text-mist">{page.lead}</p>}
       <div className="flex items-center gap-[3cqw]">
-        <RadiationJourney className="shrink-0" style={{ width: "min(60cqh, 36cqw)" }} />
+        <RadiationJourney className="shrink-0" style={{ width: "min(70cqh, 42cqw)" }} />
         <ol className="flex min-w-0 flex-1 flex-col gap-[1.2cqh]">
           {pts.map((pt, i) => (
             <li
