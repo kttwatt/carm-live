@@ -10,7 +10,7 @@ insert into public.answer_keys (scene_index, correct, multi) values
   (5, array['physician', 'dentist', 'vet', 'radtech', 'physicist', 'radofficer'], true), -- s02
   (8, array['patient'], false), -- s04
   (10, array['C'], false), -- s06
-  (12, array['collar_out'], false), -- s08
+  (12, array['chest_in'], false), -- s08
   (13, array['assess'], false); -- s09
 
 commit;

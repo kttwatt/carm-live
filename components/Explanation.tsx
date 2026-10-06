@@ -1,5 +1,3 @@
-import { Fragment } from "react";
-
 /**
  * An answer's explanation. Lines starting with "* " become a bulleted list;
  * text between ==…== sits on its own line in a yellow box (the key line of the answer).
@@ -23,7 +21,8 @@ export function Explanation({ text }: { text: string }) {
             ))}
           </ul>
         ) : (
-          <Fragment key={i}>
+          // each line of plain text is its own line on screen
+          <span key={i} className="block">
             {b.split(/==(.+?)==/g).map((part, j) =>
               j % 2 ? (
                 <mark key={j} className="mt-[0.5em] block w-fit rounded-xl bg-amber px-[0.6em] py-[0.15em] font-semibold text-ink">
@@ -33,7 +32,7 @@ export function Explanation({ text }: { text: string }) {
                 part
               ),
             )}
-          </Fragment>
+          </span>
         ),
       )}
     </>
