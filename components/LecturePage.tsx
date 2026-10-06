@@ -15,6 +15,7 @@ const Heading = ({ text }: { text: string }) => <p className="font-display text-
 export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
   if (page.figure === "radiation-journey") return <JourneyPage page={page} lite={lite} />;
   if (page.figure === "carm-3d") return <ModelPage page={page} lite={lite} />;
+  if (page.acronym) return <AcronymPage page={page} />;
   if (isTopic(page)) return <TopicPage page={page} />;
   const pts = page.points ?? [];
   // One card per row unless the page asks for more.
@@ -39,7 +40,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       style={page.imageMax ? { maxHeight: `${page.imageMax}cqh` } : undefined}
     />
   );
-  const cards = page.round || wide || page.figure === "radiation-ap" ? (
+  const cards = pts.length === 0 ? null : page.round || wide || page.figure === "radiation-ap" ? (
     // items beside a round number in equal-height cards: short ones centred, ones with a paragraph read from the top
     <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {pts.map((pt, i) => (
@@ -63,7 +64,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
         </li>
       ))}
     </ol>
-  ) : pts.length > 0 && (
+  ) : (
     <ol className="grid gap-[1.4cqw]" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {pts.map((pt, i) => (
         <li
@@ -154,6 +155,21 @@ function TopicPage({ page }: { page: Page }) {
     <div className="flex w-full flex-col items-center justify-center">
       <p className="text-center font-display text-[4.5cqw] font-bold leading-tight text-amber">{page.heading}</p>
     </div>
+  );
+}
+
+/** An acronym set large in a frame with its words spelled out under it; below, the heading beside the lead in a box. */
+function AcronymPage({ page }: { page: Page }) {
+  const { word, full } = page.acronym!;
+  return (
+    <FitBox of={page} cap={GROW} className="flex flex-col items-center gap-[2cqh]">
+      <p className="rounded-2xl border-2 border-paper/60 px-[5cqw] py-[0.6cqh] font-display text-[7cqw] font-bold leading-tight tracking-[0.08em]">{word}</p>
+      <p className="font-display text-[1.7cqw] font-bold uppercase tracking-[0.12em] text-mist">{full}</p>
+      <div className="mt-[3cqh] flex w-full items-center gap-[3cqw]">
+        {page.heading && <p className="shrink-0 font-display text-[4.2cqw] font-bold leading-tight text-amber">{page.heading}</p>}
+        {page.lead && <p className="min-w-0 flex-1 rounded-2xl border border-line bg-night-2 px-[2.4cqw] py-[2.4cqh] text-[1.9cqw] leading-relaxed">{page.lead}</p>}
+      </div>
+    </FitBox>
   );
 }
 

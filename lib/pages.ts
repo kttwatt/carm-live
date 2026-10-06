@@ -32,6 +32,8 @@ export type Page = {
   imageMax?: number;
   /** a picture to the right of the cards, with the key message under it */
   side?: { src: string; alt: string };
+  /** an acronym set large with its words under it; the heading then sits beside the lead instead of above */
+  acronym?: { word: string; full: string };
   /** the most the page may grow into spare room (default 1.4); it shrinks below 1 by itself when it would not fit */
   scale?: number;
 };
@@ -174,8 +176,9 @@ export const PAGES: Record<string, Page[]> = {
 
   s05: [
     {
-      heading: "เป้าหมาย: ALARA (As Low As Reasonably Achievable)",
-      lead: "การป้องกันและลดปริมาณรังสีที่ผู้ปฏิบัติงาน ผู้ป่วย และบุคคลทั่วไปจะได้รับให้น้อยที่สุดเท่าที่จะทำได้ โดยยังคงได้รับประโยชน์จากรังสีนั้นอยู่",
+      heading: "เป้าหมาย",
+      acronym: { word: "ALARA", full: "As Low As Reasonably Achievable" },
+      lead: "การป้องกันและลดปริมาณรังสีที่ผู้ปฏิบัติงาน ผู้⁠ป่วย และบุคคลทั่วไปจะได้รับให้น้อยที่สุดเท่าที่จะทำได้ โดยยังคงได้รับประโยชน์จากรังสีนั้นอยู่",
     },
     {
       heading: "หลัก ALARA",
