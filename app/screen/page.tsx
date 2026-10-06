@@ -166,16 +166,16 @@ function ScreenView() {
 
   if (scene.kind === "outline" && scene.items) {
     return (
-      <main className="flex flex-1 flex-col justify-center gap-[4vh] px-[8vw] py-[7vh]">
-        <h1 className="font-display text-[4vw] font-bold leading-tight">{scene.title}</h1>
-        <ol className={`flex flex-col ${scene.notes ? "gap-[1.6vh]" : "gap-[2.2vh]"}`}>
+      // the topics one card per row, each with a round number, like the closing summary
+      <main className="flex flex-1 flex-col justify-center gap-[3.5vh] px-[7vw] py-[6vh]">
+        <h1 className="font-display text-[4vw] font-bold leading-tight text-amber">{scene.title}</h1>
+        <ol className="flex flex-col gap-[1.4vh]">
           {scene.items.map((item, i) => (
-            <li key={item} className="flex items-baseline gap-[1.4vw] text-[2.4vw] leading-snug">
-              <span className="w-[2.6vw] shrink-0 text-right font-display font-bold tabular-nums text-amber">{i + 1}</span>
-              <span className="flex min-w-0 flex-col">
-                <span className={scene.notes ? "font-semibold" : ""}>{item}</span>
-                {scene.notes?.[i] && <span className="text-[1.6vw] leading-snug text-sky">{scene.notes[i]}</span>}
+            <li key={item} className="flex items-center gap-[1.4vw] rounded-2xl border border-line bg-night-2 px-[1.8vw] py-[1.4vh]">
+              <span className="grid aspect-square w-[3vw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.6vw] font-bold text-ink">
+                {i + 1}
               </span>
+              <span className="min-w-0 font-display text-[2vw] font-bold leading-snug">{item}</span>
             </li>
           ))}
         </ol>
