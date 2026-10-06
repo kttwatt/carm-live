@@ -26,6 +26,8 @@ export type Page = {
   amber?: boolean;
   /** sits at the top of the screen instead of the middle */
   top?: boolean;
+  /** with top: start this far down instead (% of the screen height; the default is 6) */
+  topGap?: number;
   /** cards per row, when the default (up to 3) would wrap their titles */
   cols?: number;
   /** cards with a round number, text centred, all the same height */
@@ -241,10 +243,11 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ชุดป้องกันรังสี",
-      // its own heading, in amber, stands as the title at the top
+      // its own heading, in amber, stands as the title near the top
       noTitle: true,
       amber: true,
       top: true,
+      topGap: 12,
       points: [
         {
           th: "Standard lead",

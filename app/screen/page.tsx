@@ -219,6 +219,7 @@ function ScreenView() {
   return (
     <main
       className={`relative flex flex-1 flex-col gap-[3vh] px-[7vw] ${!question && !isInteractive(scene.kind) && pages[pageN]?.top ? "justify-start py-[6vh]" : question && phase === "revealed" ? "justify-center py-[5vh]" : "justify-center py-[8vh]"}`}
+      style={!question && !isInteractive(scene.kind) && pages[pageN]?.top && pages[pageN]?.topGap ? { paddingTop: `${pages[pageN].topGap}vh` } : undefined}
     >
       {
         <>

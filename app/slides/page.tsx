@@ -72,7 +72,10 @@ for (const s of SLIDES) {
     frames.push({
       id: n === 0 ? s.id : `${s.id}-${n + 1}`,
       node: (
-        <main className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start py-[6cqh]" : "justify-center py-[8cqh]"}`}>
+        <main
+          className={`relative flex flex-1 flex-col gap-[3cqh] px-[7cqw] ${p.top ? "justify-start py-[6cqh]" : "justify-center py-[8cqh]"}`}
+          style={p.top && p.topGap ? { paddingTop: `${p.topGap}cqh` } : undefined}
+        >
           {!isTopic(p) && !p.noTitle && (
             <h1 className={`font-display text-[3cqw] font-bold leading-tight ${s.amber ? "text-amber" : ""}`} style={p.scale ? { zoom: p.scale } : undefined}>
               {s.title}
