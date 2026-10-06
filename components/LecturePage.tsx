@@ -28,11 +28,11 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
           {pts.map((pt, i) => (
             <li key={pt.th} className="flex flex-col gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]">
               <span className="flex items-baseline gap-[0.8cqw]">
-                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{i + 1}</span>
+                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
                 <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
               </span>
               {pt.en && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
-              {pt.desc && <span className="text-[1.4cqw] leading-snug">{pt.desc}</span>}
+              {pt.desc && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
             </li>
           ))}
         </ol>
