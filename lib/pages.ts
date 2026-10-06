@@ -9,6 +9,8 @@ export type Page = {
   heading: string;
   lead?: string;
   points?: Point[];
+  /** a paragraph under the points, set like the lead */
+  after?: string;
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
   note?: string;
@@ -64,6 +66,9 @@ export const PAGES: Record<string, Page[]> = {
         { label: "(จ)", th: "เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์" },
         { label: "(ฉ)", th: "เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี" },
       ],
+      after:
+        "สำหรับบุคคลที่เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี (ฉ) ต้องปฏิบัติงานตามคู่มือที่สภาวิชาชีพของผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่งกำหนด หรือเป็นผู้ที่ผ่านการอบรมการป้องกันอันตรายจากรังสีตามหลักสูตรที่กรมวิทยาศาสตร์การแพทย์หรือสภาวิชาชีพดังกล่าวรับรอง และต้องมีการกำกับดูแลการปฏิบัติงานโดยบุคคลที่มีคุณสมบัติตาม (ก) - (จ)",
+      note: "ที่มา: ร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2569 ข้อ 9",
     },
     {
       heading: "ต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติดังนี้",
@@ -75,12 +80,6 @@ export const PAGES: Record<string, Page[]> = {
         },
         { th: "เป็นผู้ปฏิบัติหน้าที่นักฟิสิกส์การแพทย์" },
       ],
-    },
-    {
-      heading: "",
-      lead:
-        "สำหรับบุคคลที่เป็นผู้ปฏิบัติหน้าที่เจ้าพนักงานรังสี (ฉ) ต้องปฏิบัติงานตามคู่มือที่สภาวิชาชีพของผู้ประกอบวิชาชีพอย่างใดอย่างหนึ่งกำหนด หรือเป็นผู้ที่ผ่านการอบรมการป้องกันอันตรายจากรังสีตามหลักสูตรที่กรมวิทยาศาสตร์การแพทย์หรือสภาวิชาชีพดังกล่าวรับรอง และต้องมีการกำกับดูแลการปฏิบัติงานโดยบุคคลที่มีคุณสมบัติตาม (ก) - (จ)",
-      note: "ที่มา: ร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2569 ข้อ 9",
     },
   ],
 
@@ -337,7 +336,7 @@ export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
 
 /** A heading alone is a topic page: it shows as a section title, without the slide's title above it. */
 export const isTopic = (page: Page | undefined): boolean =>
-  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image;
+  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image && !page.after;
 
 /** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
 export const firstCellSpans = (rows: string[][]): number[] =>
