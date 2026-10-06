@@ -404,7 +404,6 @@ export const PAGES: Record<string, Page[]> = {
       points: [
         {
           th: "บำรุงรักษาตามกำหนด",
-          en: "Planned maintenance programme",
           desc: "บำรุงรักษาตามกำหนดการโดยวิศวกรผู้เชี่ยวชาญ\nผู้ที่ได้รับอนุญาตจาก Philips Healthcare หรือผู้ผลิต",
         },
         {
