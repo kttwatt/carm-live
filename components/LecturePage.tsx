@@ -4,6 +4,7 @@ import { JOURNEY_SHOT, RadiationJourney } from "@/components/RadiationJourney";
 /** One lecture page on the projector, sized in vw like the rest of the main screen. */
 export function LecturePage({ page, index, total }: { page: Page; index: number; total: number }) {
   if (page.figure === "radiation-journey") return <JourneyPage page={page} index={index} total={total} />;
+  if (!page.lead && !page.points && !page.table && !page.note) return <TopicPage page={page} index={index} total={total} />;
   const pts = page.points ?? [];
   // Cards with a description need room: 4 sit 2×2, otherwise up to 3 per row.
   const cols = pts.length === 4 ? 2 : Math.min(pts.length, 3);
@@ -58,6 +59,16 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
         </table>
       )}
       {page.note && <p className="text-[1.4vw] font-semibold text-sky">{page.note}</p>}
+      {total > 1 && <p className="absolute bottom-[3vh] right-[3vw] font-display text-[1.2vw] tabular-nums text-mist">{index + 1} / {total}</p>}
+    </div>
+  );
+}
+
+/** A heading alone: a section title, large in the middle of the screen. */
+function TopicPage({ page, index, total }: { page: Page; index: number; total: number }) {
+  return (
+    <div className="flex min-h-[40vh] max-w-[86vw] flex-col items-center justify-center">
+      <p className="text-center font-display text-[4.5vw] font-bold leading-tight text-amber">{page.heading}</p>
       {total > 1 && <p className="absolute bottom-[3vh] right-[3vw] font-display text-[1.2vw] tabular-nums text-mist">{index + 1} / {total}</p>}
     </div>
   );

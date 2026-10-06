@@ -46,6 +46,9 @@ export const PAGES: Record<string, Page[]> = {
   ],
 
   s03: [
+    // Topic pages: a heading alone shows as a section title.
+    { heading: "การทำงานของ Fluoroscopy" },
+    { heading: "ส่วนประกอบของ Fluoroscopy" },
     {
       heading: "การเดินทางของรังสี",
       figure: "radiation-journey",
