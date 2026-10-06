@@ -18,6 +18,8 @@ export type Page = {
   figure?: "radiation-journey";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
+  /** leave out the slide's title above this page: its heading names the page on its own */
+  noTitle?: boolean;
 };
 
 export const PAGES: Record<string, Page[]> = {
@@ -221,6 +223,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "Dosimeter",
+      noTitle: true,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงานที่ทำงานเกี่ยวกับรังสีต้องมี เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",
       points: [
         {

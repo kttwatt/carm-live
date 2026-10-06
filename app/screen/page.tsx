@@ -172,12 +172,13 @@ function ScreenView() {
   const pageN = pg && pg.s === sceneIndex ? Math.min(pg.n, Math.max(pages.length - 1, 0)) : 0;
   // A topic page stands alone, centred, without the slide's title.
   const topic = !question && !isInteractive(scene.kind) && isTopic(pages[pageN]);
+  const noTitle = topic || (!question && !isInteractive(scene.kind) && !!pages[pageN]?.noTitle);
 
   return (
     <main className="relative flex flex-1 flex-col justify-center gap-[3vh] px-[7vw] py-[8vh]">
       {
         <>
-          {!topic && (
+          {!noTitle && (
             <h1 className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}>{scene.title}</h1>
           )}
           {question ? (
