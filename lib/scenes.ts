@@ -69,7 +69,7 @@ export const SCENES: Scene[] = [
     id: "s12",
     slide: 12,
     speaker: 6,
-    title: "สรุป",
+    title: "Summary",
     kind: "outline",
     items: TOPICS,
     notes: [
