@@ -198,6 +198,7 @@ export const PAGES: Record<string, Page[]> = {
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมเข้าเคส",
       noTitle: true,
+      amber: true,
       lead: "แพทย์ Scrub nurse และผู้ช่วยผ่าตัด",
       points: [
         { th: "ยืนฝั่งเดียวกับตัวรับภาพ", en: "Detector" },
@@ -208,6 +209,7 @@ export const PAGES: Record<string, Page[]> = {
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมรอบนอก",
       noTitle: true,
+      amber: true,
       lead: "ทีมส่งของ และทีมดูแลนอกเขตปลอดเชื้อ",
       points: [
         { th: "รักษาระยะห่างอย่างน้อย 2 เมตร (6 ฟุต)" },
@@ -252,6 +254,7 @@ export const PAGES: Record<string, Page[]> = {
     {
       heading: "Dosimeter",
       noTitle: true,
+      amber: true,
       top: true,
       scale: 1.2,
       lead: "เครื่องวัดรังสีส่วนบุคคลที่ทุกคนในหน่วยงานที่ทำงานเกี่ยวกับรังสีต้องมี เพื่อวัดค่าปริมาณรังสีที่ได้รับในแต่ละปี",

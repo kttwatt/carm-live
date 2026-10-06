@@ -225,7 +225,7 @@ function ScreenView() {
           {!noTitle && (
             // A scaled page's title grows with it, so it stays larger than the page's own heading.
             <h1
-              className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}
+              className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"} ${scene.amber ? "text-amber" : ""}`}
               style={!question && pages[pageN]?.scale ? { zoom: pages[pageN].scale } : undefined}
             >
               {scene.title}
