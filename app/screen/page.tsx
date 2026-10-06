@@ -21,6 +21,16 @@ import { asset, useRoom } from "@/lib/room";
 
 const PRESENCE = { role: "screen" as const };
 
+// The explanation after the reveal, boxed and large enough to read from the back of the room.
+function Answer({ text }: { text: string }) {
+  return (
+    <div className="flex flex-col gap-[1vh] rounded-3xl border-2 border-ok bg-night-2 px-[2vw] py-[2vh]">
+      <p className="font-display text-[2.6vw] font-extrabold leading-none tracking-wide text-ok">เฉลย</p>
+      <p className="text-[1.9vw] font-medium leading-relaxed text-paper">{text}</p>
+    </div>
+  );
+}
+
 // The choices on the projector while the room answers, in a fixed order, each with its live count (refreshed every 2 s);
 // the correct one stays hidden until the reveal.
 function ChoiceList({ question, summary, cols = 2 }: { question: Question; summary: Summary | null; cols?: 1 | 2 }) {
@@ -219,7 +229,7 @@ function ScreenView() {
             </h1>
           )}
           {question ? (
-            <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
+            <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map || phase === "revealed" ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
               {/* a prompt that only repeats the slide title is not shown twice */}
               {question.prompt.trim() !== scene.title.trim() && <p className="text-[2.2vw] leading-snug">{question.prompt}</p>}
               {question.map ? (
@@ -235,7 +245,7 @@ function ScreenView() {
                   />
                   <div className="flex min-w-0 flex-1 flex-col gap-[2vh]">
                     {phase === "revealed" ? (
-                      <p className="text-[1.3vw] leading-relaxed text-mist">{question.explanation}</p>
+                      <Answer text={question.explanation} />
                     ) : (
                       <>
                         <ChoiceList question={question} summary={results} cols={1} />
@@ -248,10 +258,15 @@ function ScreenView() {
                   </div>
                 </div>
               ) : phase === "revealed" ? (
-                <>
-                  <ResultBars question={question} summary={results} showCorrect size="xl" />
-                  <p className="text-[1.3vw] leading-relaxed text-mist">{question.explanation}</p>
-                </>
+                // bars and the answer side by side, so eight choices and the answer fit one screen
+                <div className="flex items-start gap-[3vw]">
+                  <div className="min-w-0 flex-1">
+                    <ResultBars question={question} summary={results} showCorrect size="xl" />
+                  </div>
+                  <div className="w-[36%] shrink-0">
+                    <Answer text={question.explanation} />
+                  </div>
+                </div>
               ) : (
                 <>
                   <ChoiceList question={question} summary={results} />
