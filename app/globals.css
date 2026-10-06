@@ -231,3 +231,33 @@ h3 {
   22%, 80% { opacity: 0; }
   84%, 100% { opacity: 1; }
 }
+
+/* "หลัก ALARA" icons (components/AlaraIcons.tsx): the clock hand sweeping, rays pulsing, the person walking away and
+   back with swinging legs, rays flowing in to the lead apron. */
+@keyframes al-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes al-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes al-walk {
+  0%, 10% { transform: translateX(-14px); }
+  50%, 60% { transform: translateX(16px); }
+  100% { transform: translateX(-14px); }
+}
+@keyframes al-step {
+  0%, 100% { transform: rotate(-16deg); }
+  50% { transform: rotate(16deg); }
+}
+@keyframes al-step-b {
+  0%, 100% { transform: rotate(16deg); }
+  50% { transform: rotate(-16deg); }
+}
+@keyframes al-flow {
+  to { stroke-dashoffset: -12; }
+}
+@keyframes al-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}

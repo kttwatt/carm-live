@@ -25,7 +25,7 @@ export type Page = {
   /** each line of the key message in its own smaller box, for a page where one big box would outweigh the table */
   keyApart?: boolean;
   /** an animated diagram beside the points, which light up step by step with it */
-  figure?: "radiation-journey" | "radiation-ap" | "carm-3d" | "team-step";
+  figure?: "radiation-journey" | "radiation-ap" | "carm-3d" | "team-step" | "alara-icons";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
   /** cards per row; the default is one card per row, across the screen, with a round number */
@@ -177,6 +177,8 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "หลัก ALARA",
+      // a moving icon for each principle under the cards
+      figure: "alara-icons",
       points: [
         { th: "Time", en: "เวลา", desc: "ใช้เวลาในการปฏิบัติงานให้น้อยที่สุด ยิ่งใช้เวลาน้อย รังสีจะยิ่งน้อย" },
         { th: "Distance", en: "ระยะห่าง", desc: "อยู่ห่างจากแหล่งกำเนิดรังสีให้มากที่สุดเท่าที่จะทำได้" },
