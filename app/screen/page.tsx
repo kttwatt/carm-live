@@ -298,7 +298,8 @@ function ScreenView() {
                 </div>
               ) : (
                 <>
-                  <ChoiceList question={question} summary={results} />
+                  {/* one under another; eight choices need two columns to fit the screen */}
+                  <ChoiceList question={question} summary={results} cols={question.choices.length > 6 ? 2 : 1} />
                   <p className="w-fit rounded-2xl bg-amber px-[1.6vw] py-[1vh] text-[1.6vw] font-semibold text-ink">
                     {phase === "idle" ? "เตรียมตอบบนมือถือ" : PHASE_LABEL[phase]}
                     {phase !== "idle" && ` · ตอบแล้ว ${results?.respondents ?? 0} คน`}
