@@ -181,13 +181,7 @@ function ScreenView() {
       {
         <>
           {!noTitle && (
-            // A scaled page's title grows with it, so it stays larger than the page's own heading.
-            <h1
-              className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}
-              style={!question && pages[pageN]?.scale ? { zoom: pages[pageN].scale } : undefined}
-            >
-              {scene.title}
-            </h1>
+            <h1 className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"}`}>{scene.title}</h1>
           )}
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
