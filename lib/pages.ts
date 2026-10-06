@@ -121,8 +121,6 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "โหมดการฉายรังสี",
-      // the table drawn larger
-      scale: 1.8,
       table: {
         head: ["", "Continuous", "Pulsed"],
         rows: [
@@ -131,7 +129,7 @@ export const PAGES: Record<string, Page[]> = {
           ["ภาพ", "ลื่นไหล", "อาจกระตุกเมื่อตั้งจำนวนครั้งต่ำ"],
         ],
       },
-      note: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้ ส่วน Continuous mode ใช้เมื่อต้องการเห็นการเคลื่อนไหวรวดเร็ว ต่อเนื่อง",
+      key: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้\nContinuous mode ใช้เมื่อต้องเห็นการเคลื่อนไหวเร็ว",
     },
     {
       heading: "ผลของรังสีต่อมนุษย์",
