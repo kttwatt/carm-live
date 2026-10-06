@@ -132,7 +132,7 @@ export const PAGES: Record<string, Page[]> = {
         ],
       },
       keyApart: true,
-      key: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้\nContinuous mode ใช้เมื่อต้องเห็นการเคลื่อนไหวเร็ว",
+      key: "Pulsed mode เป็นค่าเริ่มต้นที่ควรใช้\nContinuous mode ใช้เมื่อต้องเห็นการเคลื่อนไหวเร็วและต่อเนื่อง",
     },
     {
       heading: "ผลของรังสีต่อมนุษย์",
