@@ -10,6 +10,8 @@ export type Question = {
   correct: string[];
   /** "* " lines become a list; text between ==…== is highlighted (components/Explanation.tsx) */
   explanation: string;
+  /** on the projector the question itself takes the title's place, at the title's size */
+  promptAsTitle?: boolean;
   /** answer by tapping spots A–F on the operating-room map set up like this */
   map?: Geometry;
 };
@@ -63,6 +65,7 @@ export const QUESTIONS: Record<string, Question> = {
   },
   s08: {
     prompt: "ถ้ามีแผ่นวัดรังสีประจำตัว (OSL) เพียงตัวเดียว ควรติดที่ไหน?",
+    promptAsTitle: true,
     choices: [
       { id: "collar_out", label: "ที่คอเสื้อ นอกเสื้อตะกั่ว" },
       { id: "waist_in", label: "ที่เอว ใต้เสื้อตะกั่ว" },

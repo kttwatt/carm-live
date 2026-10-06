@@ -229,13 +229,13 @@ function ScreenView() {
               className={`font-display font-bold leading-tight ${pages.length ? "text-[3vw]" : "text-[4.2vw]"} ${scene.amber ? "text-amber" : ""}`}
               style={!question && pages[pageN]?.scale ? { zoom: pages[pageN].scale } : undefined}
             >
-              {scene.title}
+              {question?.promptAsTitle ? question.prompt : scene.title}
             </h1>
           )}
           {question ? (
             <div className={`mt-[1vh] flex flex-col gap-[2vh] ${question.map || phase === "revealed" ? "max-w-[86vw]" : "max-w-[70vw]"}`}>
               {/* a prompt that only repeats the slide title is not shown twice */}
-              {question.prompt.trim() !== scene.title.trim() && <p className="text-[2.2vw] leading-snug">{question.prompt}</p>}
+              {!question.promptAsTitle && question.prompt.trim() !== scene.title.trim() && <p className="text-[2.2vw] leading-snug">{question.prompt}</p>}
               {question.map ? (
                 <div className="flex items-start gap-[2.5vw]">
                   {/* sized by height so the whole room fits on the projector */}
