@@ -309,7 +309,8 @@ export const PAGES: Record<string, Page[]> = {
     },
   ],
 
-  s10: [
+  // the limits, just before the question on a pregnant colleague
+  s09a: [
     {
       heading: "ค่ากำหนดปริมาณรังสี (Dose Limits)",
       noTitle: true,
@@ -324,6 +325,9 @@ export const PAGES: Record<string, Page[]> = {
         ],
       },
     },
+  ],
+
+  s10: [
     {
       heading: "แนวทางปฏิบัติเมื่อผู้ปฏิบัติงานทางรังสีตั้งครรภ์",
       noTitle: true,
