@@ -42,6 +42,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "รังสีวินิจฉัย (Diagnostic radiology)",
+      noTitle: true,
       lead: "การนำรังสีเอกซ์มาช่วยสร้างภาพอวัยวะ เพื่อการตรวจรักษาและวินิจฉัย รวมถึงการตรวจคัดกรองโรค เช่น",
       points: [
         { th: "เครื่องเอกซเรย์ทั่วไป", en: "General X-ray" },
