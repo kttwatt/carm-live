@@ -14,7 +14,8 @@ export type Page = {
   table?: { head: string[]; rows: string[][] };
   /** one line under everything: a key message or the source */
   note?: string;
-  /** the page's take-home message, set large and highlighted under everything */
+  /** the page's take-home message, set large and highlighted under everything ("
+" starts a new line) */
   key?: string;
   /** an animated diagram beside the points, which light up step by step with it */
   figure?: "radiation-journey" | "radiation-ap" | "carm-3d";
@@ -248,6 +249,8 @@ export const PAGES: Record<string, Page[]> = {
       amber: true,
       top: true,
       topGap: 12,
+      // two set lines; the word joiner keeps "97–99%" from breaking at the dash
+      key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
       points: [
         {
           th: "Standard lead",

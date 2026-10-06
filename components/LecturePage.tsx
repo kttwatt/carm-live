@@ -116,7 +116,7 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
       {page.corner ? (
         // the key message bottom left, the picture bottom right, sized to the height left on this screen
         <div className="flex min-h-0 flex-1 items-end gap-[3cqw] pt-[1cqh]">
-          {page.key && <p className="w-fit shrink-0 rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>}
+          {page.key && <p className="w-fit shrink-0 rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>}
           {/* the picture is laid over the room this row gets, so it can never make the page taller */}
           <div className="relative min-w-0 flex-1 self-stretch">
             {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
@@ -129,7 +129,7 @@ export function LecturePage({ page, index, total, lite }: { page: Page; index: n
         </div>
       ) : (
         page.key && (
-          <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold text-ink">{page.key}</p>
+          <p className="mt-[3cqh] w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
         )
       )}
       {total > 1 && <p className="absolute bottom-[3cqh] right-[3cqw] font-display text-[1.2cqw] tabular-nums text-mist">{index + 1} / {total}</p>}
