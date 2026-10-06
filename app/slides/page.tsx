@@ -16,6 +16,14 @@ function Section({ page }: { page: Page }) {
       {page.heading && <h3 className="font-display text-xl font-bold leading-snug text-amber">{page.heading}</h3>}
       {page.lead && <p className="leading-relaxed">{page.lead}</p>}
       {page.figure === "radiation-journey" && <RadiationJourney className="mx-auto w-full max-w-sm" />}
+      {page.image && (
+        // eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer
+        <img
+          src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${page.image.src}`}
+          alt={page.image.alt}
+          className="w-full rounded-xl bg-white"
+        />
+      )}
       {page.points && page.points.length > 0 && (
         <ol className="flex flex-col gap-2">
           {page.points.map((pt, i) => (
