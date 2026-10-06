@@ -7,7 +7,7 @@ begin;
 delete from public.answer_keys;
 
 insert into public.answer_keys (scene_index, correct, multi) values
-  (5, array['patient', 'surgeon', 'scrub', 'circ', 'anes', 'tech'], true), -- s02
+  (5, array['physician', 'dentist', 'vet', 'radtech', 'physicist', 'radofficer'], true), -- s02
   (9, array['patient'], false), -- s04
   (11, array['C'], false), -- s06
   (13, array['collar_out'], false), -- s08

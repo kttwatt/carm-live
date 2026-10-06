@@ -15,19 +15,21 @@ export type Question = {
 
 export const QUESTIONS: Record<string, Question> = {
   s02: {
-    prompt: "ใครบ้างในห้องผ่าตัดที่มีโอกาสได้รับรังสีขณะใช้เครื่อง C-arm",
+    prompt: "ใครเป็นคนใช้เครื่อง Fluoroscopy",
     multi: true,
     choices: [
-      { id: "patient", label: "ผู้ป่วย" },
-      { id: "surgeon", label: "ศัลยแพทย์" },
-      { id: "scrub", label: "พยาบาลส่งเครื่องมือ" },
-      { id: "circ", label: "พยาบาลช่วยรอบนอก" },
-      { id: "anes", label: "ทีมวิสัญญี" },
-      { id: "tech", label: "ผู้ควบคุมเครื่อง C-arm" },
+      { id: "physician", label: "แพทย์" },
+      { id: "dentist", label: "ทันตแพทย์" },
+      { id: "vet", label: "สัตวแพทย์" },
+      { id: "radtech", label: "นักรังสีเทคนิค" },
+      { id: "physicist", label: "นักฟิสิกส์การแพทย์" },
+      { id: "radofficer", label: "เจ้าพนักงานรังสี" },
+      { id: "rn", label: "พยาบาลวิชาชีพ" },
+      { id: "pn", label: "ผู้ช่วยพยาบาล" },
     ],
-    correct: ["patient", "surgeon", "scrub", "circ", "anes", "tech"],
+    correct: ["physician", "dentist", "vet", "radtech", "physicist", "radofficer"],
     explanation:
-      "ทุกคนในห้อง ผู้ป่วยได้รับลำรังสีหลักโดยตรง ส่วนบุคลากรทุกคนได้รับรังสีกระเจิงจากตัวผู้ป่วย มากหรือน้อยขึ้นกับเวลา ระยะห่าง และสิ่งกำบัง",
+      "ร่างกฎกระทรวง ข้อ 9 กำหนดผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีไว้ 6 กลุ่ม คือ แพทย์ ทันตแพทย์ สัตวแพทย์ นักรังสีเทคนิค นักฟิสิกส์การแพทย์ และเจ้าพนักงานรังสี พยาบาลวิชาชีพและผู้ช่วยพยาบาลไม่อยู่ในรายชื่อนี้",
   },
   s04: {
     prompt: "ขณะฉายรังสี แหล่งรังสีกระเจิงที่สำคัญที่สุดต่อบุคลากรอยู่ที่ไหน",
