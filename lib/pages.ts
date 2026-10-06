@@ -395,11 +395,11 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "การดูแลรักษาเครื่อง C-arm",
-      // its own heading, in amber, stands as the title a quarter of the way down
+      // its own heading, in amber, stands as the title 15% of the way down
       noTitle: true,
       amber: true,
       top: true,
-      topGap: 25,
+      topGap: 15,
       // one card per row, drawn larger for the room
       cols: 1,
       scale: 1.4,
