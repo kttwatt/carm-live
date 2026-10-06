@@ -145,7 +145,7 @@ function ScreenView() {
 
   // Closing slide: a QR to the self-guided 3D model, which stays open after the seminar.
   if (scene.kind === "end") {
-    const simUrl = `${base}/sim`;
+    const simUrl = `${base}/simulator`;
     return (
       <main className="flex flex-1 items-center gap-[4vw] px-[6vw] py-[6vh]">
         <div className="flex min-w-0 flex-1 flex-col gap-[3vh]">

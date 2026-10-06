@@ -6,11 +6,11 @@ export const metadata: Metadata = {
 };
 
 // Self-guided 3D model for anyone, during or after the seminar: no room code, every control in the viewer's hands.
-// The model is a plain page (public/carm-sim.html, a copy of the presenter's carm-3d.html); the frame fills the screen.
-export default function SimPage() {
+// The model is a plain page (public/carm-simulator.html, a copy of the presenter's carm-3d.html); the frame fills the screen.
+export default function SimulatorPage() {
   return (
     <iframe
-      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/carm-sim.html?v=${process.env.MODEL_BUILD}`}
+      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/carm-simulator.html?v=${process.env.MODEL_BUILD}`}
       title="แบบจำลองสามมิติของเครื่อง C-Arm"
       allow="fullscreen"
       allowFullScreen

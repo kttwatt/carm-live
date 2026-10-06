@@ -70,7 +70,7 @@ export default function Home() {
         </div>
       </form>
 
-      <Link href="/sim" className="flex flex-col gap-1 rounded-2xl border border-amber p-6 hover:bg-night-2">
+      <Link href="/simulator" className="flex flex-col gap-1 rounded-2xl border border-amber p-6 hover:bg-night-2">
         <span className="font-display text-xl font-bold text-amber">ทดลองใช้ C-Arm สามมิติด้วยตัวเอง</span>
         <span className="text-sm text-mist">ฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วน เข้าได้ทุกเวลา ไม่ต้องใช้รหัสห้อง</span>
       </Link>
