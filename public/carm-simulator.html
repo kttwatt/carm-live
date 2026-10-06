@@ -88,6 +88,8 @@ ter-events:none}
 /* notes under the description read as part of it: same size and color */
 .detail h2 ~ .muted{font-size:inherit;color:inherit}
 .detail p{margin:0}
+/* lines under the heading start where the part name does: past the 32px number and the 10px gap */
+.detail > :not(h2){margin-left:42px}
 .act{justify-self:start;cursor:pointer;padding:7px 12px;border-radius:8px;background:none;border:1px solid var(--accent);color:var(--accent);font-size:13.5px}
 .act:hover{background:rgba(240,180,67,.1)}
 .range{display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
