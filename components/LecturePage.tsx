@@ -36,15 +36,14 @@ export function LecturePage({ page, index, total }: { page: Page; index: number;
           {pts.map((pt, i) => (
             <li
               key={pt.th}
-              className="grid grid-rows-subgrid content-start gap-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
+              // the number sits in its own column, so the lines under the title start where the title does
+              className="grid grid-cols-[auto_minmax(0,1fr)] grid-rows-subgrid content-start items-baseline gap-x-[0.8cqw] gap-y-[0.6cqh] rounded-2xl border border-line bg-night-2 px-[1.5cqw] py-[1.8cqh]"
               style={{ gridRow: `span ${lines}` }}
             >
-              <span className="flex items-baseline gap-[0.8cqw]">
-                <span className="font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
-                <span className={`font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
-              </span>
-              {named && <span className="text-[1.25cqw] text-mist">{pt.en}</span>}
-              {detailed && <span className="whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
+              <span className="row-span-full font-display text-[1.5cqw] font-bold tabular-nums text-amber">{pt.label ?? i + 1}</span>
+              <span className={`col-start-2 font-display font-bold leading-tight ${detailed ? "text-[1.8cqw]" : "text-[2cqw]"}`}>{pt.th}</span>
+              {named && <span className="col-start-2 text-[1.25cqw] text-mist">{pt.en}</span>}
+              {detailed && <span className="col-start-2 whitespace-pre-line text-[1.4cqw] leading-snug">{pt.desc}</span>}
             </li>
           ))}
         </ol>
