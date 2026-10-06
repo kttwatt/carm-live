@@ -198,6 +198,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ตำแหน่งที่ควรยืน: ทีมรอบนอก",
+      noTitle: true,
       lead: "ทีมส่งของ และทีมดูแลนอกเขตปลอดเชื้อ",
       points: [
         { th: "รักษาระยะห่างอย่างน้อย 2 เมตร (6 ฟุต)" },
