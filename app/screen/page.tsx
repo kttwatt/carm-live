@@ -21,18 +21,19 @@ import { asset, useRoom } from "@/lib/room";
 
 const PRESENCE = { role: "screen" as const };
 
-// The choices on the projector while the room answers, each with its live count (refreshed every 2 s);
+// The choices on the projector while the room answers, in a fixed order, each with its live count (refreshed every 2 s);
 // the correct one stays hidden until the reveal.
 function ChoiceList({ question, summary, cols = 2 }: { question: Question; summary: Summary | null; cols?: 1 | 2 }) {
   const counts = summary?.counts ?? {};
-  const total = summary?.respondents ?? 0;
+  // Bars are scaled to the most-picked choice, so differences show even with few answers.
+  const most = Math.max(0, ...question.choices.map((c) => counts[c.id] ?? 0));
   return (
     <>
       {question.multi && <p className="text-[1.4vw] font-semibold text-amber">เลือกได้หลายข้อ</p>}
       <ul className={`grid gap-[1.2vh] ${cols === 2 ? "grid-cols-2 gap-x-[1.5vw]" : "grid-cols-1"}`}>
         {question.choices.map((c) => {
           const n = counts[c.id] ?? 0;
-          const pct = total ? Math.round((n / total) * 100) : 0;
+          const pct = most ? Math.round((n / most) * 100) : 0;
           return (
             <li key={c.id} className="relative overflow-hidden rounded-2xl border border-line text-[1.7vw] leading-snug">
               <div className="absolute inset-y-0 left-0 bg-sky/25 transition-[width] duration-500" style={{ width: `${pct}%` }} />
