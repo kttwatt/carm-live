@@ -224,6 +224,8 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ชุดป้องกันรังสี",
+      // one card per row, so each paragraph reads across the screen
+      cols: 1,
       round: true,
       // two set lines; the word joiner keeps "97–99%" from breaking at the dash
       key: "ความหนาของชุดตะกั่ว 0.50 mm Pb\nมาตรฐานความปลอดภัยสูง ป้องกันรังสีได้ > 97–⁠99%",
@@ -237,7 +239,7 @@ export const PAGES: Record<string, Page[]> = {
         {
           th: "Lead-free",
           en: "เกรดไร้ตะกั่ว / Eco-friendly",
-          desc: "ไม่มีตะกั่วเลย แต่จะใช้โลหะหนักอื่นๆ แทน เช่น Bismuth Antimony Tungsten เป็นต้น น้ำหนักเบาที่สุด ลดน้ำหนักได้ถึง 20–30% เป็นมิตรต่อสิ่งแวดล้อม และกำจัดได้ง่ายกว่าเมื่อหมดอายุใช้งาน",
+          desc: "ไม่มีตะกั่วเลย แต่จะใช้โลหะหนักอื่นๆ แทน เช่น Bismuth Antimony Tungsten เป็นต้น น้ำหนักเบาที่สุด ลดน้ำหนักได้ถึง 20–⁠30% เป็นมิตรต่อสิ่งแวดล้อม และกำจัดได้ง่ายกว่าเมื่อหมดอายุใช้งาน",
         },
       ],
     },
