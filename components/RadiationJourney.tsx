@@ -40,9 +40,9 @@ const POSITIONS = [
   { name: "Invert", where: "หลอดเอกซเรย์อยู่ด้านบน ตัวรับภาพอยู่ใต้โต๊ะ", verdict: "หลีกเลี่ยง: รังสีกระเจิงขึ้นใบหน้าและดวงตา", color: "#f08a5d" },
 ];
 
-// A nurse standing left of the table (the side the tube swings to at lateral). While the scatter of each position
-// plays, the nurse clutches the part that takes the most of it, drawn orange: legs at AP (scatter goes down),
-// the trunk at lateral (the tube is on the nurse's side), the face at invert (scatter goes up).
+// A nurse standing left of the table (the side the tube swings to at lateral). While the scatter plays, the nurse
+// clutches the part that takes the most of it, drawn orange: the trunk at lateral (the tube is on the nurse's
+// side), the face at invert (scatter goes up). At AP, the recommended position, the nurse stands as usual.
 const NX = -50; // the nurse's centre line
 const SKIN_TONE = "#e8c4a0";
 const SCRUBS = "#4f9da6";
@@ -50,9 +50,8 @@ const PANTS = "#2f5b78";
 const SLEEVES = "#2f7880"; // darker than the top, so the arms read against it
 const HURT = "#f08a5d";
 
-function Nurse({ hurt }: { hurt?: "legs" | "trunk" | "head" }) {
-  const c = (part: "legs" | "trunk" | "head", base: string) => (hurt === part ? HURT : base);
-  // a few short strokes beside the part that hurts
+function Nurse({ hurt }: { hurt?: "trunk" | "head" }) {
+    // a few short strokes beside the part that hurts
   const ouch = (x: number, y: number) => (
     <g stroke={HURT} strokeWidth="3" strokeLinecap="round">
       <line x1={x} y1={y - 12} x2={x + 6} y2={y - 20} />
@@ -61,27 +60,11 @@ function Nurse({ hurt }: { hurt?: "legs" | "trunk" | "head" }) {
     </g>
   );
   const legs = (
-    <g stroke={c("legs", PANTS)} strokeWidth="12" strokeLinecap="round">
+    <g stroke={PANTS} strokeWidth="12" strokeLinecap="round">
       <line x1={NX - 8} y1="296" x2={NX - 10} y2="386" />
       <line x1={NX + 8} y1="296" x2={NX + 10} y2="386" />
     </g>
   );
-  if (hurt === "legs")
-    // bent over at the hips, hands on the knees
-    return (
-      <g>
-        {legs}
-        <g transform={`rotate(28 ${NX} 298)`}>
-          <rect x={NX - 17} y="214" width="34" height="84" rx="12" fill={SCRUBS} />
-          <circle cx={NX} cy="196" r="15" fill={SKIN_TONE} />
-        </g>
-        <g stroke={SLEEVES} strokeWidth="9" strokeLinecap="round">
-          <line x1={NX + 22} y1="228" x2={NX - 6} y2="338" />
-          <line x1={NX + 46} y1="240" x2={NX + 12} y2="340" />
-        </g>
-        {ouch(NX + 20, 352)}
-      </g>
-    );
   if (hurt === "trunk")
     // leaning back from the table, arms wrapped round the middle
     return (
@@ -219,8 +202,8 @@ export function RadiationJourney({ className, style }: { className?: string; sty
       <g style={turn("rj-calm")}>
         <Nurse />
       </g>
-      {(["legs", "trunk", "head"] as const).map((part, i) => (
-        <g key={part} opacity="0" style={turn(`rj-hurt-${i + 1}`)}>
+      {(["trunk", "head"] as const).map((part, i) => (
+        <g key={part} opacity="0" style={turn(`rj-hurt-${i + 2}`)}>
           <Nurse hurt={part} />
         </g>
       ))}
