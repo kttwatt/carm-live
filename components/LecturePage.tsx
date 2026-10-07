@@ -11,8 +11,8 @@ import { AlaraIcons } from "@/components/AlaraIcons";
 const GROW = 1.4;
 
 /** The page's heading: the title of the screen, in amber at the top. */
-const Heading = ({ text, center }: { text: string; center?: boolean }) => (
-  <p className={`font-display text-[4.2cqw] font-bold leading-tight text-amber ${center ? "text-center" : ""}`}>{text}</p>
+const Heading = ({ text, center, small }: { text: string; center?: boolean; small?: boolean }) => (
+  <p className={`font-display ${small ? "text-[3cqw]" : "text-[4.2cqw]"} font-bold leading-tight text-amber ${center ? "text-center" : ""}`}>{text}</p>
 );
 
 /** One lecture page on the projector. Sized in cqw/cqh: on the main screen there is no size container, so they
@@ -53,7 +53,8 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       {pts.map((pt, i) => (
         <li
           key={pt.th}
-          className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 px-[1.6cqw] ${wide ? "py-[1.4cqh]" : "py-[2cqh]"} ${long ? "items-start" : "items-center"}`}
+          // five or more across: the number above the text, so each name keeps the card's full width
+          className={`flex gap-[1.2cqw] rounded-2xl border border-line bg-night-2 ${cols >= 5 ? "flex-col px-[0.8cqw] text-center" : "px-[1.6cqw]"} ${wide ? "py-[1.4cqh]" : "py-[2cqh]"} ${long ? "items-start" : "items-center"}`}
         >
           <span className="grid aspect-square w-[3.2cqw] shrink-0 place-items-center rounded-full bg-amber font-display text-[1.7cqw] font-bold text-ink">
             {i + 1}
@@ -61,7 +62,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
           <span className="flex min-w-0 flex-col gap-[0.5cqh]">
             {/* a card across the screen has room for the English name beside the title, which saves it a line */}
             <span className={wide ? "flex flex-wrap items-baseline gap-x-[1cqw]" : "contents"}>
-              <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 4 ? "text-[1.6cqw]" : wide ? "text-[2cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
+              <span className={`font-display font-bold leading-snug [text-wrap:balance] ${cols >= 5 ? "text-[1.5cqw]" : cols >= 4 ? "text-[1.6cqw]" : wide ? "text-[2cqw]" : "text-[1.8cqw]"}`}>{pt.th}</span>
               {pt.en && <span className={`leading-snug text-sky ${wide ? "text-[1.5cqw]" : "text-[1.3cqw]"}`}>{pt.en}</span>}
             </span>
             {pt.desc && (
@@ -103,9 +104,11 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
       <p className="w-fit rounded-2xl bg-amber px-[2cqw] py-[1.4cqh] font-display text-[2.2cqw] font-bold whitespace-pre-line text-ink">{page.key}</p>
     ));
   const shortLabels = (page.table?.rows ?? []).every((row) => row[0].length <= 15);
+  // a first column of plain numbers (doses) sits centred, and so do the column headers
+  const numberLabels = (page.table?.rows ?? []).every((row) => /^[\d,.–-]+$/.test(row[0]));
   return (
     <>
-      {page.heading && <Heading text={page.heading} center={page.centerHeading} />}
+      {page.heading && <Heading text={page.heading} center={page.centerHeading} small={page.smallHeading} />}
       {/* everything under the heading grows into the room left, or shrinks until it fits */}
       <FitBox of={page} cap={page.scale ?? GROW} className="flex flex-col gap-[2.4cqh]">
         {page.lead && <p className="text-[1.7cqw] leading-relaxed">{page.lead}</p>}
@@ -147,7 +150,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
               <thead>
                 <tr className="bg-amber text-ink">
                   {page.table.head.map((h, i) => (
-                    <th key={i} className="px-[1.2cqw] py-[1.2cqh] text-left font-display font-bold">
+                    <th key={i} className={`px-[1.2cqw] py-[1.2cqh] font-display font-bold ${numberLabels ? "text-center" : "text-left"} ${i === 0 && shortLabels ? "whitespace-nowrap" : ""}`}>
                       {h}
                     </th>
                   ))}
@@ -161,7 +164,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
                         <td
                           key={c}
                           rowSpan={c === 0 && spans[r] > 1 ? spans[r] : undefined}
-                          className={`px-[1.2cqw] py-[1.2cqh] align-top ${c === 0 ? `font-semibold text-amber ${shortLabels ? "whitespace-nowrap" : ""}` : ""}`}
+                          className={`px-[1.2cqw] py-[1.2cqh] align-top ${c === 0 ? `font-semibold text-amber ${shortLabels ? "whitespace-nowrap" : ""} ${numberLabels ? "text-center" : ""}` : ""}`}
                         >
                           {cell}
                         </td>
