@@ -210,7 +210,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
             ))}
           </div>
         )}
-        {page.note && <p className="text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
+        {page.note && <p className="whitespace-pre-line text-[1.4cqw] font-semibold text-sky">{page.note}</p>}
         {!page.side && keyMessage && <div className="mt-[3cqh]">{keyMessage}</div>}
       </FitBox>
     </>
