@@ -3,23 +3,43 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { LeaderRow, MyResult } from "@/lib/scoring";
 
-/** Re-reads a value every few seconds while `enabled`. */
-export function usePolled<T>(load: () => Promise<T>, enabled: boolean, everyMs = 3000) {
+/**
+ * Re-reads a value every few seconds while `enabled`, never with a read still in flight.
+ * `once`: stop after the first good read (scores cannot change while they are on screen), retrying every `everyMs` until then.
+ * `spreadMs`: wait a random time up to this before the first read, so a room of phones does not ask all at once
+ * (100 phones at once queue the database for many seconds; load test 2026-10-07).
+ */
+export function usePolled<T>(load: () => Promise<T>, enabled: boolean, everyMs = 3000, opts: { once?: boolean; spreadMs?: number } = {}) {
   const [data, setData] = useState<T | null>(null);
+  const { once = false, spreadMs = 0 } = opts;
   useEffect(() => {
     if (!enabled) return;
     let alive = true;
-    const run = () =>
+    let busy = false;
+    let done = false;
+    let t: number | undefined;
+    const run = () => {
+      if (busy || done) return;
+      busy = true;
       load()
-        .then((d) => alive && setData(d))
-        .catch(() => {});
-    run();
-    const t = window.setInterval(run, everyMs);
+        .then((d) => {
+          if (!alive) return;
+          setData(d);
+          if (once) done = true;
+        })
+        .catch(() => {})
+        .finally(() => (busy = false));
+    };
+    const first = window.setTimeout(() => {
+      run();
+      t = window.setInterval(run, everyMs);
+    }, Math.random() * spreadMs);
     return () => {
       alive = false;
+      clearTimeout(first);
       clearInterval(t);
     };
-  }, [load, enabled, everyMs]);
+  }, [load, enabled, everyMs, once, spreadMs]);
   return data;
 }
 

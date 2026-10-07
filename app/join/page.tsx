@@ -13,6 +13,8 @@ import { NicknameSchema, PHASE_LABEL } from "@/lib/state";
 import { useLive } from "@/lib/useLive";
 import { asset, useRoom } from "@/lib/room";
 
+const PHONE_READ = { once: true, spreadMs: 6000 };
+
 function JoinView() {
   const room = useRoom();
   const [nickname, setNickname] = useState<string | null>(null);
@@ -29,9 +31,10 @@ function JoinView() {
   const { state, status, participants, joinParticipant, submitAnswer, myAnswer, myResult, leaderboard, mode } = useLive(room, presence);
   const kindNow = sceneAt(state?.sceneIndex ?? 0).kind;
   const showingScores = !!nickname && (kindNow === "leaderboard" || kindNow === "end" || state?.phase === "scores");
-  const result = usePolled(myResult, showingScores, 4000);
+  // Scores are fixed while they show: each phone reads them once, at a random moment in the first 6 s, retrying every 5 s.
+  const result = usePolled(myResult, showingScores, 5000, PHONE_READ);
   const top10 = useCallback(() => leaderboard(10), [leaderboard]);
-  const board = usePolled(top10, showingScores && kindNow !== "end", 4000);
+  const board = usePolled(top10, showingScores && kindNow !== "end", 5000, PHONE_READ);
   const me = result && nickname ? { nickname, rank: result.rank, score: result.score } : null;
 
   async function submit(name: string) {
