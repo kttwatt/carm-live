@@ -27,7 +27,7 @@ export type Page = {
   /** each line of the key message in its own smaller box, for a page where one big box would outweigh the table */
   keyApart?: boolean;
   /** an animated diagram beside the points, which light up step by step with it */
-  figure?: "radiation-journey" | "radiation-ap" | "carm-3d" | "team-step" | "alara-icons";
+  figure?: "radiation-journey" | "radiation-ap" | "carm-3d" | "team-step" | "alara-icons" | "dose-scale";
   /** a picture from the source document, shown as is (file in public/) */
   image?: { src: string; alt: string };
   /** cards per row; the default is one card per row, across the screen, with a round number */
@@ -169,17 +169,11 @@ export const PAGES: Record<string, Page[]> = {
       note: "ที่มา: ICRP, Radiation and your patient: A guide for medical practitioners (icrp.org/docs/rad_for_gp_for_web.pdf) · เลนส์ตา: ICRP Publication 118 (2012)",
     },
     {
-      heading: "ปริมาณรังสีกับอาการ (ICRP) · 1,000–10,000 mSv",
+      // per-exposure doses against the thresholds from the table before, on a ruler where each step is ten times the last
+      heading: "รังสีที่โดนจริง เทียบกับขีดที่เกิดผล",
       smallHeading: true,
-      table: {
-        head: ["ปริมาณรังสี (mSv)", "อาการ"],
-        rows: [
-          ["1,000", "มีอาการคลื่นไส้ อาเจียนและอ่อนเพลีย"],
-          ["3,000", "อ่อนเพลีย อาเจียน ท้องเสีย เม็ดเลือดขาวลดลง ผมร่วง เบื่ออาหาร ตัวซีด คอแห้ง มีไข้ อายุสั้น อาจเสียชีวิตภายใน 3–6 สัปดาห์"],
-          ["6,000", "อ่อนเพลีย อาเจียน ท้องร่วงภายใน 1–2 ชั่วโมง เม็ดเลือดขาวลดลงอย่างรวดเร็ว ผมร่วง มีไข้ อักเสบบริเวณปากและลำคออย่างรุนแรง มีเลือดออก มีโอกาสเสียชีวิตถึง 50% ภายใน 2–6 สัปดาห์"],
-          ["10,000", "มีอาการเหมือนข้างต้น ผิวหนังพองบวม ผมร่วง เสียชีวิตภายใน 2–3 สัปดาห์"],
-        ],
-      },
+      figure: "dose-scale",
+      note: "ค่าที่โดนต่อครั้งเป็นค่าประมาณ ขึ้นกับเครื่อง ขนาดตัวผู้ป่วย และระยะที่ยืน",
     },
   ],
 
