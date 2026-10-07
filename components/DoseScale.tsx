@@ -86,12 +86,12 @@ export function DoseScale() {
       </div>
       <p className="flex items-center gap-[0.8cqw] font-display text-[1.6cqw] font-bold">
         <span className="aspect-square w-[1cqw] rounded-full" style={{ background: EXPOSED }} />
-        ที่โดนจริงต่อครั้ง (ค่าประมาณ)
+        ที่ได้รับต่อครั้ง (ค่าประมาณ)
       </p>
       <Rows rows={PER_EXPOSURE} color={EXPOSED} />
       <p className="mt-[2cqh] flex items-center gap-[0.8cqw] font-display text-[1.6cqw] font-bold">
         <span className="aspect-square w-[1cqw] rounded-full" style={{ background: EFFECT }} />
-        ขีดที่เริ่มเกิดผลต่ออวัยวะ
+        ขีดที่เริ่มเป็นอันตรายต่ออวัยวะ
       </p>
       <Rows rows={THRESHOLDS} color={EFFECT} />
       <div className="grid grid-cols-[27cqw_minmax(0,1fr)] gap-[1.6cqw]">
