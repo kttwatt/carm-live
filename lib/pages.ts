@@ -158,7 +158,7 @@ export const PAGES: Record<string, Page[]> = {
           ["อัณฑะ", "เป็นหมันชั่วคราว", "150"],
           ["อัณฑะ", "เป็นหมันถาวร", "3,500–6,000"],
           ["รังไข่", "เป็นหมัน", "2,500–6,000"],
-          ["เลนส์ตา", "ต้อกระจก", "5,000"],
+          ["เลนส์ตา", "ต้อกระจก", "500"],
           ["ทั่วร่างกาย", "Acute radiation sickness", "1,000"],
         ],
       },
@@ -166,7 +166,7 @@ export const PAGES: Record<string, Page[]> = {
         ["mGy", "รังสีที่อวัยวะหรือเนื้อเยื่อตรงนั้นได้รับจริง", "ผลที่เกิดเมื่อได้รับเกินค่าหนึ่ง เช่น ผิวหนังแดง ต้อกระจก เป็นหมัน"],
         ["mSv", "ความเสี่ยงต่อร่างกาย คิดจากชนิดรังสีและความไวของแต่ละอวัยวะ", "ค่ากำหนดปริมาณรังสี (Dose Limits) ผลวัดจากแผ่น OSL และความเสี่ยงมะเร็งระยะยาว"],
       ],
-      note: "ที่มา: ICRP, Radiation and your patient: A guide for medical practitioners (icrp.org/docs/rad_for_gp_for_web.pdf)",
+      note: "ที่มา: ICRP, Radiation and your patient: A guide for medical practitioners (icrp.org/docs/rad_for_gp_for_web.pdf) · เลนส์ตา: ICRP Publication 118 (2012)",
     },
     {
       heading: "ปริมาณรังสีกับอาการ (ICRP) · 1,000–10,000 mSv",
