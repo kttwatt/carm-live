@@ -6,6 +6,7 @@ import { JourneyBeep } from "@/components/JourneyBeep";
 import { FitBox } from "@/components/FitBox";
 import { TeamStepBack } from "@/components/TeamStepBack";
 import { AlaraIcons } from "@/components/AlaraIcons";
+import { DoseScale } from "@/components/DoseScale";
 
 /** How much larger a page may draw when it has room to spare, unless it sets its own `scale`. */
 const GROW = 1.4;
@@ -136,6 +137,7 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
           cards
         )}
         {page.figure === "alara-icons" && <AlaraIcons lite={lite} />}
+        {page.figure === "dose-scale" && <DoseScale />}
         {page.imageBelow && image}
         {page.figure === "radiation-ap" && (
           <div className="flex justify-center">
