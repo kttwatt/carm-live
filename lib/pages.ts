@@ -172,10 +172,10 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       // per-exposure doses against the thresholds from the table before, on a ruler where each step is ten times the last
-      heading: "รังสีที่โดนจริง เทียบกับขีดที่เกิดผล",
+      heading: "ปริมาณรังสีต่อครั้ง ห่างจากขีดอันตรายแค่ไหน",
       smallHeading: true,
       figure: "dose-scale",
-      note: "ค่าที่โดนต่อครั้งเป็นค่าประมาณ ขึ้นกับเครื่อง ขนาดตัวผู้ป่วย และระยะที่ยืน",
+      note: "ค่าที่ได้รับต่อครั้งเป็นค่าประมาณ ขึ้นกับเครื่อง ขนาดตัวผู้ป่วย และระยะที่ยืน",
     },
   ],
 
