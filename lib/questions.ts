@@ -20,7 +20,7 @@ export type Question = {
 
 export const QUESTIONS: Record<string, Question> = {
   s02: {
-    prompt: "ใครเป็นผู้ใช้งานเครื่อง Fluoroscopy",
+    prompt: "ตามหลักปฏิบัติที่ถูกต้อง ใครควรเป็นผู้ใช้งานเครื่อง Fluoroscopy",
     multi: true,
     choices: [
       { id: "physician", label: "แพทย์" },
