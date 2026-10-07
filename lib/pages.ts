@@ -10,6 +10,8 @@ export type Page = {
   heading: string;
   /** the heading centred above a picture that is centred under it */
   centerHeading?: boolean;
+  /** a smaller heading, for a long one that would otherwise take two lines over a picture */
+  smallHeading?: boolean;
   lead?: string;
   points?: Point[];
   /** a paragraph under the points, smaller than the lead */
@@ -71,6 +73,17 @@ export const PAGES: Record<string, Page[]> = {
 
   s02c: [
     {
+      // AORN Journal, May 2021 (doi 10.1002/aorn.13402), with the user's highlights
+      heading: "แนวทางของ AORN (2021)",
+      centerHeading: true,
+      image: {
+        src: "/pages/s02c-aorn-highlights.webp",
+        alt: "AORN Journal พฤษภาคม 2021: ให้เฉพาะบุคลากรที่มีคุณสมบัติใช้งานเครื่องเอกซเรย์ สถานพยาบาลต้องมีโครงการความปลอดภัยทางรังสีเมื่อมีโอกาสได้รับรังสีจากการทำงาน และโครงการนั้นต้องมีรายชื่อผู้ได้รับอนุญาตให้ใช้งานเครื่อง",
+      },
+      // the highlighted lines are small in the scan: let it fill the page
+      imageMax: 85,
+    },
+    {
       heading: "ใครเป็นผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีได้",
       lead:
         "จากร่างกฎกระทรวง มาตรฐานความปลอดภัยของเครื่องกำเนิดรังสีเพื่อการวินิจฉัยทางการแพทย์ที่ต้องแจ้งการมีไว้ในครอบครองหรือใช้ พ.ศ. 2566 ข้อ 9 ระบุว่า ผู้มีไว้ในครอบครองหรือใช้เครื่องกำเนิดรังสีต้องจัดให้มีผู้ควบคุมการใช้งานเครื่องกำเนิดรังสีที่มีคุณสมบัติอย่างใดอย่างหนึ่ง ดังต่อไปนี้",
@@ -113,14 +126,14 @@ export const PAGES: Record<string, Page[]> = {
       ],
     },
     {
-      heading: "รังสีฟุ้งกระจายหรือรังสีกระเจิง (Scatter)",
+      heading: "รังสีกระเจิง (Scatter)",
       // the AP diagram, held still, sits centred under the three cards
       figure: "radiation-ap",
       cols: 3,
       points: [
-        { th: "ผู้ป่วยคือแหล่งรังสีฟุ้งกระจาย (Scatter) หลักในห้องผ่าตัด" },
-        { th: "ฝั่ง X-ray tube มีรังสีฟุ้งกระจายมากกว่าฝั่งตัวรับภาพ" },
-        { th: "ผู้ป่วยที่มีตัวหนา เครื่องเพิ่มกำลังรังสีอัตโนมัติ", desc: "ผู้ป่วยและทีมได้รับรังสีมากขึ้น" },
+        { th: "รังสีที่เกิดจาก Primary beam กระทบตัวผู้ป่วย แล้วกระเจิงออกสู่ห้องผ่าตัด" },
+        { th: "ฝั่ง X-ray tube มีรังสีกระเจิงมากกว่าฝั่งตัวรับภาพ" },
+        { th: "ผู้ป่วยที่มีตัวหนา ขนาดตัว⁠ใหญ่ เครื่องต้องเพิ่มกำลังรังสีอัตโนมัติ ทำให้ผู้ป่วยและทีมได้รับรังสีมากขึ้น" },
       ],
     },
     {
@@ -157,6 +170,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ปริมาณรังสีกับอาการ (ICRP) · 1,000–10,000 mSv",
+      smallHeading: true,
       table: {
         head: ["ปริมาณรังสี (mSv)", "อาการ"],
         rows: [
@@ -209,27 +223,41 @@ export const PAGES: Record<string, Page[]> = {
       ],
     },
     {
-      heading: "ตำแหน่งยืนที่ปลอดภัย",
+      heading: "แผนภาพความปลอดภัย: ท่าถ่ายภาพหน้า-หลัง (AP view)",
       centerHeading: true,
+      smallHeading: true,
+      image: {
+        src: "/pages/safe-distance.webp",
+        alt: "C-arm ตัวรับภาพอยู่ด้านบน รังสีกระเจิงออกจากตัวผู้ป่วยใต้เตียงเป็นบริเวณอันตราย แพทย์ผ่าตัดใส่ปลอกคอกันรังสี พยาบาลหมุนเวียนยืนห่างเกิน 2 เมตรหลังฉากกั้นรังสี ในระยะปลอดภัย",
+      },
+      imageMax: 78,
+    },
+    {
+      heading: "แผนภาพความปลอดภัย: ท่าถ่ายภาพด้านข้าง (Lateral view)",
+      centerHeading: true,
+      smallHeading: true,
+      imageMax: 78,
       image: {
         src: "/pages/standing-zones.webp",
         alt: "จำลองสถานการณ์ C-arm ท่า Lateral มองจากด้านบน: ฝั่งหลอดเอกซเรย์เป็นเขตอันตราย รังสีกระเจิงสูง ฝั่งตัวรับภาพปลอดภัยกว่า พยาบาลส่งเครื่องมือยืนฝั่งตัวรับภาพ พยาบาลหมุนเวียนอยู่ห่างเกิน 2 เมตรหลังฉากกั้นรังสีแบบเคลื่อนที่ ซึ่งปลอดภัยที่สุด",
       },
     },
     {
-      // four cards across the top, the picture centred under them
+      // five cards across the top, the picture centred under them
       heading: "อุปกรณ์ป้องกันรังสีส่วนบุคคล",
+      centerHeading: true,
       round: true,
-      cols: 4,
+      cols: 5,
       image: {
         src: "/pages/ppe.webp",
         alt: "ผู้สวมอุปกรณ์ป้องกันรังสี: หมวก แว่นตา ปลอกคอ เสื้อ กระโปรง และถุงมือกันรังสี และฉากกั้นรังสีแบบตั้งพื้นมีช่องมอง",
       },
       imageBelow: true,
       points: [
-        { th: "ชุดป้องกันรังสี", en: "Lead apron" },
-        { th: "แว่นตากันรังสี", en: "Lead glasses" },
         { th: "หมวกป้องกันรังสี", en: "Lead caps" },
+        { th: "แว่นตากันรังสี", en: "Lead glasses" },
+        { th: "ถุงมือกันรังสี", en: "Lead gloves" },
+        { th: "ชุดป้องกันรังสี", en: "Lead apron" },
         { th: "ฉากป้องกันรังสี", en: "Lead shield" },
       ],
     },
@@ -279,6 +307,7 @@ export const PAGES: Record<string, Page[]> = {
     },
     {
       heading: "ตำแหน่งการติด OSL dosimeter",
+      centerHeading: true,
       image: {
         src: "/pages/osl-placement.webp",
         alt: "สำหรับเจ้าหน้าที่ที่ใช้แผ่นวัดรังสี 2 แผ่น แผ่นที่ 1 ควรติดด้านนอกปลอกคอกำบังรังสี แผ่นที่ 2 ติดด้านในเสื้อกำบังรังสี",
@@ -301,6 +330,7 @@ export const PAGES: Record<string, Page[]> = {
           ["หญิงตั้งครรภ์ (ต่อทารกในครรภ์ ตลอดช่วงที่เหลือของการตั้งครรภ์)", "1 mSv", "–"],
         ],
       },
+      note: "ที่มา: ICRP, Radiation and your patient: A guide for medical practitioners (icrp.org/docs/rad_for_gp_for_web.pdf)",
     },
   ],
 
