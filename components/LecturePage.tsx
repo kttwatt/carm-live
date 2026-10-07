@@ -139,6 +139,26 @@ export function LecturePage({ page, lite }: { page: Page; lite?: boolean }) {
         {page.figure === "alara-icons" && <AlaraIcons lite={lite} />}
         {page.figure === "dose-scale" && <DoseScale />}
         {page.imageBelow && image}
+        {page.covers && (
+          // the documents side by side, all the same height, each named under its cover
+          <ol className="grid items-start gap-[1.6cqw]" style={{ gridTemplateColumns: `repeat(${page.covers.length}, minmax(0, 1fr))` }}>
+            {page.covers.map((d) => (
+              <li key={d.src} className="flex flex-col items-center gap-[1.2cqh] text-center">
+                {/* a frame the same height for every cover, so their titles line up; the cover fits inside it and its shadow hugs it */}
+                <div className="flex h-[40cqh] w-full items-end justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- static export, no image optimizer */}
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${d.src}`}
+                    alt={`${d.title} · ${d.source}`}
+                    className="max-h-full max-w-full rounded-lg shadow-[0_6px_24px_rgba(0,0,0,0.35)] ring-1 ring-white/10"
+                  />
+                </div>
+                <p className="font-display text-[1.25cqw] font-bold leading-snug [text-wrap:balance]">{d.title}</p>
+                <p className="text-[1.05cqw] leading-snug text-mist [text-wrap:balance]">{d.source}</p>
+              </li>
+            ))}
+          </ol>
+        )}
         {page.figure === "radiation-ap" && (
           <div className="flex justify-center">
             <RadiationJourney still style={{ height: "54cqh" }} />

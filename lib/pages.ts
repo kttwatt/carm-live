@@ -38,6 +38,8 @@ export type Page = {
   imageBelow?: boolean;
   /** the picture's height limit, in % of the screen height, when the page has room for a larger one */
   imageMax?: number;
+  /** document covers in one row, each with its title and source under it (a references page) */
+  covers?: { src: string; title: string; source: string }[];
   /** a picture to the right of the cards, with the key message under it */
   side?: { src: string; alt: string };
   /** an acronym set large with its words under it; the heading then sits beside the lead instead of above */
@@ -409,6 +411,17 @@ export const PAGES: Record<string, Page[]> = {
         },
       ],
     },
+    {
+      heading: "ข้อมูลอ้างอิง",
+      centerHeading: true,
+      covers: [
+        { src: "/pages/refs/aorn-guideline-first-look.webp", title: "Guideline for radiation safety", source: "AORN · Periop Briefing 2021 · doi 10.1002/aorn.13334" },
+        { src: "/pages/refs/aorn-quick-view.webp", title: "Guideline Quick View: Radiation Safety", source: "AORN Journal 2021;113(5) · doi 10.1002/aorn.13402" },
+        { src: "/pages/refs/dmsc-lab-safety-2567.webp", title: "คู่มือความปลอดภัยทางห้องปฏิบัติการด้านรังสี", source: "กรมวิทยาศาสตร์การแพทย์ กระทรวงสาธารณสุข · พ.ศ. 2567" },
+        { src: "/pages/refs/dmsc-xray-protection-2566.webp", title: "การป้องกันอันตรายจากเครื่องกำเนิดรังสีเอกซ์ทางการแพทย์", source: "สำนักรังสีและเครื่องมือแพทย์ กรมวิทยาศาสตร์การแพทย์ · พ.ศ. 2566" },
+        { src: "/pages/refs/mahidol-radiation-safety.webp", title: "แนวปฏิบัติเพื่อความปลอดภัยทางรังสี", source: "ศูนย์บริหารความปลอดภัย อาชีวอนามัยและสิ่งแวดล้อม (COSHEM) มหาวิทยาลัยมหิดล" },
+      ],
+    },
   ],
 };
 
@@ -416,7 +429,7 @@ export const pagesFor = (sceneId: string): Page[] => PAGES[sceneId] ?? [];
 
 /** A heading alone is a topic page: it shows as a section title, without the slide's title above it. */
 export const isTopic = (page: Page | undefined): boolean =>
-  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image && !page.after && !page.key;
+  !!page && !page.lead && !page.points && !page.table && !page.note && !page.figure && !page.image && !page.after && !page.key && !page.covers;
 
 /** How many rows each row's first cell spans, so a label repeated on consecutive rows shows once, as on the deck (0 = covered by the row above). */
 export const firstCellSpans = (rows: string[][]): number[] =>
