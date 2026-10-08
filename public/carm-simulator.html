@@ -95,7 +95,10 @@ ter-events:none}
 .range{display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
 .range input{width:100%;accent-color:var(--accent)}
 .muted{color:var(--muted);font-size:13.5px}
-.keys{margin-top:auto;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+.foot{margin-top:auto;display:grid;gap:8px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+.copy{margin:0}
+.copy a{color:inherit;text-underline-offset:2px}
+.copy a:hover{color:var(--ink)}
 kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
 
 .diag{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:8px;background:rgba(14,20,24,.92);border:1px solid var(--line);font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre}
@@ -139,6 +142,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
   .rail>header{order:0}
   .detail{order:1;border-top:0;padding-top:0}
   .parts{order:2;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line);padding-top:14px}
+  .foot{order:3}
   .keys{display:none}
   .state{top:10px;font-size:13.5px}
 }
@@ -199,7 +203,10 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
     </header>
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
-    <footer class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> ท่า AP/LAT · <kbd>R</kbd> หมุนรอบ</footer>
+    <footer class="foot">
+      <p class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> ท่า AP/LAT · <kbd>R</kbd> หมุนรอบ</p>
+      <p class="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
+    </footer>
   </aside>
 </div>
 
