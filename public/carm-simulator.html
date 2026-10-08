@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>body{margin:0}[hidden]{display:none!important}</style>
 <title>C-Arm สามมิติ · ทดลองใช้เอง</title>
-<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วนได้เอง">
+<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด สลับ A-P/Lateral view และดูหน้าที่ของแต่ละส่วนได้เอง">
 <meta name="theme-color" content="#0e1418">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -186,7 +186,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
     </section>
     <div class="toolbar" role="toolbar" aria-label="ควบคุมแบบจำลอง">
       <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
-      <button class="tb" id="bLat" aria-pressed="false">ท่า AP</button>
+      <button class="tb" id="bLat" aria-pressed="false">A-P view</button>
       <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
       <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
       <button class="tb" id="bHome">ภาพรวม</button>
@@ -204,7 +204,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
     <footer class="foot">
-      <p class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> ท่า AP/LAT · <kbd>R</kbd> หมุนรอบ</p>
+      <p class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
       <p class="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
     </footer>
   </aside>
@@ -521,7 +521,7 @@ function renderDetail(){
       <ol class="try muted">
         <li><b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง</li>
         <li><b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม</li>
-        <li><b>ท่า LAT</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ</li>
+        <li><b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ</li>
         <li>เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง</li>
       </ol>`;
     return;
@@ -559,14 +559,14 @@ function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.last
 function flipLabel(){ return st.lat ? 'หลอดฝั่งทีม' : 'หลอดเหนือเตียง'; }
 function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
-function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า LAT':'ท่า AP'; setFlip(st.flip); }
+function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'Lateral view':'A-P view'; setFlip(st.flip); }
 function updateState(){
   if(st.lat){
     stateEl.hidden=!(st.fire||st.flip);
     stateEl.className=st.flip?'state warn':'state';
     stateEl.innerHTML = st.flip
-      ? (st.fire ? '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
-      : 'ท่า LAT · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
+      ? (st.fire ? '<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
+      : 'Lateral view · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
     return;
   }
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
