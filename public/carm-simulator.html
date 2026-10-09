@@ -302,12 +302,12 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
 </div>
 
 <script>
-// Language: ?lang=en|th, else the last choice on this device, else Thai (the seminar audience).
+// Language: ?lang=en|th, else the last choice on this device, else English (Thai seminar links add ?lang=th).
 window.LANG=(function(){
   var q=new URLSearchParams(location.search).get('lang');
   if(q==='en'||q==='th') return q;
   try{ var s=localStorage.getItem('carm-lang'); if(s==='en'||s==='th') return s; }catch(e){}
-  return 'th';
+  return 'en';
 })();
 window.FAILS={
   th:{load:'โหลดไฟล์แบบจำลองไม่สำเร็จ', browser:'เบราว์เซอร์นี้รันแบบจำลองไม่ได้', webgl:'อุปกรณ์หรือเบราว์เซอร์นี้ปิดการแสดงผลสามมิติ (WebGL) ไว้'},

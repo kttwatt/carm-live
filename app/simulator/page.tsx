@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function SimulatorPage() {
   return (
     <iframe
-      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/carm-simulator.html?v=${process.env.MODEL_BUILD}`}
+      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/carm-simulator.html?lang=th&v=${process.env.MODEL_BUILD}`}
       title="แบบจำลองสามมิติของเครื่อง C-Arm"
       allow="fullscreen"
       allowFullScreen
