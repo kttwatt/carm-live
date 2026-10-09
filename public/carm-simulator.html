@@ -57,16 +57,49 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .stage.has-dose .state{left:242px;right:16px;transform:none;max-width:none;width:fit-content;margin:0 auto}
 .state b{color:var(--scatter);font-weight:600}
 
-.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
+/* Two groups: the machine (fire, mode, view, invert) on a card, and the camera/page buttons, quieter, to the right.
+   wrap-reverse: when they don't fit on one line the camera group goes up and the machine stays at the bottom. */
+.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap-reverse;gap:8px;align-items:flex-end;pointer-events:none}
 .toolbar>*{pointer-events:auto}
-.tb{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
-  background:rgba(21,30,36,.9);border:1px solid var(--line);font-size:14px}
+.grp{display:flex;gap:6px;align-items:stretch}
+.machine{padding:6px;border-radius:14px;background:rgba(14,20,24,.82);border:1px solid var(--line)}
+.camera{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.tb{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
+  background:rgba(21,30,36,.9);border:1px solid var(--line);font-size:14px;line-height:1.3}
 .tb:hover{border-color:#3d525c}
 .tb[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-.tb.fire[aria-pressed="true"]{background:var(--beam);border-color:var(--beam);color:#fff}
-.tb .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.8}
-.hint{margin-left:auto;color:var(--muted);font-size:12.5px;pointer-events:none}
+.camera .tb{padding:6px 12px;font-size:13.5px;color:var(--muted)}
+.camera .tb:hover{color:var(--ink)}
 .tb[hidden]{display:none}
+
+/* fire: the biggest button; hold to expose, a quick tap leaves it on */
+.fire{display:inline-flex;align-items:center;gap:10px;padding:6px 18px 6px 14px;border-radius:10px;cursor:pointer;text-align:left;
+  background:#3a1518;border:1.5px solid var(--beam);color:#fff;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.fire:hover{background:#4a1a1e}
+.fire .dot{flex:none;width:12px;height:12px;border-radius:50%;background:var(--beam);box-shadow:0 0 0 3px rgba(229,72,77,.25)}
+.fire .fl{display:grid;line-height:1.25}
+.fire .ft{font-family:var(--f-display);font-weight:700;font-size:16px}
+.fire .fs{font-size:11.5px;color:#f3b9bb}
+.fire[aria-pressed="true"]{background:var(--beam);animation:firing 1s ease-in-out infinite}
+.fire[aria-pressed="true"] .dot{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.fire[aria-pressed="true"] .fs{color:#fff}
+@keyframes firing{50%{box-shadow:0 0 0 5px rgba(229,72,77,.35)}}
+
+/* two-way choice: the current one is filled */
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:10px;background:rgba(21,30,36,.9);border:1px solid var(--line)}
+.seg button{flex:1;cursor:pointer;padding:6px 12px;border-radius:7px;background:none;border:0;color:var(--muted);font-size:14px;line-height:1.3;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+
+/* on/off switch */
+.sw{display:inline-flex;align-items:center;gap:8px}
+.sw .knob{position:relative;flex:none;width:30px;height:18px;border-radius:999px;background:#2b3a42;transition:background .15s}
+.sw .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.sw[aria-checked="true"] .knob{background:var(--accent)}
+.sw[aria-checked="true"] .knob::after{transform:translateX(12px);background:var(--accent-ink)}
+/* the tube above the table is not the standard position: orange like the scatter warning */
+#bFlip[aria-checked="true"]{border-color:var(--scatter);color:#ffd2b5}
+#bFlip[aria-checked="true"] .knob{background:var(--scatter)}
 
 /* rail */
 .rail{display:flex;flex-direction:column;gap:18px;padding:22px 20px;background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-width:0}
@@ -123,7 +156,6 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
 
 /* tablet landscape and small laptops */
 @media (max-width:1180px){
-  .hint{display:none}
   .rail{padding:18px 16px;gap:14px}
   .rail h1{font-size:22px}
   .tb{padding:8px 12px}
@@ -131,15 +163,23 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
 /* short landscape screens (phones turned sideways) */
 @media (max-height:560px) and (orientation:landscape){
   .app{grid-template-columns:minmax(0,1fr) clamp(240px,34vw,340px)}
-  .toolbar{left:8px;right:8px;bottom:8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
+  .toolbar{left:8px;right:8px;bottom:8px;gap:6px;flex-wrap:nowrap;align-items:flex-end;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
   .toolbar::-webkit-scrollbar{display:none}
+  /* more buttons off the right edge: fade it so the row reads as swipeable */
+  .toolbar.more{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
+  .grp{flex:none}
+  .machine{padding:4px}
+  .camera{flex-wrap:nowrap}
   .tb{flex:none;padding:6px 10px;font-size:13px;white-space:nowrap}
+  .seg button{padding:6px 10px;font-size:13px}
+  .fire{padding:4px 14px 4px 12px}
+  .fire .ft{font-size:15px}
   .rail{padding:12px 14px;gap:10px}
   .rail h1{font-size:18px}
   .eyebrow,.keys{display:none}
   .detail h2{font-size:18px}
   .state{top:8px;font-size:13px;padding:6px 12px}
-  .dose{top:auto;bottom:56px;left:8px;width:190px;padding:6px 10px}
+  .dose{top:auto;bottom:72px;left:8px;width:190px;padding:6px 10px}
   .stage.has-dose .state{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 16px);width:auto;margin:0}
   .tag .t{display:none}
   .tag{padding:3px}
@@ -149,9 +189,17 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
   html,body{height:auto}
   .app{grid-template-columns:1fr;height:auto}
   .stage{flex:none;height:min(62svh,720px);min-height:320px}
-  .toolbar{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 12px;
+  /* machine: [fire ......][invert] / [Continuous|Pulsed][A-P|Lateral]; camera: four small buttons in a row */
+  .toolbar{position:static;display:grid;gap:10px;padding:12px;
     background:var(--panel);border-top:1px solid var(--line);pointer-events:auto}
-  .tb{justify-content:center;text-align:center;line-height:1.3;padding:10px 6px}
+  .machine{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-flow:row dense;gap:8px;padding:0;background:none;border:0}
+  .fire{grid-column:span 4;justify-content:center;min-height:56px}
+  #bFlip{grid-column:span 2}
+  .seg{grid-column:span 3;min-width:0}
+  .seg button{min-width:0;padding:8px 4px;white-space:normal;text-align:center}
+  .camera{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+  .tb{text-align:center;padding:10px 6px}
+  .camera .tb{padding:8px 4px}
   .rail{border-left:0;border-top:1px solid var(--line);padding:16px 16px calc(20px + env(safe-area-inset-bottom));overflow:visible}
   .rail>header{order:0}
   .detail{order:1;border-top:0;padding-top:0}
@@ -164,9 +212,12 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
 }
 @media (orientation:portrait) and (min-width:600px) and (max-width:1023px){
   .stage{height:min(58svh,760px)}
-  .toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .seg button{padding:8px 10px}
 }
 @media (max-width:599px){
+  /* no room for a switch beside the camera labels: on = gold, like the other pressed buttons */
+  .camera .sw .knob{display:none}
+  .camera .sw[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
   .tag .t{display:none}
   .tag{padding:3px}
   .rail h1{font-size:22px}
@@ -177,6 +228,8 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
 /* fingers: bigger targets */
 @media (pointer:coarse){
   .tb{min-height:44px}
+  .seg button{min-height:38px}   /* plus the 3px frame: 44px */
+  .fire{min-height:52px}
   .parts button{min-height:44px}
   .tag .n{width:30px;height:30px}
   .act{padding:10px 14px}
@@ -207,15 +260,24 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
     </div>
     </section>
     <div class="toolbar" role="toolbar" data-i18n-aria="toolbar" aria-label="ควบคุมแบบจำลอง">
-      <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
-      <button class="tb" id="bMode" aria-pressed="false">Continuous</button>
-      <button class="tb" id="bLat" aria-pressed="false">A-P view</button>
-      <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
-      <button class="tb" id="bSpin" aria-pressed="false" data-i18n="spin">หมุนรอบ</button>
-      <button class="tb" id="bHome" data-i18n="home">ภาพรวม</button>
-      <button class="tb" id="bSound" aria-pressed="true">เสียง: เปิด</button>
-      <button class="tb" id="bFull" aria-pressed="false">เต็มจอ</button>
-      <span class="hint" data-i18n="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
+      <div class="grp machine" role="group" data-i18n-aria="gMachine" aria-label="เครื่อง C-Arm">
+        <button class="fire" id="bFire" type="button" aria-pressed="false"><span class="dot"></span><span class="fl"><span class="ft">ฉายรังสี</span><span class="fs">กดค้างไว้</span></span></button>
+        <div class="seg" role="group" data-i18n-aria="gMode" aria-label="ชนิดการฉายรังสี">
+          <button type="button" id="bCont" aria-pressed="true">Continuous</button>
+          <button type="button" id="bPulse" aria-pressed="false">Pulsed</button>
+        </div>
+        <div class="seg" role="group" data-i18n-aria="gView" aria-label="ท่าถ่าย">
+          <button type="button" id="bAP" aria-pressed="true">A-P view</button>
+          <button type="button" id="bLat" aria-pressed="false">Lateral view</button>
+        </div>
+        <button class="tb sw" id="bFlip" type="button" role="switch" aria-checked="false"><span class="knob"></span>Invert</button>
+      </div>
+      <div class="grp camera" role="group" data-i18n-aria="gCamera" aria-label="มุมมอง">
+        <button class="tb" id="bHome" type="button" data-i18n="home">ภาพรวม</button>
+        <button class="tb sw" id="bSpin" type="button" role="switch" aria-checked="false"><span class="knob"></span><span data-i18n="spin">หมุนรอบ</span></button>
+        <button class="tb sw" id="bSound" type="button" role="switch" aria-checked="true"><span class="knob"></span><span data-i18n="sound">เสียง</span></button>
+        <button class="tb" id="bFull" type="button" aria-pressed="false">เต็มจอ</button>
+      </div>
     </div>
   </div>
 
@@ -231,7 +293,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
     <footer class="foot">
-      <p class="keys" data-i18n="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
+      <p class="keys" data-i18n="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี (กดค้าง) · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
       <p class="copy"><span data-i18n="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า</span> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
     </footer>
   </aside>
@@ -270,7 +332,7 @@ addEventListener('error',function(e){
 <script src="vendor/three-r128/OrbitControls.js"></script>
 <script>
 (function(){
-if(typeof THREE==='undefined'||!THREE.OrbitControls){ carmFail(FAILS[LANG].load); return; }
+if(typeof THREE==='undefined'||!THREE.OrbitControls){ carmFail(FAILS[window.LANG].load); return; }
 const C2D=CanvasRenderingContext2D.prototype;
 if(!C2D.roundRect) C2D.roundRect=function(x,y,w,h,r){
   r=Math.max(0,Math.min(+r||0,Math.abs(w)/2,Math.abs(h)/2));
@@ -312,12 +374,12 @@ const TEXT = {
     canvas:'แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง',
     failT:'แสดงภาพสามมิติไม่ได้', failWhy:'อุปกรณ์นี้แสดงภาพสามมิติไม่ได้',
     failHelp:'ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่', reload:'โหลดใหม่',
-    toolbar:'ควบคุมแบบจำลอง', fire:'ฉายรังสี', firing:'กำลังฉายรังสี', spin:'หมุนรอบ', home:'ภาพรวม',
-    full:'เต็มจอ', fullOff:'ออกจากเต็มจอ', ap:'A-P view', lat:'Lateral view',
-    hint:'ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด',
+    toolbar:'ควบคุมแบบจำลอง', gMachine:'เครื่อง C-Arm', gMode:'ชนิดการฉายรังสี', gView:'ท่าถ่าย', gCamera:'มุมมอง',
+    fire:'ฉายรังสี', firing:'กำลังฉายรังสี', fireHold:'กดค้างไว้', fireLetGo:'ปล่อยเพื่อหยุด', fireLatched:'แตะเพื่อหยุด',
+    spin:'หมุนรอบ', home:'ภาพรวม', sound:'เสียง', full:'เต็มจอ', fullOff:'ออกจากเต็มจอ',
     back:'‹ หน้าแรก', lang:'EN', langAria:'Switch to English',
     eyebrow:'แบบจำลองสามมิติ · ทดลองใช้เอง', h1:'ส่วนประกอบของเครื่อง C-Arm',
-    keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> เปิด/ปิดเสียง · <kbd>R</kbd> หมุนรอบ',
+    keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี (กดค้าง) · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> เปิด/ปิดเสียง · <kbd>R</kbd> หมุนรอบ',
     copy:'© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า',
     beamSize:'ขนาดลำรังสี',
     detectorNote:'ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์',
@@ -326,15 +388,14 @@ const TEXT = {
     monitorNote:'แสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)',
     pedalOff:'ปล่อยสวิตช์', pedalOn:'เหยียบสวิตช์: ฉายรังสี',
     intro:'แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม',
-    tries:['<b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง',
+    tries:['กดค้างที่ <b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง (แตะครั้งเดียวจะฉายค้างไว้)',
       '<b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม',
       '<b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ',
       '<b>Pulsed</b> แล้วฉายนานเท่าเดิม เทียบเวลาและปริมาณรังสีกับ Continuous ที่มุมของภาพ',
       'เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง'],
-    soundOn:'เสียง: เปิด', soundOff:'เสียง: ปิด', doseH:'เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)',
+    doseH:'เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)',
     modeNote:'<b>Continuous</b> ฉายต่อเนื่องตลอดเวลาที่กดสวิตช์ <b>Pulsed</b> ฉายเป็นจังหวะสั้น ๆ (3 ครั้งต่อวินาที) ได้ปริมาณรังสีน้อยกว่า',
     toCont:'เปลี่ยนเป็น Continuous', toPulse:'เปลี่ยนเป็น Pulsed',
-    flipTeam:'หลอดฝั่งทีม', flipOver:'หลอดเหนือเตียง',
     latTeamFire:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง',
     latTeam:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย',
     latOk:'Lateral view · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ',
@@ -349,12 +410,12 @@ const TEXT = {
     canvas:'3D model of a C-arm beside an operating table. Drag to rotate the view.',
     failT:'The 3D model cannot be shown', failWhy:'This device cannot display 3D graphics',
     failHelp:'Try the latest Chrome or Safari, check your internet connection, then reload the page.', reload:'Reload',
-    toolbar:'Model controls', fire:'Fire X-ray', firing:'X-ray on', spin:'Auto-rotate', home:'Overview',
-    full:'Full screen', fullOff:'Exit full screen', ap:'A-P view', lat:'Lateral view',
-    hint:'Drag to rotate · Scroll to zoom · Click a part for details',
+    toolbar:'Model controls', gMachine:'C-arm', gMode:'Fluoroscopy mode', gView:'View', gCamera:'Camera',
+    fire:'Fire X-ray', firing:'X-ray on', fireHold:'Press and hold', fireLetGo:'Release to stop', fireLatched:'Tap to stop',
+    spin:'Auto-rotate', home:'Overview', sound:'Sound', full:'Full screen', fullOff:'Exit full screen',
     back:'‹ Home', lang:'ไทย', langAria:'เปลี่ยนเป็นภาษาไทย',
     eyebrow:'3D model · Self-guided', h1:'Parts of a C-Arm',
-    keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> sound on/off · <kbd>R</kbd> auto-rotate',
+    keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray (hold) · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> sound on/off · <kbd>R</kbd> auto-rotate',
     copy:'© 2026 Kittiwat · Free to use for teaching with credit; non-commercial',
     beamSize:'Beam size',
     detectorNote:'It normally sits at the top of the C-arm, above the patient, opposite the X-ray tube.',
@@ -363,15 +424,14 @@ const TEXT = {
     monitorNote:'Shows cumulative fluoroscopy time, tube settings (kV, mA) and cumulative dose (mGy).',
     pedalOff:'Release the switch', pedalOn:'Press the foot switch: fire X-ray',
     intro:'Tap a number on the model or in the list to see what each part does. Drag to rotate; pinch or scroll to zoom.',
-    tries:['<b>Fire X-ray</b> to see the beam and the scatter with the tube under the table',
+    tries:['Press and hold <b>Fire X-ray</b> to see the beam and the scatter with the tube under the table (a quick tap keeps it on)',
       '<b>Invert</b>, then fire again: the tube is above the table and scatter goes to the team\'s heads and eyes',
       '<b>Lateral view</b>: keep the tube on the side opposite the team; the team stands on the detector side',
       '<b>Pulsed</b>, then fire for the same time: compare the time and dose with Continuous in the corner of the view',
       'Select the <b>Collimator (2)</b> to narrow the beam'],
-    soundOn:'Sound on', soundOff:'Sound off', doseH:'Fluoro time · dose (illustrative)',
+    doseH:'Fluoro time · dose (illustrative)',
     modeNote:'<b>Continuous</b> exposes for as long as the switch is pressed. <b>Pulsed</b> exposes in short pulses (3 per second) and gives a lower dose.',
     toCont:'Switch to Continuous', toPulse:'Switch to Pulsed',
-    flipTeam:'tube on team side', flipOver:'tube above table',
     latTeamFire:'<b>Lateral view · X-ray tube on the team\'s side:</b> scatter goes straight at the team',
     latTeam:'<b>Lateral view · X-ray tube on the team\'s side</b> Fire X-ray to see the scatter',
     latOk:'Lateral view · X-ray tube opposite the team: most scatter stays on the tube side, so the team stands on the detector side',
@@ -676,7 +736,7 @@ function renderDetail(){
   detailEl.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.act;
     if(a==='tilt'){ st.tilt = st.tilt?0:0.5; }
-    if(a==='fire'){ setFire(!st.fire); }
+    if(a==='fire'){ pressAt=0; setFire(!st.fire); }
     if(a==='mode'){ setMode(!FL.pulsed); }
     renderDetail();
   });
@@ -699,7 +759,21 @@ function select(id){
 }
 
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin');
-function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?T('firing'):T('fire');
+const fireTitle=bFire.querySelector('.ft'), fireSub=bFire.querySelector('.fs');
+// Hold to expose, like the real switch; a press shorter than HOLD_MS leaves it on until the next press.
+const HOLD_MS=300; let pressAt=0;
+function labelFire(){ fireTitle.textContent=st.fire?T('firing'):T('fire');
+  fireSub.textContent=!st.fire?T('fireHold'):pressAt?T('fireLetGo'):T('fireLatched'); }
+function firePress(){
+  if(st.fire){ pressAt=0; setFire(false); } else { pressAt=performance.now(); setFire(true); }
+  if(sel==='switch') renderDetail();
+}
+function fireRelease(){
+  if(!pressAt) return;
+  const held=performance.now()-pressAt; pressAt=0;
+  if(held>=HOLD_MS){ setFire(false); if(sel==='switch') renderDetail(); } else labelFire();
+}
+function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); labelFire();
   if(v){ FL.ph=0; FL.n=-1; if(FL.sound) ensureAudio(); } else setTone(0);
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); showDose(); }
 
@@ -720,11 +794,11 @@ function setTone(v){ if(!actx||v===toneLevel) return; toneLevel=v; toneGain.gain
 document.addEventListener('visibilitychange',()=>{ if(!actx) return;
   if(document.hidden) actx.suspend().catch(()=>{}); else if(st.fire&&FL.sound) actx.resume().catch(()=>{}); });
 
-const bMode=document.getElementById('bMode'), bSound=document.getElementById('bSound');
+const bCont=document.getElementById('bCont'), bPulse=document.getElementById('bPulse'), bSound=document.getElementById('bSound');
 const doseEl=document.getElementById('dose'), dCont=document.getElementById('dCont'), dPulse=document.getElementById('dPulse');
 function setMode(p){ FL.pulsed=p; FL.ph=0; FL.n=-1;
-  bMode.setAttribute('aria-pressed',p); bMode.textContent=p?'Pulsed':'Continuous'; panelTex.redraw(st.fire); showDose(); }
-function labelSound(){ bSound.setAttribute('aria-pressed',FL.sound); bSound.textContent=FL.sound?T('soundOn'):T('soundOff'); }
+  bCont.setAttribute('aria-pressed',!p); bPulse.setAttribute('aria-pressed',p); panelTex.redraw(st.fire); showDose(); }
+function labelSound(){ bSound.setAttribute('aria-checked',FL.sound); }
 function setSound(v){ FL.sound=v; labelSound();
   try{ localStorage.setItem('carm-sound',v?'on':'off'); }catch(e){}
   if(v&&st.fire) ensureAudio(); if(!v) setTone(0); }
@@ -734,10 +808,10 @@ function showDose(){
     el.classList.toggle('on',st.fire&&FL.pulsed===p); });
   const any=FL.cont.t>0||FL.pulse.t>0; doseEl.hidden=!any; stage.classList.toggle('has-dose',any);
 }
-function flipLabel(){ return st.lat ? T('flipTeam') : T('flipOver'); }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-checked',v); updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
-function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?T('lat'):T('ap'); setFlip(st.flip); }
+const bAP=document.getElementById('bAP'), bLat=document.getElementById('bLat');
+function setLat(v){ st.lat=v; bAP.setAttribute('aria-pressed',!v); bLat.setAttribute('aria-pressed',v); setFlip(st.flip); }
 function updateState(){
   if(st.lat){
     stateEl.hidden=!(st.fire||st.flip);
@@ -753,13 +827,23 @@ function updateState(){
     stateEl.innerHTML=T('underFire'); }
   else stateEl.hidden=true;
 }
-bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
-bMode.onclick=()=>{ setMode(!FL.pulsed); if(sel==='switch') renderDetail(); };
+// pointer capture keeps the release with the button even if the finger slides off it
+bFire.addEventListener('pointerdown',e=>{ if(e.button) return; e.preventDefault();
+  if(bFire.setPointerCapture) try{ bFire.setPointerCapture(e.pointerId); }catch(_){}
+  firePress(); });
+['pointerup','pointercancel'].forEach(ev=>bFire.addEventListener(ev,fireRelease));
+bFire.addEventListener('contextmenu',e=>e.preventDefault());   // long press on a phone would open a menu
+bFire.addEventListener('keydown',e=>{ if(e.key!==' '&&e.key!=='Enter') return; e.preventDefault(); if(!e.repeat) firePress(); });
+bFire.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') fireRelease(); });
+addEventListener('blur',fireRelease);   // a release we never see (switching apps) must not leave the beam on
+function setModeTo(p){ if(FL.pulsed!==p){ setMode(p); if(sel==='switch') renderDetail(); } }
+bCont.onclick=()=>setModeTo(false);
+bPulse.onclick=()=>setModeTo(true);
+bAP.onclick=()=>setLat(false);
+bLat.onclick=()=>setLat(true);
 bSound.onclick=()=>setSound(!FL.sound);
 bFlip.onclick=()=>setFlip(!st.flip);
-const bLat=document.getElementById('bLat');
-bLat.onclick=()=>setLat(!st.lat);
-bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-pressed',controls.autoRotate); };
+bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-checked',controls.autoRotate); };
 document.getElementById('bHome').onclick=()=>select(null);
 // Fullscreen: hidden where the browser has none (iPhone Safari) or the frame doesn't allow it
 const bFull=document.getElementById('bFull');
@@ -775,6 +859,9 @@ bFull.onclick=()=>{
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
   bFull.setAttribute('aria-pressed',on); bFull.textContent=on?T('fullOff'):T('full');
 }));
+const toolbarEl=document.querySelector('.toolbar');
+function markMore(){ toolbarEl.classList.toggle('more',toolbarEl.scrollLeft+toolbarEl.clientWidth<toolbarEl.scrollWidth-2); }
+toolbarEl.addEventListener('scroll',markMore,{passive:true}); addEventListener('resize',markMore);
 const bLang=document.getElementById('bLang');
 function applyLang(){
   document.documentElement.lang=LANG;
@@ -786,7 +873,7 @@ function applyLang(){
   bFull.textContent=on?T('fullOff'):T('full');
   renderPartNames();
   setFire(st.fire); setLat(st.lat); setMode(FL.pulsed); labelSound(); refTex.redraw();
-  renderDetail();
+  renderDetail(); markMore();
 }
 bLang.onclick=()=>{
   LANG = LANG==='en' ? 'th' : 'en'; window.LANG=LANG;
@@ -802,14 +889,15 @@ addEventListener('keydown',e=>{
   else if(e.key==='ArrowLeft'){ select(PARTS[(i+6)%7].id); e.preventDefault(); }
   else if(e.key>='1'&&e.key<='7') select(PARTS[+e.key-1].id);
   else if(e.key==='0'||e.key==='Escape') select(null);
-  else if(e.key==='x'||e.key==='X') bFire.click();
+  else if(e.key==='x'||e.key==='X'){ if(!e.repeat) firePress(); }
   else if(e.key==='f'||e.key==='F') bFlip.click();
-  else if(e.key==='l'||e.key==='L') bLat.click();
+  else if(e.key==='l'||e.key==='L') setLat(!st.lat);
   else if(e.key==='r'||e.key==='R') bSpin.click();
-  else if(e.key==='p'||e.key==='P') bMode.click();
+  else if(e.key==='p'||e.key==='P') setModeTo(!FL.pulsed);
   else if(e.key==='m'||e.key==='M') bSound.click();
   else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
 });
+addEventListener('keyup',e=>{ if(e.key==='x'||e.key==='X') fireRelease(); });
 
 /* click on a part in 3D */
 const ray=new THREE.Raycaster(), ndc=new THREE.Vector2(); let down=null;
