@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>body{margin:0}[hidden]{display:none!important}</style>
 <title>C-Arm สามมิติ · ทดลองใช้เอง</title>
-<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด สลับ A-P/Lateral view และดูหน้าที่ของแต่ละส่วนได้เอง">
+<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด สลับ A-P/Lateral view และดูหน้าที่ของแต่ละส่วนได้เอง · Self-guided 3D C-arm model: fire X-ray, invert the tube, switch A-P/Lateral view and learn what each part does.">
 <meta name="theme-color" content="#0e1418">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #c:active{cursor:grabbing}
 
 /* number badges pinned to parts */
-ter-events:none}
+.tags{position:absolute;inset:0;pointer-events:none}
 .tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;pointer-events:auto;cursor:pointer;
   background:rgba(14,20,24,.82);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;
   font-size:13px;white-space:nowrap;transition:background .2s,border-color .2s;will-change:transform}
@@ -65,8 +65,12 @@ ter-events:none}
 .rail{display:flex;flex-direction:column;gap:18px;padding:22px 20px;background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-width:0}
 .eyebrow{margin:0;font-size:12px;letter-spacing:.06em;color:var(--muted)}
 .rail h1{margin:4px 0 0;font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.25;text-wrap:balance}
-.home{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;color:var(--muted);font-size:13.5px;text-decoration:none}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.home{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13.5px;text-decoration:none}
 .home:hover{color:var(--ink)}
+/* language switch: shows the language you can switch to */
+.lang{cursor:pointer;padding:3px 10px;border-radius:999px;background:none;border:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.5}
+.lang:hover{color:var(--ink);border-color:#3d525c}
 .try{margin:0;padding-left:20px;display:grid;gap:6px}
 .try b{color:var(--accent);font-weight:600}
 .parts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
@@ -164,6 +168,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
   .parts button{min-height:44px}
   .tag .n{width:30px;height:30px}
   .act{padding:10px 14px}
+  .lang{min-height:36px;padding:3px 14px}
   .range input{height:32px}
 }
 </style>
@@ -173,64 +178,80 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
 <div class="app" id="app">
   <div class="view">
     <section class="stage" id="stage">
-      <canvas id="c" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
+      <canvas id="c" data-i18n-aria="canvas" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
       <div class="tags" id="tags"></div>
       <div class="state" id="state" hidden></div>
       <div class="diag" id="diag" hidden></div>
     <div class="fail" id="fail" role="alert" hidden>
-      <p class="fail-t">แสดงภาพสามมิติไม่ได้</p>
+      <p class="fail-t" data-i18n="failT">แสดงภาพสามมิติไม่ได้</p>
       <p data-why>อุปกรณ์นี้แสดงภาพสามมิติไม่ได้</p>
-      <p class="muted">ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่</p>
-      <button class="fail-b" type="button" onclick="location.reload()">โหลดใหม่</button>
+      <p class="muted" data-i18n="failHelp">ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่</p>
+      <button class="fail-b" type="button" onclick="location.reload()" data-i18n="reload">โหลดใหม่</button>
     </div>
     </section>
-    <div class="toolbar" role="toolbar" aria-label="ควบคุมแบบจำลอง">
+    <div class="toolbar" role="toolbar" data-i18n-aria="toolbar" aria-label="ควบคุมแบบจำลอง">
       <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
       <button class="tb" id="bLat" aria-pressed="false">A-P view</button>
       <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
-      <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
-      <button class="tb" id="bHome">ภาพรวม</button>
+      <button class="tb" id="bSpin" aria-pressed="false" data-i18n="spin">หมุนรอบ</button>
+      <button class="tb" id="bHome" data-i18n="home">ภาพรวม</button>
       <button class="tb" id="bFull" aria-pressed="false">เต็มจอ</button>
-      <span class="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
+      <span class="hint" data-i18n="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
     </div>
   </div>
 
   <aside class="rail">
     <header>
-      <a class="home" href="./" target="_top">‹ หน้าแรก</a>
-      <p class="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
-      <h1>ส่วนประกอบของเครื่อง C-Arm</h1>
+      <div class="top">
+        <a class="home" href="./" target="_top" data-i18n="back">‹ หน้าแรก</a>
+        <button class="lang" id="bLang" type="button"></button>
+      </div>
+      <p class="eyebrow" data-i18n="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
+      <h1 data-i18n="h1">ส่วนประกอบของเครื่อง C-Arm</h1>
     </header>
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
     <footer class="foot">
-      <p class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
-      <p class="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
+      <p class="keys" data-i18n="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
+      <p class="copy"><span data-i18n="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า</span> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
     </footer>
   </aside>
 </div>
 
 <script>
+// Language: ?lang=en|th, else the last choice on this device, else Thai (the seminar audience).
+window.LANG=(function(){
+  var q=new URLSearchParams(location.search).get('lang');
+  if(q==='en'||q==='th') return q;
+  try{ var s=localStorage.getItem('carm-lang'); if(s==='en'||s==='th') return s; }catch(e){}
+  return 'th';
+})();
+window.FAILS={
+  th:{load:'โหลดไฟล์แบบจำลองไม่สำเร็จ', browser:'เบราว์เซอร์นี้รันแบบจำลองไม่ได้', webgl:'อุปกรณ์หรือเบราว์เซอร์นี้ปิดการแสดงผลสามมิติ (WebGL) ไว้'},
+  en:{load:'Could not load the model files', browser:'This browser cannot run the model', webgl:'3D graphics (WebGL) are turned off on this device or browser'}
+};
 // Anything that stops the model before its first frame (a blocked or missing file, no WebGL, an old browser)
 // shows a message on the stage instead of leaving it dark.
 window.carmFail=function(why){
   if(window.carmReady) return;
   var el=document.getElementById('fail'); if(!el) return;
   if(why&&el.hidden) el.querySelector('[data-why]').textContent=why;
+  if(window.LANG==='en'){ var F={'.fail-t':'The 3D model cannot be shown','.fail .muted':'Try the latest Chrome or Safari, check your internet connection, then reload the page.','.fail-b':'Reload'};
+    for(var k in F){ var n=document.querySelector(k); if(n) n.textContent=F[k]; } }
   el.hidden=false; document.documentElement.classList.add('failed');
 };
 addEventListener('error',function(e){
   var t=e.target;
-  if(t&&t.tagName){ if(t.tagName==='SCRIPT') carmFail('โหลดไฟล์แบบจำลองไม่สำเร็จ'); return; }  // a font or image failing is fine
+  if(t&&t.tagName){ if(t.tagName==='SCRIPT') carmFail(FAILS[LANG].load); return; }  // a font or image failing is fine
   if(e.filename&&!/carm-|three-r128/.test(e.filename)) return;                                // not ours (e.g. a browser extension)
-  carmFail('เบราว์เซอร์นี้รันแบบจำลองไม่ได้');
+  carmFail(FAILS[LANG].browser);
 },true);
 </script>
 <script src="vendor/three-r128/three.min.js"></script>
 <script src="vendor/three-r128/OrbitControls.js"></script>
 <script>
 (function(){
-if(typeof THREE==='undefined'||!THREE.OrbitControls){ carmFail('โหลดไฟล์แบบจำลองไม่สำเร็จ'); return; }
+if(typeof THREE==='undefined'||!THREE.OrbitControls){ carmFail(FAILS[LANG].load); return; }
 const C2D=CanvasRenderingContext2D.prototype;
 if(!C2D.roundRect) C2D.roundRect=function(x,y,w,h,r){
   r=Math.max(0,Math.min(+r||0,Math.abs(w)/2,Math.abs(h)/2));
@@ -244,14 +265,97 @@ const LITE = QS.has('lite') || (matchMedia('(pointer:coarse)').matches && Math.m
 const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
 
 const PARTS = [
-  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสี X ตำแหน่งปกติอยู่ด้านล่างของ C Arm (ใต้เตียงผ่าตัด)', off:[-1.25,0.45,1.35]},
-  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของรังสี', off:[-1.0,0.55,1.15]},
-  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ', off:[-1.2,0.35,1.4]},
-  {id:'carm', n:4, name:'C Arm', en:'', desc:'แขนยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ', off:[-2.0,0.6,2.0]},
-  {id:'base', n:5, name:'ฐานเครื่อง', en:'', desc:'ส่วนใหญ่บรรจุเครื่องกำเนิดไฟฟ้าแรงสูง และมีแผงควบคุม', off:[-1.6,0.9,1.4]},
-  {id:'monitor', n:6, name:'จอแสดงผล', en:'', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี', off:[-1.7,0.1,1.1]},
-  {id:'switch', n:7, name:'Switch', en:'', desc:'Hand switch / Foot switch', off:[-0.9,1.0,1.1]},
+  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสี X ตำแหน่งปกติอยู่ด้านล่างของ C Arm (ใต้เตียงผ่าตัด)',
+    descEn:'Produces the X-rays. It normally sits at the bottom of the C-arm, under the operating table.', off:[-1.25,0.45,1.35]},
+  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของรังสี',
+    descEn:'Sits in front of the X-ray tube and sets the size and shape of the beam.', off:[-1.0,0.55,1.15]},
+  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ',
+    descEn:'Receives the X-rays that pass through the patient and turns them into an image.', off:[-1.2,0.35,1.4]},
+  {id:'carm', n:4, name:'C Arm', en:'', nameEn:'C-arm', desc:'แขนยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ',
+    descEn:'Holds the X-ray tube and the detector exactly opposite each other.', off:[-2.0,0.6,2.0]},
+  {id:'base', n:5, name:'ฐานเครื่อง', en:'', nameEn:'Base unit', desc:'ส่วนใหญ่บรรจุเครื่องกำเนิดไฟฟ้าแรงสูง และมีแผงควบคุม',
+    descEn:'Houses most of the high-voltage generator and carries the control panel.', off:[-1.6,0.9,1.4]},
+  {id:'monitor', n:6, name:'จอแสดงผล', en:'', nameEn:'Monitors', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี',
+    descEn:'Show the live image, a reference image and the radiation readings.', off:[-1.7,0.1,1.1]},
+  {id:'switch', n:7, name:'Switch', en:'', nameEn:'Exposure switch', desc:'Hand switch / Foot switch',
+    descEn:'Hand switch / foot switch', off:[-0.9,1.0,1.1]},
 ];
+// In English the English name is the heading, with no second-language line under it.
+const pName = p => LANG==='en' ? (p.nameEn||p.en) : p.name;
+const pSub  = p => LANG==='en' ? '' : p.en;
+const pDesc = p => LANG==='en' ? p.descEn : p.desc;
+
+/* ---------- interface text (Thai / English) ---------- */
+let LANG = window.LANG;
+const TEXT = {
+  th:{
+    title:'C-Arm สามมิติ · ทดลองใช้เอง',
+    canvas:'แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง',
+    failT:'แสดงภาพสามมิติไม่ได้', failWhy:'อุปกรณ์นี้แสดงภาพสามมิติไม่ได้',
+    failHelp:'ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่', reload:'โหลดใหม่',
+    toolbar:'ควบคุมแบบจำลอง', fire:'ฉายรังสี', firing:'กำลังฉายรังสี', spin:'หมุนรอบ', home:'ภาพรวม',
+    full:'เต็มจอ', fullOff:'ออกจากเต็มจอ', ap:'A-P view', lat:'Lateral view',
+    hint:'ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด',
+    back:'‹ หน้าแรก', lang:'EN', langAria:'Switch to English',
+    eyebrow:'แบบจำลองสามมิติ · ทดลองใช้เอง', h1:'ส่วนประกอบของเครื่อง C-Arm',
+    keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ',
+    copy:'© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า',
+    beamSize:'ขนาดลำรังสี',
+    detectorNote:'ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์',
+    tiltOn:'ตั้ง C Arm ตรง', tiltOff:'เอียง C Arm ให้ดู',
+    oarm:'O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน',
+    monitorNote:'แสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)',
+    pedalOff:'ปล่อยสวิตช์', pedalOn:'เหยียบสวิตช์: ฉายรังสี',
+    intro:'แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม',
+    tries:['<b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง',
+      '<b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม',
+      '<b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ',
+      'เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง'],
+    flipTeam:'หลอดฝั่งทีม', flipOver:'หลอดเหนือเตียง',
+    latTeamFire:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง',
+    latTeam:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย',
+    latOk:'Lateral view · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ',
+    overFire:'<b>X-ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม',
+    over:'<b>X-ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย',
+    underFire:'X-ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม',
+    live:'ภาพสด', ref:'ภาพอ้างอิง', xray:'ฉายรังสี',
+    fps:'ภาพต่อวินาที', reduced:'ลดการเคลื่อนไหว', reducedOn:'เปิด (กล้องจะกระโดด)', reducedOff:'ปิด', res:'ความละเอียด',
+  },
+  en:{
+    title:'3D C-Arm · Self-guided',
+    canvas:'3D model of a C-arm beside an operating table. Drag to rotate the view.',
+    failT:'The 3D model cannot be shown', failWhy:'This device cannot display 3D graphics',
+    failHelp:'Try the latest Chrome or Safari, check your internet connection, then reload the page.', reload:'Reload',
+    toolbar:'Model controls', fire:'Fire X-ray', firing:'X-ray on', spin:'Auto-rotate', home:'Overview',
+    full:'Full screen', fullOff:'Exit full screen', ap:'A-P view', lat:'Lateral view',
+    hint:'Drag to rotate · Scroll to zoom · Click a part for details',
+    back:'‹ Home', lang:'ไทย', langAria:'เปลี่ยนเป็นภาษาไทย',
+    eyebrow:'3D model · Self-guided', h1:'Parts of a C-Arm',
+    keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> auto-rotate',
+    copy:'© 2026 Kittiwat · Free to use for teaching with credit; non-commercial',
+    beamSize:'Beam size',
+    detectorNote:'It normally sits at the top of the C-arm, above the patient, opposite the X-ray tube.',
+    tiltOn:'Straighten the C-arm', tiltOff:'Tilt the C-arm',
+    oarm:'An O-arm has similar parts, but in a closed O-shaped ring with the tube and detector rotating inside.',
+    monitorNote:'Shows cumulative fluoroscopy time, tube settings (kV, mA) and cumulative dose (mGy).',
+    pedalOff:'Release the switch', pedalOn:'Press the foot switch: fire X-ray',
+    intro:'Tap a number on the model or in the list to see what each part does. Drag to rotate; pinch or scroll to zoom.',
+    tries:['<b>Fire X-ray</b> to see the beam and the scatter with the tube under the table',
+      '<b>Invert</b>, then fire again: the tube is above the table and scatter goes to the team\'s heads and eyes',
+      '<b>Lateral view</b>: keep the tube on the side opposite the team; the team stands on the detector side',
+      'Select the <b>Collimator (2)</b> to narrow the beam'],
+    flipTeam:'tube on team side', flipOver:'tube above table',
+    latTeamFire:'<b>Lateral view · X-ray tube on the team\'s side:</b> scatter goes straight at the team',
+    latTeam:'<b>Lateral view · X-ray tube on the team\'s side</b> Fire X-ray to see the scatter',
+    latOk:'Lateral view · X-ray tube opposite the team: most scatter stays on the tube side, so the team stands on the detector side',
+    overFire:'<b>X-ray tube above the table:</b> scatter goes up toward the team\'s heads and eyes',
+    over:'<b>X-ray tube above the table</b> Not the standard position. Fire X-ray to see the scatter',
+    underFire:'X-ray tube under the table: most scatter goes back down under the table, away from the team\'s heads',
+    live:'LIVE', ref:'REFERENCE', xray:'X-RAY',
+    fps:'Frames per second', reduced:'Reduced motion', reducedOn:'on (camera jumps)', reducedOff:'off', res:'Resolution',
+  },
+};
+const T = k => TEXT[LANG][k];
 const byId = Object.fromEntries(PARTS.map(p=>[p.id,p]));
 
 /* ---------- renderer / scene ---------- */
@@ -259,7 +363,7 @@ const stage = document.getElementById('stage');
 const canvas = document.getElementById('c');
 let renderer;
 try{ renderer = new THREE.WebGLRenderer({canvas, antialias:true}); }
-catch(e){ carmFail('อุปกรณ์หรือเบราว์เซอร์นี้ปิดการแสดงผลสามมิติ (WebGL) ไว้'); return; }
+catch(e){ carmFail(FAILS[LANG].webgl); return; }
 renderer.shadowMap.enabled = !LITE;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 // Resolution budget: a full-screen projector at high display scaling would otherwise draw 3-4x the pixels.
@@ -339,7 +443,7 @@ function drawFluoro(g,w,h,label,withImplant,live){
   g.fillText('0:42   71 kV   2.4 mA', 18, h-16);
   g.textAlign='right'; g.fillText('12.6 mGy', w-18, h-16); g.textAlign='left';
   if(live){ g.fillStyle='#f0b443'; g.beginPath(); g.arc(w-150,26,8,0,7); g.fill();
-    g.font='600 20px Tahoma, sans-serif'; g.fillText('ฉายรังสี', w-134, 33); }
+    g.font='600 20px Tahoma, sans-serif'; g.fillText(T('xray'), w-134, 33); }
 }
 function drawTrefoil(g,w,h){
   g.fillStyle='#f2c418'; g.beginPath(); g.arc(w/2,h/2,w/2-2,0,7); g.fill();
@@ -441,8 +545,8 @@ mesh(new THREE.BoxGeometry(0.72,0.1,0.56), M.trim, 'monitor', cart).position.y=0
 mesh(new THREE.BoxGeometry(0.56,0.82,0.44), M.plastic, 'monitor', cart).position.y=0.6;
 mesh(new THREE.BoxGeometry(0.1,0.42,0.1), M.dark, 'monitor', cart).position.y=1.21;
 [[-0.3,0.3],[0.3,-0.3]].forEach(([x,ry])=>{ const w=mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16), M.dark, 'monitor', cart); w.rotation.z=Math.PI/2; w.position.set(x*1.05,0.05,0.2); });
-const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,'ภาพสด',true,!!on));
-const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,'ภาพอ้างอิง',false,false));
+const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,T('live'),true,!!on));
+const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,T('ref'),false,false));
 [[-0.3,0.14,liveTex],[0.3,-0.14,refTex]].forEach(([x,ry,tex])=>{
   const m=new THREE.Group(); m.position.set(x,1.6,0.02); m.rotation.y=ry; cart.add(m);
   mesh(new THREE.BoxGeometry(0.58,0.44,0.05), M.dark, 'monitor', m);
@@ -494,41 +598,42 @@ const stateEl=document.getElementById('state');
 const tags={};
 PARTS.forEach(p=>{
   const b=document.createElement('button'); b.className='tag'; b.type='button';
-  b.innerHTML=`<span class="n">${p.n}</span><span class="t">${p.name}</span>`;
-  b.setAttribute('aria-label',`${p.n} ${p.name}`);
   b.onclick=()=>select(sel===p.id?null:p.id); tagsEl.appendChild(b); tags[p.id]=b;
   const li=document.createElement('li');
-  li.innerHTML=`<button type="button" id="part-${p.id}"><span class="n">${p.n}</span><span><span class="nm">${p.name}</span>${p.en?`<span class="en">${p.en}</span>`:''}</span></button>`;
+  li.innerHTML=`<button type="button" id="part-${p.id}"></button>`;
   li.firstChild.onclick=()=>select(sel===p.id?null:p.id); partsEl.appendChild(li);
 });
+function renderPartNames(){
+  PARTS.forEach(p=>{
+    const b=tags[p.id];
+    b.innerHTML=`<span class="n">${p.n}</span><span class="t">${pName(p)}</span>`;
+    b.setAttribute('aria-label',`${p.n} ${pName(p)}`);
+    document.getElementById('part-'+p.id).innerHTML=`<span class="n">${p.n}</span><span><span class="nm">${pName(p)}</span>${pSub(p)?`<span class="en">${pSub(p)}</span>`:''}</span>`;
+  });
+}
 
 const st = {fire:false, flip:false, lat:false, tilt:0, beamScale:1};
 let sel=null;
 
 function extra(id){
-  if(id==='collimator') return `<label class="range" for="beamSize">ขนาดลำรังสี <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
+  if(id==='collimator') return `<label class="range" for="beamSize">${T('beamSize')} <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
     <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>`;
-  if(id==='detector') return `<p class="muted">ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
-  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้ง C Arm ตรง':'เอียง C Arm ให้ดู'}</button>
-    <p class="muted">O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</p>`;
-  if(id==='monitor') return `<p class="muted">แสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)</p>`;
-  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?'ปล่อยสวิตช์':'เหยียบสวิตช์: ฉายรังสี'}</button>`;
+  if(id==='detector') return `<p class="muted">${T('detectorNote')}</p>`;
+  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?T('tiltOn'):T('tiltOff')}</button>
+    <p class="muted">${T('oarm')}</p>`;
+  if(id==='monitor') return `<p class="muted">${T('monitorNote')}</p>`;
+  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?T('pedalOff'):T('pedalOn')}</button>`;
   return '';
 }
 function renderDetail(){
   if(!sel){
-    detailEl.innerHTML = `<p class="muted">แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม</p>
-      <ol class="try muted">
-        <li><b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง</li>
-        <li><b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม</li>
-        <li><b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ</li>
-        <li>เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง</li>
-      </ol>`;
+    detailEl.innerHTML = `<p class="muted">${T('intro')}</p>
+      <ol class="try muted">${T('tries').map(x=>`<li>${x}</li>`).join('')}</ol>`;
     return;
   }
   const p=byId[sel];
   detailEl.hidden=false;
-  detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${p.name}${p.en?`<span class="en">${p.en}</span>`:''}</h2><p>${p.desc}</p>${extra(p.id)}`;
+  detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${pName(p)}${pSub(p)?`<span class="en">${pSub(p)}</span>`:''}</h2><p>${pDesc(p)}</p>${extra(p.id)}`;
   detailEl.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.act;
     if(a==='tilt'){ st.tilt = st.tilt?0:0.5; }
@@ -554,25 +659,25 @@ function select(id){
 }
 
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin');
-function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
+function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?T('firing'):T('fire');
   liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function flipLabel(){ return st.lat ? 'หลอดฝั่งทีม' : 'หลอดเหนือเตียง'; }
+function flipLabel(){ return st.lat ? T('flipTeam') : T('flipOver'); }
 function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
-function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'Lateral view':'A-P view'; setFlip(st.flip); }
+function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?T('lat'):T('ap'); setFlip(st.flip); }
 function updateState(){
   if(st.lat){
     stateEl.hidden=!(st.fire||st.flip);
     stateEl.className=st.flip?'state warn':'state';
     stateEl.innerHTML = st.flip
-      ? (st.fire ? '<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
-      : 'Lateral view · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
+      ? (st.fire ? T('latTeamFire') : T('latTeam'))
+      : T('latOk');
     return;
   }
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
-    stateEl.innerHTML= st.fire ? '<b>X-ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>X-ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
+    stateEl.innerHTML= st.fire ? T('overFire') : T('over'); }
   else if(st.fire){ stateEl.hidden=false; stateEl.className='state';
-    stateEl.innerHTML='X-ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม'; }
+    stateEl.innerHTML=T('underFire'); }
   else stateEl.hidden=true;
 }
 bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
@@ -593,8 +698,28 @@ bFull.onclick=()=>{
 };
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
-  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?'ออกจากเต็มจอ':'เต็มจอ';
+  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?T('fullOff'):T('full');
 }));
+const bLang=document.getElementById('bLang');
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.innerHTML=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',T(el.dataset.i18nAria)));
+  bLang.textContent=T('lang'); bLang.setAttribute('aria-label',T('langAria')); bLang.lang=LANG==='en'?'th':'en';
+  const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  bFull.textContent=on?T('fullOff'):T('full');
+  renderPartNames();
+  setFire(st.fire); setLat(st.lat); refTex.redraw();
+  renderDetail();
+}
+bLang.onclick=()=>{
+  LANG = LANG==='en' ? 'th' : 'en'; window.LANG=LANG;
+  try{ localStorage.setItem('carm-lang',LANG); }catch(e){}
+  try{ const u=new URL(location.href); u.searchParams.set('lang',LANG); history.replaceState(null,'',u); }catch(e){}
+  applyLang();
+};
+applyLang();
 addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey) return;
   const i=sel?byId[sel].n-1:-1;
@@ -712,9 +837,9 @@ function frame(){
   diagFrames++;
   if(!diagEl.hidden && performance.now()-diagT0>1000){
     const fps=Math.round(diagFrames*1000/(performance.now()-diagT0));
-    diagEl.textContent=`ภาพต่อวินาที  ${fps}
-ลดการเคลื่อนไหว  ${REDUCED?'เปิด (กล้องจะกระโดด)':'ปิด'}
-ความละเอียด  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.width}×${renderer.domElement.height}`;
+    diagEl.textContent=`${T('fps')}  ${fps}
+${T('reduced')}  ${REDUCED?T('reducedOn'):T('reducedOff')}
+${T('res')}  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.width}×${renderer.domElement.height}`;
     diagFrames=0; diagT0=performance.now();
   } else if(diagEl.hidden){ diagFrames=0; diagT0=performance.now(); }
 
