@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>body{margin:0}[hidden]{display:none!important}</style>
 <title>C-Arm สามมิติ · ทดลองใช้เอง</title>
-<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วนได้เอง">
+<meta name="description" content="แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด สลับ A-P/Lateral view และดูหน้าที่ของแต่ละส่วนได้เอง · Self-guided 3D C-arm model: fire X-ray, invert the tube, switch A-P/Lateral view and learn what each part does.">
 <meta name="theme-color" content="#0e1418">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,7 +34,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #c:active{cursor:grabbing}
 
 /* number badges pinned to parts */
-ter-events:none}
+.tags{position:absolute;inset:0;pointer-events:none}
 .tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:6px;pointer-events:auto;cursor:pointer;
   background:rgba(14,20,24,.82);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;
   font-size:13px;white-space:nowrap;transition:background .2s,border-color .2s;will-change:transform}
@@ -48,25 +48,70 @@ ter-events:none}
   padding:8px 16px;border-radius:10px;font-size:14px;text-align:center;text-wrap:balance;
   background:rgba(14,20,24,.88);border:1px solid var(--line)}
 .state.warn{border-color:var(--scatter);color:#ffd2b5}
+/* fluoro time and dose per mode; the status line moves into the space beside it */
+.dose{position:absolute;left:16px;top:16px;width:210px;padding:8px 12px;border-radius:10px;background:rgba(14,20,24,.88);border:1px solid var(--line);font-size:12.5px;line-height:1.5}
+.dose .h{display:block;color:var(--muted);font-size:11.5px}
+.dose p{margin:0;display:flex;justify-content:space-between;gap:8px}
+.dose .v{font-family:var(--f-mono);font-size:12px}
+.dose p.on{color:var(--accent)}
+.stage.has-dose .state{left:242px;right:16px;transform:none;max-width:none;width:fit-content;margin:0 auto}
 .state b{color:var(--scatter);font-weight:600}
 
-.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
+/* Two groups: the machine (fire, mode, view, invert) on a card, and the camera/page buttons, quieter, to the right.
+   wrap-reverse: when they don't fit on one line the camera group goes up and the machine stays at the bottom. */
+.toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap-reverse;gap:8px;align-items:flex-end;pointer-events:none}
 .toolbar>*{pointer-events:auto}
-.tb{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
-  background:rgba(21,30,36,.9);border:1px solid var(--line);font-size:14px}
+.grp{display:flex;gap:6px;align-items:stretch}
+.machine{padding:6px;border-radius:14px;background:rgba(14,20,24,.82);border:1px solid var(--line)}
+.camera{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.tb{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
+  background:rgba(21,30,36,.9);border:1px solid var(--line);font-size:14px;line-height:1.3}
 .tb:hover{border-color:#3d525c}
 .tb[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-.tb.fire[aria-pressed="true"]{background:var(--beam);border-color:var(--beam);color:#fff}
-.tb .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.8}
-.hint{margin-left:auto;color:var(--muted);font-size:12.5px;pointer-events:none}
+.camera .tb{padding:6px 12px;font-size:13.5px;color:var(--muted)}
+.camera .tb:hover{color:var(--ink)}
 .tb[hidden]{display:none}
+
+/* fire: the biggest button; hold to expose, a quick tap leaves it on */
+.fire{display:inline-flex;align-items:center;gap:10px;padding:6px 18px 6px 14px;border-radius:10px;cursor:pointer;text-align:left;
+  background:#3a1518;border:1.5px solid var(--beam);color:#fff;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.fire:hover{background:#4a1a1e}
+.fire .dot{flex:none;width:12px;height:12px;border-radius:50%;background:var(--beam);box-shadow:0 0 0 3px rgba(229,72,77,.25)}
+.fire .fl{display:grid;line-height:1.25}
+.fire .ft{font-family:var(--f-display);font-weight:700;font-size:16px}
+.fire .fs{font-size:11.5px;color:#f3b9bb}
+.fire[aria-pressed="true"]{background:var(--beam);animation:firing 1s ease-in-out infinite}
+.fire[aria-pressed="true"] .dot{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.fire[aria-pressed="true"] .fs{color:#fff}
+@keyframes firing{50%{box-shadow:0 0 0 5px rgba(229,72,77,.35)}}
+
+/* two-way choice: the current one is filled */
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:10px;background:rgba(21,30,36,.9);border:1px solid var(--line)}
+.seg button{flex:1;cursor:pointer;padding:6px 12px;border-radius:7px;background:none;border:0;color:var(--muted);font-size:14px;line-height:1.3;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+
+/* on/off switch */
+.sw{display:inline-flex;align-items:center;gap:8px}
+.sw .knob{position:relative;flex:none;width:30px;height:18px;border-radius:999px;background:#2b3a42;transition:background .15s}
+.sw .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.sw[aria-checked="true"] .knob{background:var(--accent)}
+.sw[aria-checked="true"] .knob::after{transform:translateX(12px);background:var(--accent-ink)}
+/* the tube above the table is not the standard position: orange like the scatter warning */
+#bFlip[aria-checked="true"]{border-color:var(--scatter);color:#ffd2b5}
+#bFlip[aria-checked="true"] .knob{background:var(--scatter)}
 
 /* rail */
 .rail{display:flex;flex-direction:column;gap:18px;padding:22px 20px;background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-width:0}
 .eyebrow{margin:0;font-size:12px;letter-spacing:.06em;color:var(--muted)}
 .rail h1{margin:4px 0 0;font-family:var(--f-display);font-weight:700;font-size:26px;line-height:1.25;text-wrap:balance}
-.home{display:inline-flex;align-items:center;gap:6px;margin-bottom:10px;color:var(--muted);font-size:13.5px;text-decoration:none}
+.top{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:10px}
+.top .home{margin-right:auto}
+.home{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13.5px;text-decoration:none}
 .home:hover{color:var(--ink)}
+/* language switch: shows the language you can switch to */
+.lang{cursor:pointer;padding:3px 10px;border-radius:999px;background:none;border:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.5}
+.lang:hover{color:var(--ink);border-color:#3d525c}
 .try{margin:0;padding-left:20px;display:grid;gap:6px}
 .try b{color:var(--accent);font-weight:600}
 .parts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
@@ -95,7 +140,10 @@ ter-events:none}
 .range{display:grid;gap:4px;font-size:13.5px;color:var(--muted)}
 .range input{width:100%;accent-color:var(--accent)}
 .muted{color:var(--muted);font-size:13.5px}
-.keys{margin-top:auto;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+.foot{margin-top:auto;display:grid;gap:8px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+.copy{margin:0}
+.copy a{color:inherit;text-underline-offset:2px}
+.copy a:hover{color:var(--ink)}
 kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
 
 .diag{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:8px;background:rgba(14,20,24,.92);border:1px solid var(--line);font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre}
@@ -104,26 +152,37 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 .fail p{margin:0;max-width:34em}
 .fail-t{font-family:var(--f-display);font-weight:700;font-size:20px;color:var(--accent)}
 .fail-b{margin-top:6px;cursor:pointer;padding:9px 18px;border-radius:8px;background:none;border:1px solid var(--accent);color:var(--accent)}
-html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important}
+html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{display:none!important}
 
 /* tablet landscape and small laptops */
 @media (max-width:1180px){
-  .hint{display:none}
   .rail{padding:18px 16px;gap:14px}
   .rail h1{font-size:22px}
   .tb{padding:8px 12px}
 }
 /* short landscape screens (phones turned sideways) */
 @media (max-height:560px) and (orientation:landscape){
-  .app{grid-template-columns:minmax(0,1fr) clamp(240px,34vw,340px)}
-  .toolbar{left:8px;right:8px;bottom:8px;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
-  .toolbar::-webkit-scrollbar{display:none}
-  .tb{flex:none;padding:6px 10px;font-size:13px;white-space:nowrap}
+  .app{grid-template-columns:minmax(0,1fr) clamp(220px,30vw,320px)}
+  /* only the machine card stays under the model (the camera buttons move to the side panel, see placeCamera);
+     on the narrowest phones the card wraps to two rows rather than scrolling */
+  .toolbar{left:8px;right:8px;bottom:8px}
+  .machine{flex-wrap:wrap;padding:4px;gap:4px}
+  .tb{padding:6px 10px;font-size:13px;white-space:nowrap}
+  .seg button{padding:6px 8px;font-size:13px}
+  .fire{padding:4px 12px 4px 10px;gap:8px}
+  .fire .ft{font-size:15px}
+  .rail .camera{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0}
+  .rail .camera .tb{padding:6px 4px;white-space:normal;text-align:center}
+  /* the panel is too narrow for a switch beside the label: on = gold, like the other pressed buttons */
+  .rail .camera .sw .knob{display:none}
+  .rail .camera .sw[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
   .rail{padding:12px 14px;gap:10px}
   .rail h1{font-size:18px}
   .eyebrow,.keys{display:none}
   .detail h2{font-size:18px}
   .state{top:8px;font-size:13px;padding:6px 12px}
+  .dose{top:auto;bottom:calc(var(--tbh,56px) + 16px);left:8px;width:190px;padding:6px 10px}
+  .stage.has-dose .state{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 16px);width:auto;margin:0}
   .tag .t{display:none}
   .tag{padding:3px}
 }
@@ -132,21 +191,35 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
   html,body{height:auto}
   .app{grid-template-columns:1fr;height:auto}
   .stage{flex:none;height:min(62svh,720px);min-height:320px}
-  .toolbar{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 12px;
+  /* machine: [fire ......][invert] / [Continuous|Pulsed][A-P|Lateral]; camera: four small buttons in a row */
+  .toolbar{position:static;display:grid;gap:10px;padding:12px;
     background:var(--panel);border-top:1px solid var(--line);pointer-events:auto}
-  .tb{justify-content:center;text-align:center;line-height:1.3;padding:10px 6px}
+  .machine{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-flow:row dense;gap:8px;padding:0;background:none;border:0}
+  .fire{grid-column:span 4;justify-content:center;min-height:56px}
+  #bFlip{grid-column:span 2}
+  .seg{grid-column:span 3;min-width:0}
+  .seg button{min-width:0;padding:8px 4px;white-space:normal;text-align:center}
+  .camera{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+  .tb{text-align:center;padding:10px 6px}
+  .camera .tb{padding:8px 4px}
   .rail{border-left:0;border-top:1px solid var(--line);padding:16px 16px calc(20px + env(safe-area-inset-bottom));overflow:visible}
   .rail>header{order:0}
   .detail{order:1;border-top:0;padding-top:0}
   .parts{order:2;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line);padding-top:14px}
+  .foot{order:3}
   .keys{display:none}
   .state{top:10px;font-size:13.5px}
+  .dose{top:auto;bottom:10px;left:10px}
+  .stage.has-dose .state{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 32px);width:auto;margin:0}
 }
 @media (orientation:portrait) and (min-width:600px) and (max-width:1023px){
   .stage{height:min(58svh,760px)}
-  .toolbar{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .seg button{padding:8px 10px}
 }
 @media (max-width:599px){
+  /* no room for a switch beside the camera labels: on = gold, like the other pressed buttons */
+  .camera .sw .knob{display:none}
+  .camera .sw[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
   .tag .t{display:none}
   .tag{padding:3px}
   .rail h1{font-size:22px}
@@ -157,9 +230,12 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
 /* fingers: bigger targets */
 @media (pointer:coarse){
   .tb{min-height:44px}
+  .seg button{min-height:38px}   /* plus the 3px frame: 44px */
+  .fire{min-height:52px}
   .parts button{min-height:44px}
   .tag .n{width:30px;height:30px}
   .act{padding:10px 14px}
+  .lang{min-height:36px;padding:3px 14px}
   .range input{height:32px}
 }
 </style>
@@ -169,61 +245,96 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
 <div class="app" id="app">
   <div class="view">
     <section class="stage" id="stage">
-      <canvas id="c" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
+      <canvas id="c" data-i18n-aria="canvas" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
       <div class="tags" id="tags"></div>
       <div class="state" id="state" hidden></div>
+      <div class="dose" id="dose" hidden>
+        <span class="h" data-i18n="doseH">เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)</span>
+        <p id="dCont" hidden><span>Continuous</span><span class="v"></span></p>
+        <p id="dPulse" hidden><span>Pulsed</span><span class="v"></span></p>
+      </div>
       <div class="diag" id="diag" hidden></div>
     <div class="fail" id="fail" role="alert" hidden>
-      <p class="fail-t">แสดงภาพสามมิติไม่ได้</p>
+      <p class="fail-t" data-i18n="failT">แสดงภาพสามมิติไม่ได้</p>
       <p data-why>อุปกรณ์นี้แสดงภาพสามมิติไม่ได้</p>
-      <p class="muted">ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่</p>
-      <button class="fail-b" type="button" onclick="location.reload()">โหลดใหม่</button>
+      <p class="muted" data-i18n="failHelp">ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่</p>
+      <button class="fail-b" type="button" onclick="location.reload()" data-i18n="reload">โหลดใหม่</button>
     </div>
     </section>
-    <div class="toolbar" role="toolbar" aria-label="ควบคุมแบบจำลอง">
-      <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
-      <button class="tb" id="bLat" aria-pressed="false">ท่า AP</button>
-      <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
-      <button class="tb" id="bSpin" aria-pressed="false">หมุนรอบ</button>
-      <button class="tb" id="bHome">ภาพรวม</button>
-      <button class="tb" id="bFull" aria-pressed="false">เต็มจอ</button>
-      <span class="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
+    <div class="toolbar" role="toolbar" data-i18n-aria="toolbar" aria-label="ควบคุมแบบจำลอง">
+      <div class="grp machine" role="group" data-i18n-aria="gMachine" aria-label="เครื่อง C-Arm">
+        <button class="fire" id="bFire" type="button" aria-pressed="false"><span class="dot"></span><span class="fl"><span class="ft">ฉายรังสี</span><span class="fs">กดค้างไว้</span></span></button>
+        <div class="seg" role="group" data-i18n-aria="gMode" aria-label="ชนิดการฉายรังสี">
+          <button type="button" id="bCont" aria-pressed="true">Continuous</button>
+          <button type="button" id="bPulse" aria-pressed="false">Pulsed</button>
+        </div>
+        <div class="seg" role="group" data-i18n-aria="gView" aria-label="ท่าถ่าย">
+          <button type="button" id="bAP" aria-pressed="true">A-P view</button>
+          <button type="button" id="bLat" aria-pressed="false">Lateral view</button>
+        </div>
+        <button class="tb sw" id="bFlip" type="button" role="switch" aria-checked="false"><span class="knob"></span>Invert</button>
+      </div>
+      <div class="grp camera" role="group" data-i18n-aria="gCamera" aria-label="มุมมอง">
+        <button class="tb" id="bHome" type="button" data-i18n="home">ภาพรวม</button>
+        <button class="tb sw" id="bSpin" type="button" role="switch" aria-checked="false"><span class="knob"></span><span data-i18n="spin">หมุนรอบ</span></button>
+        <button class="tb sw" id="bSound" type="button" role="switch" aria-checked="true"><span class="knob"></span><span data-i18n="sound">เสียง</span></button>
+        <button class="tb" id="bFull" type="button" aria-pressed="false">เต็มจอ</button>
+      </div>
     </div>
   </div>
 
   <aside class="rail">
     <header>
-      <a class="home" href="./" target="_top">‹ หน้าแรก</a>
-      <p class="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
-      <h1>ส่วนประกอบของเครื่อง C-Arm</h1>
+      <div class="top">
+        <a class="home" href="./" target="_top" data-i18n="back">‹ หน้าแรก</a>
+        <button class="lang" id="bLang" type="button"></button>
+      </div>
+      <p class="eyebrow" data-i18n="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
+      <h1 data-i18n="h1">ส่วนประกอบของเครื่อง C-Arm</h1>
     </header>
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
-    <footer class="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> ท่า AP/LAT · <kbd>R</kbd> หมุนรอบ</footer>
+    <footer class="foot">
+      <p class="keys" data-i18n="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี (กดค้าง) · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
+      <p class="copy"><span data-i18n="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า</span> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
+    </footer>
   </aside>
 </div>
 
 <script>
+// Language: ?lang=en|th, else the last choice on this device, else English (Thai seminar links add ?lang=th).
+window.LANG=(function(){
+  var q=new URLSearchParams(location.search).get('lang');
+  if(q==='en'||q==='th') return q;
+  try{ var s=localStorage.getItem('carm-lang'); if(s==='en'||s==='th') return s; }catch(e){}
+  return 'en';
+})();
+window.FAILS={
+  th:{load:'โหลดไฟล์แบบจำลองไม่สำเร็จ', browser:'เบราว์เซอร์นี้รันแบบจำลองไม่ได้', webgl:'อุปกรณ์หรือเบราว์เซอร์นี้ปิดการแสดงผลสามมิติ (WebGL) ไว้'},
+  en:{load:'Could not load the model files', browser:'This browser cannot run the model', webgl:'3D graphics (WebGL) are turned off on this device or browser'}
+};
 // Anything that stops the model before its first frame (a blocked or missing file, no WebGL, an old browser)
 // shows a message on the stage instead of leaving it dark.
 window.carmFail=function(why){
   if(window.carmReady) return;
   var el=document.getElementById('fail'); if(!el) return;
   if(why&&el.hidden) el.querySelector('[data-why]').textContent=why;
+  if(window.LANG==='en'){ var F={'.fail-t':'The 3D model cannot be shown','.fail .muted':'Try the latest Chrome or Safari, check your internet connection, then reload the page.','.fail-b':'Reload'};
+    for(var k in F){ var n=document.querySelector(k); if(n) n.textContent=F[k]; } }
   el.hidden=false; document.documentElement.classList.add('failed');
 };
 addEventListener('error',function(e){
   var t=e.target;
-  if(t&&t.tagName){ if(t.tagName==='SCRIPT') carmFail('โหลดไฟล์แบบจำลองไม่สำเร็จ'); return; }  // a font or image failing is fine
+  if(t&&t.tagName){ if(t.tagName==='SCRIPT') carmFail(FAILS[LANG].load); return; }  // a font or image failing is fine
   if(e.filename&&!/carm-|three-r128/.test(e.filename)) return;                                // not ours (e.g. a browser extension)
-  carmFail('เบราว์เซอร์นี้รันแบบจำลองไม่ได้');
+  carmFail(FAILS[LANG].browser);
 },true);
 </script>
 <script src="vendor/three-r128/three.min.js"></script>
 <script src="vendor/three-r128/OrbitControls.js"></script>
 <script>
 (function(){
-if(typeof THREE==='undefined'||!THREE.OrbitControls){ carmFail('โหลดไฟล์แบบจำลองไม่สำเร็จ'); return; }
+if(typeof THREE==='undefined'||!THREE.OrbitControls){ carmFail(FAILS[window.LANG].load); return; }
 const C2D=CanvasRenderingContext2D.prototype;
 if(!C2D.roundRect) C2D.roundRect=function(x,y,w,h,r){
   r=Math.max(0,Math.min(+r||0,Math.abs(w)/2,Math.abs(h)/2));
@@ -237,14 +348,103 @@ const LITE = QS.has('lite') || (matchMedia('(pointer:coarse)').matches && Math.m
 const R = 0.78, CY = 1.0;              // C radius and C centre height (metres)
 
 const PARTS = [
-  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสี X ตำแหน่งปกติอยู่ด้านล่างของ C Arm (ใต้เตียงผ่าตัด)', off:[-1.25,0.45,1.35]},
-  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของรังสี', off:[-1.0,0.55,1.15]},
-  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ', off:[-1.2,0.35,1.4]},
-  {id:'carm', n:4, name:'C Arm', en:'', desc:'แขนยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ', off:[-2.0,0.6,2.0]},
-  {id:'base', n:5, name:'ฐานเครื่อง', en:'', desc:'ส่วนใหญ่บรรจุเครื่องกำเนิดไฟฟ้าแรงสูง และมีแผงควบคุม', off:[-1.6,0.9,1.4]},
-  {id:'monitor', n:6, name:'จอแสดงผล', en:'', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี', off:[-1.7,0.1,1.1]},
-  {id:'switch', n:7, name:'Switch', en:'', desc:'Hand switch / Foot switch', off:[-0.9,1.0,1.1]},
+  {id:'tube', n:1, name:'หลอดเอกซเรย์', en:'X-ray tube', desc:'ผลิตรังสี X ตำแหน่งปกติอยู่ด้านล่างของ C Arm (ใต้เตียงผ่าตัด)',
+    descEn:'Produces the X-rays. It normally sits at the bottom of the C-arm, under the operating table.', off:[-1.25,0.45,1.35]},
+  {id:'collimator', n:2, name:'ตัวจำกัดลำรังสี', en:'Collimator', desc:'อยู่หน้าหลอดเอกซเรย์ กำหนดขนาดและรูปร่างของรังสี',
+    descEn:'Sits in front of the X-ray tube and sets the size and shape of the beam.', off:[-1.0,0.55,1.15]},
+  {id:'detector', n:3, name:'ตัวรับภาพ', en:'Flat panel detector', desc:'รับรังสีที่ทะลุผ่านผู้ป่วยแล้วแปลงเป็นภาพ',
+    descEn:'Receives the X-rays that pass through the patient and turns them into an image.', off:[-1.2,0.35,1.4]},
+  {id:'carm', n:4, name:'C Arm', en:'', nameEn:'C-arm', desc:'แขนยึดหลอดเอกซเรย์กับตัวรับภาพให้อยู่ตรงข้ามกันเสมอ',
+    descEn:'Holds the X-ray tube and the detector exactly opposite each other.', off:[-2.0,0.6,2.0]},
+  {id:'base', n:5, name:'ฐานเครื่อง', en:'', nameEn:'Base unit', desc:'ส่วนใหญ่บรรจุเครื่องกำเนิดไฟฟ้าแรงสูง และมีแผงควบคุม',
+    descEn:'Houses most of the high-voltage generator and carries the control panel.', off:[-1.6,0.9,1.4]},
+  {id:'monitor', n:6, name:'จอแสดงผล', en:'', nameEn:'Monitors', desc:'แสดงภาพสด ภาพอ้างอิง และค่ารังสี',
+    descEn:'Show the live image, a reference image and the radiation readings.', off:[-1.35,0.1,-1.3]},
+  {id:'switch', n:7, name:'Switch', en:'', nameEn:'Exposure switch', desc:'Hand switch / Foot switch',
+    descEn:'Hand switch / foot switch', off:[-0.9,1.0,1.1]},
 ];
+// In English the English name is the heading, with no second-language line under it.
+const pName = p => LANG==='en' ? (p.nameEn||p.en) : p.name;
+const pSub  = p => LANG==='en' ? '' : p.en;
+const pDesc = p => LANG==='en' ? p.descEn : p.desc;
+
+/* ---------- interface text (Thai / English) ---------- */
+let LANG = window.LANG;
+const TEXT = {
+  th:{
+    title:'C-Arm สามมิติ · ทดลองใช้เอง',
+    canvas:'แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง',
+    failT:'แสดงภาพสามมิติไม่ได้', failWhy:'อุปกรณ์นี้แสดงภาพสามมิติไม่ได้',
+    failHelp:'ลองเปิดด้วย Chrome หรือ Safari รุ่นล่าสุด ตรวจว่าต่ออินเทอร์เน็ตอยู่ แล้วโหลดหน้าใหม่', reload:'โหลดใหม่',
+    toolbar:'ควบคุมแบบจำลอง', gMachine:'เครื่อง C-Arm', gMode:'ชนิดการฉายรังสี', gView:'ท่าถ่าย', gCamera:'มุมมอง',
+    fire:'ฉายรังสี', firing:'กำลังฉายรังสี', fireHold:'กดค้างไว้', fireLetGo:'ปล่อยเพื่อหยุด', fireLatched:'แตะเพื่อหยุด',
+    spin:'หมุนรอบ', home:'ภาพรวม', sound:'เสียง', full:'เต็มจอ', fullOff:'ออกจากเต็มจอ',
+    back:'‹ หน้าแรก', lang:'EN', langAria:'Switch to English',
+    eyebrow:'แบบจำลองสามมิติ · ทดลองใช้เอง', h1:'ส่วนประกอบของเครื่อง C-Arm',
+    keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี (กดค้าง) · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> เปิด/ปิดเสียง · <kbd>R</kbd> หมุนรอบ',
+    copy:'© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า',
+    beamSize:'ขนาดลำรังสี',
+    detectorNote:'ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์',
+    tiltOn:'ตั้ง C Arm ตรง', tiltOff:'เอียง C Arm ให้ดู',
+    oarm:'O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน',
+    monitorNote:'แสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)',
+    pedalOff:'ปล่อยสวิตช์', pedalOn:'เหยียบสวิตช์: ฉายรังสี',
+    intro:'แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม',
+    tries:['กดค้างที่ <b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง (แตะครั้งเดียวจะฉายค้างไว้)',
+      '<b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม',
+      '<b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ',
+      '<b>Pulsed</b> แล้วฉายนานเท่าเดิม เทียบเวลาและปริมาณรังสีกับ Continuous ที่มุมของภาพ',
+      'เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง'],
+    doseH:'เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)',
+    modeNote:'<b>Continuous</b> ฉายต่อเนื่องตลอดเวลาที่กดสวิตช์ <b>Pulsed</b> ฉายเป็นจังหวะสั้น ๆ (3 ครั้งต่อวินาที) ได้ปริมาณรังสีน้อยกว่า',
+    toCont:'เปลี่ยนเป็น Continuous', toPulse:'เปลี่ยนเป็น Pulsed',
+    latTeamFire:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง',
+    latTeam:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย',
+    latOk:'Lateral view · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ',
+    overFire:'<b>X-ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม',
+    over:'<b>X-ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย',
+    underFire:'X-ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม',
+    live:'ภาพสด', ref:'ภาพอ้างอิง', xray:'ฉายรังสี',
+    fps:'ภาพต่อวินาที', reduced:'ลดการเคลื่อนไหว', reducedOn:'เปิด (กล้องจะกระโดด)', reducedOff:'ปิด', res:'ความละเอียด',
+  },
+  en:{
+    title:'3D C-Arm · Self-guided',
+    canvas:'3D model of a C-arm beside an operating table. Drag to rotate the view.',
+    failT:'The 3D model cannot be shown', failWhy:'This device cannot display 3D graphics',
+    failHelp:'Try the latest Chrome or Safari, check your internet connection, then reload the page.', reload:'Reload',
+    toolbar:'Model controls', gMachine:'C-arm', gMode:'Fluoroscopy mode', gView:'View', gCamera:'Camera',
+    fire:'Fire X-ray', firing:'X-ray on', fireHold:'Press and hold', fireLetGo:'Release to stop', fireLatched:'Tap to stop',
+    spin:'Auto-rotate', home:'Overview', sound:'Sound', full:'Full screen', fullOff:'Exit full screen',
+    back:'‹ Home', lang:'ไทย', langAria:'เปลี่ยนเป็นภาษาไทย',
+    eyebrow:'3D model · Self-guided', h1:'Parts of a C-Arm',
+    keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray (hold) · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> sound on/off · <kbd>R</kbd> auto-rotate',
+    copy:'© 2026 Kittiwat · Free to use for teaching with credit; non-commercial',
+    beamSize:'Beam size',
+    detectorNote:'It normally sits at the top of the C-arm, above the patient, opposite the X-ray tube.',
+    tiltOn:'Straighten the C-arm', tiltOff:'Tilt the C-arm',
+    oarm:'An O-arm has similar parts, but in a closed O-shaped ring with the tube and detector rotating inside.',
+    monitorNote:'Shows cumulative fluoroscopy time, tube settings (kV, mA) and cumulative dose (mGy).',
+    pedalOff:'Release the switch', pedalOn:'Press the foot switch: fire X-ray',
+    intro:'Tap a number on the model or in the list to see what each part does. Drag to rotate; pinch or scroll to zoom.',
+    tries:['Press and hold <b>Fire X-ray</b> to see the beam and the scatter with the tube under the table (a quick tap keeps it on)',
+      '<b>Invert</b>, then fire again: the tube is above the table and scatter goes to the team\'s heads and eyes',
+      '<b>Lateral view</b>: keep the tube on the side opposite the team; the team stands on the detector side',
+      '<b>Pulsed</b>, then fire for the same time: compare the time and dose with Continuous in the corner of the view',
+      'Select the <b>Collimator (2)</b> to narrow the beam'],
+    doseH:'Fluoro time · dose (illustrative)',
+    modeNote:'<b>Continuous</b> exposes for as long as the switch is pressed. <b>Pulsed</b> exposes in short pulses (3 per second) and gives a lower dose.',
+    toCont:'Switch to Continuous', toPulse:'Switch to Pulsed',
+    latTeamFire:'<b>Lateral view · X-ray tube on the team\'s side:</b> scatter goes straight at the team',
+    latTeam:'<b>Lateral view · X-ray tube on the team\'s side</b> Fire X-ray to see the scatter',
+    latOk:'Lateral view · X-ray tube opposite the team: most scatter stays on the tube side, so the team stands on the detector side',
+    overFire:'<b>X-ray tube above the table:</b> scatter goes up toward the team\'s heads and eyes',
+    over:'<b>X-ray tube above the table</b> Not the standard position. Fire X-ray to see the scatter',
+    underFire:'X-ray tube under the table: most scatter goes back down under the table, away from the team\'s heads',
+    live:'LIVE', ref:'REFERENCE', xray:'X-RAY',
+    fps:'Frames per second', reduced:'Reduced motion', reducedOn:'on (camera jumps)', reducedOff:'off', res:'Resolution',
+  },
+};
+const T = k => TEXT[LANG][k];
 const byId = Object.fromEntries(PARTS.map(p=>[p.id,p]));
 
 /* ---------- renderer / scene ---------- */
@@ -252,7 +452,7 @@ const stage = document.getElementById('stage');
 const canvas = document.getElementById('c');
 let renderer;
 try{ renderer = new THREE.WebGLRenderer({canvas, antialias:true}); }
-catch(e){ carmFail('อุปกรณ์หรือเบราว์เซอร์นี้ปิดการแสดงผลสามมิติ (WebGL) ไว้'); return; }
+catch(e){ carmFail(FAILS[LANG].webgl); return; }
 renderer.shadowMap.enabled = !LITE;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 // Resolution budget: a full-screen projector at high display scaling would otherwise draw 3-4x the pixels.
@@ -304,6 +504,14 @@ function mesh(geo, mat, part, parent, shadow=true){
 }
 function anchor(id, parent, x,y,z){ const o=new THREE.Object3D(); o.position.set(x,y,z); parent.add(o); anchors[id]=o; }
 
+/* ---------- fluoroscopy mode and dose counter ---------- */
+// Pulsed: short exposures, PPS a second (3 or fewer keeps the beam under the flash-safety limit).
+// Dose numbers are illustrative: continuous at DOSE_RATE mGy/s, pulsed about a quarter of that.
+const PPS=3, DUTY=0.35, DOSE_RATE=0.3, DOSE_PULSE=DOSE_RATE/4/PPS;
+const FL={pulsed:false, sound:true, ph:0, n:-1, cont:{t:0,d:0}, pulse:{t:0,d:0}};
+try{ FL.sound = localStorage.getItem('carm-sound')!=='off'; }catch(e){}
+const fmtT = x => `${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
+
 /* ---------- canvas textures ---------- */
 function canvasTex(w,h,draw){
   const c=document.createElement('canvas'); c.width=w; c.height=h;
@@ -311,7 +519,7 @@ function canvasTex(w,h,draw){
   t.redraw=(...a)=>{draw(c.getContext('2d'),w,h,...a); t.needsUpdate=true;};
   t.redraw(); return t;
 }
-function drawFluoro(g,w,h,label,withImplant,live){
+function drawFluoro(g,w,h,label,withImplant,live,rd){
   g.fillStyle='#030506'; g.fillRect(0,0,w,h);
   const cx=w/2, cy=h/2+6, r=h*0.44;
   g.save(); g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.clip();
@@ -329,10 +537,10 @@ function drawFluoro(g,w,h,label,withImplant,live){
   g.restore();
   g.fillStyle='#e7eef1'; g.font='600 22px Tahoma, sans-serif'; g.fillText(label,18,32);
   g.font='18px Consolas, monospace'; g.fillStyle='#b9c7cd';
-  g.fillText('0:42   71 kV   2.4 mA', 18, h-16);
-  g.textAlign='right'; g.fillText('12.6 mGy', w-18, h-16); g.textAlign='left';
+  g.fillText(`${fmtT(rd.t)}   71 kV   2.4 mA`, 18, h-16);
+  g.textAlign='right'; g.fillText(`${rd.d.toFixed(1)} mGy`, w-18, h-16); g.textAlign='left';
   if(live){ g.fillStyle='#f0b443'; g.beginPath(); g.arc(w-150,26,8,0,7); g.fill();
-    g.font='600 20px Tahoma, sans-serif'; g.fillText('ฉายรังสี', w-134, 33); }
+    g.font='600 20px Tahoma, sans-serif'; g.fillText(T('xray'), w-134, 33); }
 }
 function drawTrefoil(g,w,h){
   g.fillStyle='#f2c418'; g.beginPath(); g.arc(w/2,h/2,w/2-2,0,7); g.fill();
@@ -345,7 +553,7 @@ function drawPanel(g,w,h,on){
   g.fillStyle='#0d1417'; g.fillRect(0,0,w,h);
   g.fillStyle='#14303a'; g.fillRect(14,14,w*0.55,h-28);
   g.fillStyle='#8fe0f0'; g.font='22px Consolas, monospace';
-  g.fillText('71 kV', 30, 52); g.fillText('2.4 mA', 30, 84); g.fillText('PULSE 15', 30, 116);
+  g.fillText('71 kV', 30, 52); g.fillText('2.4 mA', 30, 84); g.fillText(FL.pulsed?`PULSE ${PPS}`:'CONT', 30, 116);
   const cols=['#4d6c7a','#4d6c7a','#e5484d','#4d6c7a'];
   cols.forEach((c,i)=>{ g.fillStyle=c; g.beginPath(); g.roundRect(w*0.64+(i%2)*56, 22+Math.floor(i/2)*56, 44, 40, 6); g.fill(); });
   g.fillStyle= on ? '#f0b443' : '#3a3220'; g.beginPath(); g.arc(w-30,h-26,10,0,7); g.fill();
@@ -429,13 +637,15 @@ handle.position.set(0,0.72,2.27); handle.rotation.x=-0.2;
 anchor('base', stand, -0.34,0.5,1.92);
 
 /* monitor cart */
-const cart = new THREE.Group(); cart.position.set(2.05,0,0.75); cart.rotation.y=-1.0; scene.add(cart);
+// the screens face the scrub nurse across the table, the person who watches them during the case
+const cart = new THREE.Group(); cart.position.set(2.05,0,0.75);
+cart.rotation.y=Math.atan2(staff.position.x-cart.position.x, staff.position.z-cart.position.z); scene.add(cart);
 mesh(new THREE.BoxGeometry(0.72,0.1,0.56), M.trim, 'monitor', cart).position.y=0.12;
 mesh(new THREE.BoxGeometry(0.56,0.82,0.44), M.plastic, 'monitor', cart).position.y=0.6;
 mesh(new THREE.BoxGeometry(0.1,0.42,0.1), M.dark, 'monitor', cart).position.y=1.21;
 [[-0.3,0.3],[0.3,-0.3]].forEach(([x,ry])=>{ const w=mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16), M.dark, 'monitor', cart); w.rotation.z=Math.PI/2; w.position.set(x*1.05,0.05,0.2); });
-const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,'ภาพสด',true,!!on));
-const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,'ภาพอ้างอิง',false,false));
+const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,T('live'),true,!!on,{t:FL.cont.t+FL.pulse.t,d:FL.cont.d+FL.pulse.d}));
+const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,T('ref'),false,false,{t:42,d:12.6}));
 [[-0.3,0.14,liveTex],[0.3,-0.14,refTex]].forEach(([x,ry,tex])=>{
   const m=new THREE.Group(); m.position.set(x,1.6,0.02); m.rotation.y=ry; cart.add(m);
   mesh(new THREE.BoxGeometry(0.58,0.44,0.05), M.dark, 'monitor', m);
@@ -487,45 +697,49 @@ const stateEl=document.getElementById('state');
 const tags={};
 PARTS.forEach(p=>{
   const b=document.createElement('button'); b.className='tag'; b.type='button';
-  b.innerHTML=`<span class="n">${p.n}</span><span class="t">${p.name}</span>`;
-  b.setAttribute('aria-label',`${p.n} ${p.name}`);
   b.onclick=()=>select(sel===p.id?null:p.id); tagsEl.appendChild(b); tags[p.id]=b;
   const li=document.createElement('li');
-  li.innerHTML=`<button type="button" id="part-${p.id}"><span class="n">${p.n}</span><span><span class="nm">${p.name}</span>${p.en?`<span class="en">${p.en}</span>`:''}</span></button>`;
+  li.innerHTML=`<button type="button" id="part-${p.id}"></button>`;
   li.firstChild.onclick=()=>select(sel===p.id?null:p.id); partsEl.appendChild(li);
 });
+function renderPartNames(){
+  PARTS.forEach(p=>{
+    const b=tags[p.id];
+    b.innerHTML=`<span class="n">${p.n}</span><span class="t">${pName(p)}</span>`;
+    b.setAttribute('aria-label',`${p.n} ${pName(p)}`);
+    document.getElementById('part-'+p.id).innerHTML=`<span class="n">${p.n}</span><span><span class="nm">${pName(p)}</span>${pSub(p)?`<span class="en">${pSub(p)}</span>`:''}</span>`;
+  });
+}
 
 const st = {fire:false, flip:false, lat:false, tilt:0, beamScale:1};
 let sel=null;
 
 function extra(id){
-  if(id==='collimator') return `<label class="range" for="beamSize">ขนาดลำรังสี <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
+  if(id==='collimator') return `<label class="range" for="beamSize">${T('beamSize')} <span id="beamPct">${Math.round(st.beamScale*100)}%</span>
     <input type="range" id="beamSize" min="35" max="100" value="${Math.round(st.beamScale*100)}"></label>`;
-  if(id==='detector') return `<p class="muted">ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์</p>`;
-  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?'ตั้ง C Arm ตรง':'เอียง C Arm ให้ดู'}</button>
-    <p class="muted">O-Arm มีส่วนประกอบคล้ายกัน แต่เป็นวงแหวนรูปตัว O ที่หลอดและตัวรับภาพหมุนอยู่ภายใน</p>`;
-  if(id==='monitor') return `<p class="muted">แสดงเวลาฉายรังสีสะสม ค่าไฟฟ้า และปริมาณรังสีสะสม (mGy)</p>`;
-  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?'ปล่อยสวิตช์':'เหยียบสวิตช์: ฉายรังสี'}</button>`;
+  if(id==='detector') return `<p class="muted">${T('detectorNote')}</p>`;
+  if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?T('tiltOn'):T('tiltOff')}</button>
+    <p class="muted">${T('oarm')}</p>`;
+  if(id==='monitor') return `<p class="muted">${T('monitorNote')}</p>`;
+  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?T('pedalOff'):T('pedalOn')}</button>
+    <p class="muted">${T('modeNote')}</p>
+    <button class="act" type="button" data-act="mode">${FL.pulsed?T('toCont'):T('toPulse')}</button>`;
   return '';
 }
 function renderDetail(){
   if(!sel){
-    detailEl.innerHTML = `<p class="muted">แตะหมายเลขบนภาพหรือในรายการ เพื่อดูหน้าที่ของแต่ละส่วน ลากเพื่อหมุน ถ่างสองนิ้วหรือใช้ล้อเมาส์เพื่อซูม</p>
-      <ol class="try muted">
-        <li><b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง</li>
-        <li><b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม</li>
-        <li><b>ท่า LAT</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ</li>
-        <li>เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง</li>
-      </ol>`;
+    detailEl.innerHTML = `<p class="muted">${T('intro')}</p>
+      <ol class="try muted">${T('tries').map(x=>`<li>${x}</li>`).join('')}</ol>`;
     return;
   }
   const p=byId[sel];
   detailEl.hidden=false;
-  detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${p.name}${p.en?`<span class="en">${p.en}</span>`:''}</h2><p>${p.desc}</p>${extra(p.id)}`;
+  detailEl.innerHTML=`<h2><span class="n">${p.n}</span>${pName(p)}${pSub(p)?`<span class="en">${pSub(p)}</span>`:''}</h2><p>${pDesc(p)}</p>${extra(p.id)}`;
   detailEl.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.act;
     if(a==='tilt'){ st.tilt = st.tilt?0:0.5; }
-    if(a==='fire'){ setFire(!st.fire); }
+    if(a==='fire'){ pressAt=0; setFire(!st.fire); }
+    if(a==='mode'){ setMode(!FL.pulsed); }
     renderDetail();
   });
   const r=document.getElementById('beamSize');
@@ -547,32 +761,91 @@ function select(id){
 }
 
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin');
-function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?'กำลังฉายรังสี':'ฉายรังสี';
-  liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
-function flipLabel(){ return st.lat ? 'หลอดฝั่งทีม' : 'หลอดเหนือเตียง'; }
-function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
+const fireTitle=bFire.querySelector('.ft'), fireSub=bFire.querySelector('.fs');
+// Hold to expose, like the real switch; a press shorter than HOLD_MS leaves it on until the next press.
+const HOLD_MS=300; let pressAt=0;
+function labelFire(){ fireTitle.textContent=st.fire?T('firing'):T('fire');
+  fireSub.textContent=!st.fire?T('fireHold'):pressAt?T('fireLetGo'):T('fireLatched'); }
+function firePress(){
+  if(st.fire){ pressAt=0; setFire(false); } else { pressAt=performance.now(); setFire(true); }
+  if(sel==='switch') renderDetail();
+}
+function fireRelease(){
+  if(!pressAt) return;
+  const held=performance.now()-pressAt; pressAt=0;
+  if(held>=HOLD_MS){ setFire(false); if(sel==='switch') renderDetail(); } else labelFire();
+}
+function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); labelFire();
+  if(v){ FL.ph=0; FL.n=-1; if(FL.sound) ensureAudio(); } else setTone(0);
+  liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); showDose(); }
+
+// Exposure tone: two steady oscillators behind one gain, opened on the first press (browsers need a tap first).
+let actx=null, toneGain=null, toneLevel=0;
+function ensureAudio(){
+  if(!actx){
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    try{
+      actx=new AC(); toneGain=actx.createGain(); toneGain.gain.value=0; toneGain.connect(actx.destination);
+      [[880,1],[1320,0.35]].forEach(([f,v])=>{ const o=actx.createOscillator(), g=actx.createGain();
+        o.type='sine'; o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(toneGain); o.start(); });
+    }catch(e){ actx=null; return; }
+  }
+  if(actx.state==='suspended') actx.resume().catch(()=>{});
+}
+function setTone(v){ if(!actx||v===toneLevel) return; toneLevel=v; toneGain.gain.setTargetAtTime(v, actx.currentTime, 0.004); }
+document.addEventListener('visibilitychange',()=>{ if(!actx) return;
+  if(document.hidden) actx.suspend().catch(()=>{}); else if(st.fire&&FL.sound) actx.resume().catch(()=>{}); });
+
+const bCont=document.getElementById('bCont'), bPulse=document.getElementById('bPulse'), bSound=document.getElementById('bSound');
+const doseEl=document.getElementById('dose'), dCont=document.getElementById('dCont'), dPulse=document.getElementById('dPulse');
+function setMode(p){ FL.pulsed=p; FL.ph=0; FL.n=-1;
+  bCont.setAttribute('aria-pressed',!p); bPulse.setAttribute('aria-pressed',p); panelTex.redraw(st.fire); showDose(); }
+function labelSound(){ bSound.setAttribute('aria-checked',FL.sound); }
+function setSound(v){ FL.sound=v; labelSound();
+  try{ localStorage.setItem('carm-sound',v?'on':'off'); }catch(e){}
+  if(v&&st.fire) ensureAudio(); if(!v) setTone(0); }
+function showDose(){
+  [[dCont,FL.cont,false],[dPulse,FL.pulse,true]].forEach(([el,m,p])=>{
+    el.hidden=!(m.t>0); el.lastChild.textContent=`${m.t.toFixed(1)} s · ${m.d.toFixed(2)} mGy`;
+    el.classList.toggle('on',st.fire&&FL.pulsed===p); });
+  const any=FL.cont.t>0||FL.pulse.t>0; doseEl.hidden=!any; stage.classList.toggle('has-dose',any);
+}
+function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-checked',v); updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
-function setLat(v){ st.lat=v; bLat.setAttribute('aria-pressed',v); bLat.textContent=v?'ท่า LAT':'ท่า AP'; setFlip(st.flip); }
+const bAP=document.getElementById('bAP'), bLat=document.getElementById('bLat');
+function setLat(v){ st.lat=v; bAP.setAttribute('aria-pressed',!v); bLat.setAttribute('aria-pressed',v); setFlip(st.flip); }
 function updateState(){
   if(st.lat){
     stateEl.hidden=!(st.fire||st.flip);
     stateEl.className=st.flip?'state warn':'state';
     stateEl.innerHTML = st.flip
-      ? (st.fire ? '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง' : '<b>ท่า LAT · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย')
-      : 'ท่า LAT · X-ray tube ฝั่งตรงข้ามทีม: รังสีฟุ้งกระจายส่วนใหญ่อยู่ฝั่ง X-ray tube ทีมยืนฝั่งตัวรับภาพ';
+      ? (st.fire ? T('latTeamFire') : T('latTeam'))
+      : T('latOk');
     return;
   }
   if(st.flip){ stateEl.hidden=false; stateEl.className='state warn';
-    stateEl.innerHTML= st.fire ? '<b>X-ray tube อยู่เหนือเตียง:</b> รังสีฟุ้งกระจายพุ่งขึ้นไปที่ศีรษะและตาของทีม' : '<b>X-ray tube อยู่เหนือเตียง</b> ไม่ใช่ตำแหน่งมาตรฐาน กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย'; }
+    stateEl.innerHTML= st.fire ? T('overFire') : T('over'); }
   else if(st.fire){ stateEl.hidden=false; stateEl.className='state';
-    stateEl.innerHTML='X-ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม'; }
+    stateEl.innerHTML=T('underFire'); }
   else stateEl.hidden=true;
 }
-bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
+// pointer capture keeps the release with the button even if the finger slides off it
+bFire.addEventListener('pointerdown',e=>{ if(e.button) return; e.preventDefault();
+  if(bFire.setPointerCapture) try{ bFire.setPointerCapture(e.pointerId); }catch(_){}
+  firePress(); });
+['pointerup','pointercancel'].forEach(ev=>bFire.addEventListener(ev,fireRelease));
+bFire.addEventListener('contextmenu',e=>e.preventDefault());   // long press on a phone would open a menu
+bFire.addEventListener('keydown',e=>{ if(e.key!==' '&&e.key!=='Enter') return; e.preventDefault(); if(!e.repeat) firePress(); });
+bFire.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') fireRelease(); });
+addEventListener('blur',fireRelease);   // a release we never see (switching apps) must not leave the beam on
+function setModeTo(p){ if(FL.pulsed!==p){ setMode(p); if(sel==='switch') renderDetail(); } }
+bCont.onclick=()=>setModeTo(false);
+bPulse.onclick=()=>setModeTo(true);
+bAP.onclick=()=>setLat(false);
+bLat.onclick=()=>setLat(true);
+bSound.onclick=()=>setSound(!FL.sound);
 bFlip.onclick=()=>setFlip(!st.flip);
-const bLat=document.getElementById('bLat');
-bLat.onclick=()=>setLat(!st.lat);
-bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-pressed',controls.autoRotate); };
+bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute('aria-checked',controls.autoRotate); };
 document.getElementById('bHome').onclick=()=>select(null);
 // Fullscreen: hidden where the browser has none (iPhone Safari) or the frame doesn't allow it
 const bFull=document.getElementById('bFull');
@@ -586,8 +859,35 @@ bFull.onclick=()=>{
 };
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
-  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?'ออกจากเต็มจอ':'เต็มจอ';
+  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?T('fullOff'):T('full');
 }));
+// Sideways phones: the camera buttons move to the side panel so the machine card fits under the model.
+const toolbarEl=document.querySelector('.toolbar'), cameraEl=document.querySelector('.camera'), railHead=document.querySelector('.rail>header');
+const sideMQ=matchMedia('(max-height:560px) and (orientation:landscape)');
+function placeCamera(){ if(sideMQ.matches) railHead.after(cameraEl); else toolbarEl.appendChild(cameraEl); }
+if(sideMQ.addEventListener) sideMQ.addEventListener('change',placeCamera); else sideMQ.addListener(placeCamera);
+placeCamera();
+if(window.ResizeObserver) new ResizeObserver(()=>stage.style.setProperty('--tbh',toolbarEl.offsetHeight+'px')).observe(toolbarEl);
+const bLang=document.getElementById('bLang');
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.title=T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.innerHTML=T(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',T(el.dataset.i18nAria)));
+  bLang.textContent=T('lang'); bLang.setAttribute('aria-label',T('langAria')); bLang.lang=LANG==='en'?'th':'en';
+  const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  bFull.textContent=on?T('fullOff'):T('full');
+  renderPartNames();
+  setFire(st.fire); setLat(st.lat); setMode(FL.pulsed); labelSound(); refTex.redraw();
+  renderDetail();
+}
+bLang.onclick=()=>{
+  LANG = LANG==='en' ? 'th' : 'en'; window.LANG=LANG;
+  try{ localStorage.setItem('carm-lang',LANG); }catch(e){}
+  try{ const u=new URL(location.href); u.searchParams.set('lang',LANG); history.replaceState(null,'',u); }catch(e){}
+  applyLang();
+};
+applyLang();
 addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.ctrlKey||e.metaKey||e.altKey) return;
   const i=sel?byId[sel].n-1:-1;
@@ -595,12 +895,15 @@ addEventListener('keydown',e=>{
   else if(e.key==='ArrowLeft'){ select(PARTS[(i+6)%7].id); e.preventDefault(); }
   else if(e.key>='1'&&e.key<='7') select(PARTS[+e.key-1].id);
   else if(e.key==='0'||e.key==='Escape') select(null);
-  else if(e.key==='x'||e.key==='X') bFire.click();
+  else if(e.key==='x'||e.key==='X'){ if(!e.repeat) firePress(); }
   else if(e.key==='f'||e.key==='F') bFlip.click();
-  else if(e.key==='l'||e.key==='L') bLat.click();
+  else if(e.key==='l'||e.key==='L') setLat(!st.lat);
   else if(e.key==='r'||e.key==='R') bSpin.click();
+  else if(e.key==='p'||e.key==='P') setModeTo(!FL.pulsed);
+  else if(e.key==='m'||e.key==='M') bSound.click();
   else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
 });
+addEventListener('keyup',e=>{ if(e.key==='x'||e.key==='X') fireRelease(); });
 
 /* click on a part in 3D */
 const ray=new THREE.Raycaster(), ndc=new THREE.Vector2(); let down=null;
@@ -650,7 +953,7 @@ resize();
 
 /* ---------- loop ---------- */
 const clock=new THREE.Clock(), black=new THREE.Color(0), accent=new THREE.Color(0xf0b443), proj=new THREE.Vector3();
-let beamA=0, danger=0, rot=0, orb=0;
+let beamA=0, danger=0, rot=0, orb=0, readoutT=0;
 const tubeW=new THREE.Vector3(), pivW=new THREE.Vector3();
 renderDetail();
 function frame(){
@@ -667,7 +970,19 @@ function frame(){
   pivot.updateMatrixWorld(true);
   tubeDir.copy(tubeG.getWorldPosition(tubeW)).sub(pivot.getWorldPosition(pivW)).normalize();
 
-  beamA+=((st.fire?1:0)-beamA)*Math.min(1,dt*8);
+  // Pulsed: the beam and the tone are on for DUTY of each pulse; reduced motion keeps a steady, dimmer beam on screen.
+  let gate=1;
+  if(st.fire){
+    // pulse phase runs on frame time (dt is capped), so a paused tab doesn't add a burst of pulses on return
+    const m=FL.pulsed?FL.pulse:FL.cont;
+    m.t+=dt; FL.ph+=dt;
+    if(FL.pulsed){ const n=Math.floor(FL.ph*PPS); while(FL.n<n){ FL.n++; m.d+=DOSE_PULSE; } gate=(FL.ph*PPS)%1<DUTY?1:0; }
+    else m.d+=DOSE_RATE*dt;
+    readoutT+=dt; if(readoutT>0.2){ readoutT=0; showDose(); liveTex.redraw(true); }
+  }
+  setTone(st.fire&&FL.sound?0.07*gate:0);
+  const shown = FL.pulsed&&REDUCED ? 0.55 : gate;
+  beamA+=((st.fire?shown:0)-beamA)*Math.min(1,dt*(FL.pulsed?30:8));
   beam.visible=beamA>0.01; beamMats[0].opacity=0.16*beamA; beamMats[1].opacity=0.3*beamA*(0.85+0.15*Math.sin(t*30));
   beam.scale.set(st.beamScale,1,st.beamScale);
   pedals[0].position.y += ((st.fire?0.05:0.066)-pedals[0].position.y)*Math.min(1,dt*12);
@@ -677,7 +992,8 @@ function frame(){
   warnRing.scale.setScalar(1+0.08*Math.sin(t*6));
 
   // scatter
-  let spawnBudget = st.fire ? Math.ceil(dt*(LITE?170:420)*st.beamScale) : 0;
+  const spawnK = !st.fire ? 0 : !FL.pulsed ? 1 : REDUCED ? DUTY : gate;
+  let spawnBudget = spawnK ? Math.ceil(dt*(LITE?170:420)*st.beamScale*spawnK) : 0;
   for(let i=0;i<NS;i++){
     const s=S[i];
     if(!s.alive && spawnBudget>0){ spawn(s); spawnBudget--; }
@@ -705,9 +1021,9 @@ function frame(){
   diagFrames++;
   if(!diagEl.hidden && performance.now()-diagT0>1000){
     const fps=Math.round(diagFrames*1000/(performance.now()-diagT0));
-    diagEl.textContent=`ภาพต่อวินาที  ${fps}
-ลดการเคลื่อนไหว  ${REDUCED?'เปิด (กล้องจะกระโดด)':'ปิด'}
-ความละเอียด  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.width}×${renderer.domElement.height}`;
+    diagEl.textContent=`${T('fps')}  ${fps}
+${T('reduced')}  ${REDUCED?T('reducedOn'):T('reducedOff')}
+${T('res')}  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.width}×${renderer.domElement.height}`;
     diagFrames=0; diagT0=performance.now();
   } else if(diagEl.hidden){ diagFrames=0; diagT0=performance.now(); }
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "C-Arm สามมิติ · ทดลองใช้เอง",
-  description: "แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด เปลี่ยนท่า AP/LAT และดูหน้าที่ของแต่ละส่วนได้เอง ไม่ต้องใช้รหัสห้อง",
+  description: "แบบจำลองสามมิติของเครื่อง C-Arm ทดลองฉายรังสี กลับด้านหลอด สลับ A-P/Lateral view และดูหน้าที่ของแต่ละส่วนได้เอง ไม่ต้องใช้รหัสห้อง",
 };
 
 // Self-guided 3D model for anyone, during or after the seminar: no room code, every control in the viewer's hands.
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function SimulatorPage() {
   return (
     <iframe
-      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/carm-simulator.html?v=${process.env.MODEL_BUILD}`}
+      src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/carm-simulator.html?lang=th&v=${process.env.MODEL_BUILD}`}
       title="แบบจำลองสามมิติของเครื่อง C-Arm"
       allow="fullscreen"
       allowFullScreen

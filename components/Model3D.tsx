@@ -81,8 +81,8 @@ export function Model3DControls({ sim, onChange, busy }: { sim: Sim; onChange: (
         <span className="text-sm text-mist">ท่าถ่าย</span>
         <div className="flex overflow-hidden rounded-xl border-2 border-sky" role="group" aria-label="ท่าถ่าย">
           {([
-            [false, "AP"],
-            [true, "LAT"],
+            [false, "A-P view"],
+            [true, "Lateral view"],
           ] as const).map(([lat, label]) => (
             <button
               key={label}
