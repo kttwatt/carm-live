@@ -113,6 +113,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .lang{cursor:pointer;padding:3px 10px;border-radius:999px;background:none;border:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.5}
 .lang:hover{color:var(--ink);border-color:#3d525c}
 .try{margin:0;padding-left:20px;display:grid;gap:6px}
+/* "Self-guided": the how-to-use text folds away behind one button, closed at first */
+.guide-b{justify-self:start;display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:6px 14px;border-radius:999px;
+  background:none;border:1px solid var(--accent);color:var(--accent);font-size:14px;font-weight:500}
+.guide-b:hover{background:rgba(240,180,67,.1)}
+.guide-b .chev{width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.guide-b[aria-expanded="true"] .chev{transform:translateY(1px) rotate(-135deg)}
+.guide{display:grid;gap:10px}
+.detail > .guide-b,.detail > .guide{margin-left:0}
 .try b{color:var(--accent);font-weight:600}
 .parts{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .parts button{width:100%;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:center;text-align:left;cursor:pointer;
@@ -235,6 +243,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
   .parts button{min-height:44px}
   .tag .n{width:30px;height:30px}
   .act{padding:10px 14px}
+  .guide-b{min-height:44px;padding:6px 16px}
   .lang{min-height:36px;padding:3px 14px}
   .range input{height:32px}
 }
@@ -289,7 +298,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
         <a class="home" href="./" target="_top" data-i18n="back">‹ หน้าแรก</a>
         <button class="lang" id="bLang" type="button"></button>
       </div>
-      <p class="eyebrow" data-i18n="eyebrow">แบบจำลองสามมิติ · ทดลองใช้เอง</p>
+      <p class="eyebrow" data-i18n="eyebrow">แบบจำลองสามมิติ</p>
       <h1 data-i18n="h1">ส่วนประกอบของเครื่อง C-Arm</h1>
     </header>
     <ol class="parts" id="parts"></ol>
@@ -380,7 +389,7 @@ const TEXT = {
     fire:'ฉายรังสี', firing:'กำลังฉายรังสี', fireHold:'กดค้างไว้', fireLetGo:'ปล่อยเพื่อหยุด', fireLatched:'แตะเพื่อหยุด',
     spin:'หมุนรอบ', home:'ภาพรวม', sound:'เสียง', full:'เต็มจอ', fullOff:'ออกจากเต็มจอ',
     back:'‹ หน้าแรก', lang:'EN', langAria:'Switch to English',
-    eyebrow:'แบบจำลองสามมิติ · ทดลองใช้เอง', h1:'ส่วนประกอบของเครื่อง C-Arm',
+    eyebrow:'แบบจำลองสามมิติ', guide:'ทดลองใช้เอง', h1:'ส่วนประกอบของเครื่อง C-Arm',
     keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี (กดค้าง) · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> เปิด/ปิดเสียง · <kbd>R</kbd> หมุนรอบ',
     copy:'© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า',
     beamSize:'ขนาดลำรังสี',
@@ -416,7 +425,7 @@ const TEXT = {
     fire:'Fire X-ray', firing:'X-ray on', fireHold:'Press and hold', fireLetGo:'Release to stop', fireLatched:'Tap to stop',
     spin:'Auto-rotate', home:'Overview', sound:'Sound', full:'Full screen', fullOff:'Exit full screen',
     back:'‹ Home', lang:'ไทย', langAria:'เปลี่ยนเป็นภาษาไทย',
-    eyebrow:'3D model · Self-guided', h1:'Parts of a C-Arm',
+    eyebrow:'3D model', guide:'Self-guided', h1:'Parts of a C-Arm',
     keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray (hold) · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> sound on/off · <kbd>R</kbd> auto-rotate',
     copy:'© 2026 Kittiwat · Free to use for teaching with credit; non-commercial',
     beamSize:'Beam size',
@@ -726,10 +735,14 @@ function extra(id){
     <button class="act" type="button" data-act="mode">${FL.pulsed?T('toCont'):T('toPulse')}</button>`;
   return '';
 }
+let guideOpen=false;
 function renderDetail(){
   if(!sel){
-    detailEl.innerHTML = `<p class="muted">${T('intro')}</p>
-      <ol class="try muted">${T('tries').map(x=>`<li>${x}</li>`).join('')}</ol>`;
+    detailEl.innerHTML = `<button class="guide-b" type="button" aria-expanded="${guideOpen}" aria-controls="guide">${T('guide')}<span class="chev" aria-hidden="true"></span></button>
+      <div class="guide" id="guide"${guideOpen?'':' hidden'}><p class="muted">${T('intro')}</p>
+      <ol class="try muted">${T('tries').map(x=>`<li>${x}</li>`).join('')}</ol></div>`;
+    const gb=detailEl.querySelector('.guide-b'), g=detailEl.querySelector('.guide');
+    gb.onclick=()=>{ guideOpen=!guideOpen; gb.setAttribute('aria-expanded',guideOpen); g.hidden=!guideOpen; };
     return;
   }
   const p=byId[sel];
