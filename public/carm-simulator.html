@@ -101,6 +101,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #bSound .ico{width:20px;height:20px;flex:none}
 #bSound[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
 #bSound[aria-checked="true"] .s-off,#bSound[aria-checked="false"] .s-on{display:none}
+/* full screen: corners pointing out to enter, pointing in to leave */
+#bFull .ico{width:20px;height:20px;flex:none}
+#bFull[aria-pressed="true"] .f-on,#bFull[aria-pressed="false"] .f-off{display:none}
 /* the tube above the table is not the standard position: orange like the scatter warning */
 #bFlip[aria-checked="true"]{border-color:var(--scatter);color:#ffd2b5}
 #bFlip[aria-checked="true"] .knob{background:var(--scatter)}
@@ -293,7 +296,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
         <button class="tb" id="bHome" type="button" data-i18n="home">ภาพรวม</button>
         <button class="tb sw" id="bSpin" type="button" role="switch" aria-checked="false"><span class="knob"></span><span data-i18n="spin">หมุนรอบ</span></button>
         <button class="tb" id="bSound" type="button" role="switch" aria-checked="true" data-i18n-aria="sound" aria-label="เสียง"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="s-on" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="s-off" d="m16 9 6 6m0-6-6 6"/></svg></button>
-        <button class="tb" id="bFull" type="button" aria-pressed="false">เต็มจอ</button>
+        <button class="tb" id="bFull" type="button" aria-pressed="false" aria-label="เต็มจอ"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="f-on" d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/><path class="f-off" d="M9 4v5H4m11-5v5h5m0 6h-5v5M4 15h5v5"/></svg></button>
       </div>
     </div>
   </div>
@@ -870,6 +873,8 @@ bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute
 document.getElementById('bHome').onclick=()=>select(null);
 // Fullscreen: hidden where the browser has none (iPhone Safari) or the frame doesn't allow it
 const bFull=document.getElementById('bFull');
+function labelFull(){ const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  bFull.setAttribute('aria-label',on?T('fullOff'):T('full')); bFull.title=bFull.getAttribute('aria-label'); }
 bFull.hidden=!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
 bFull.onclick=()=>{
   const el=document.getElementById('app');
@@ -880,7 +885,7 @@ bFull.onclick=()=>{
 };
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
-  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?T('fullOff'):T('full');
+  bFull.setAttribute('aria-pressed',on); labelFull();
 }));
 // Sideways phones: the camera buttons move to the side panel so the machine card fits under the model.
 const toolbarEl=document.querySelector('.toolbar'), cameraEl=document.querySelector('.camera'), railHead=document.querySelector('.rail>header');
@@ -896,8 +901,7 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.innerHTML=T(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',T(el.dataset.i18nAria)));
   bLang.textContent=T('lang'); bLang.setAttribute('aria-label',T('langAria')); bLang.lang=LANG==='en'?'th':'en';
-  const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
-  bFull.textContent=on?T('fullOff'):T('full');
+  labelFull();
   renderPartNames(); renderGuide();
   setFire(st.fire); setLat(st.lat); setMode(FL.pulsed); labelSound(); refTex.redraw();
   renderDetail();
