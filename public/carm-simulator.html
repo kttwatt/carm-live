@@ -101,6 +101,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #bSound .ico{width:20px;height:20px;flex:none}
 #bSound[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
 #bSound[aria-checked="true"] .s-off,#bSound[aria-checked="false"] .s-on{display:none}
+/* full screen: corners pointing out to enter, pointing in to leave */
+#bFull .ico{width:20px;height:20px;flex:none}
+#bFull[aria-pressed="true"] .f-on,#bFull[aria-pressed="false"] .f-off{display:none}
 /* the tube above the table is not the standard position: orange like the scatter warning */
 #bFlip[aria-checked="true"]{border-color:var(--scatter);color:#ffd2b5}
 #bFlip[aria-checked="true"] .knob{background:var(--scatter)}
@@ -158,6 +161,30 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .copy{margin:0}
 .copy a{color:inherit;text-underline-offset:2px}
 .copy a:hover{color:var(--ink)}
+/* the scrub nurse: dose at eyes, neck and trunk, and the protection they wear */
+.staffp{border-top:1px solid var(--line);padding-top:16px;display:grid;gap:10px}
+.staffp h2{margin:0;font-family:var(--f-display);font-weight:600;font-size:19px;line-height:1.3}
+.staffp h3{margin:4px 0 0;font-size:14px;font-weight:600}
+.staffp p{margin:0}
+.dist{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.dist b{font-family:var(--f-mono);font-weight:500}
+.mv{display:flex;flex-wrap:wrap;gap:6px}
+.act.sm{padding:4px 10px;font-size:13px}
+.bars{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.bars li{display:grid;grid-template-columns:minmax(5.5em,auto) 1fr 3.6em;align-items:center;gap:8px;font-size:13.5px}
+.bars .bt{height:8px;border-radius:4px;background:#22303a;overflow:hidden}
+.bars .bt i{display:block;height:100%;width:0;border-radius:4px;background:var(--accent);transition:width .2s}
+.bars li.hi .bt i{background:var(--scatter)}
+.bars .bv{font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.prot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.prot .tb{justify-content:flex-start;padding:7px 10px;font-size:13.5px;text-align:left}
+.prot .tb[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
+/* badge over the nurse's head: dose to the eyes */
+.who{position:absolute;left:0;top:0;pointer-events:none;padding:3px 9px;border-radius:8px;background:rgba(14,20,24,.86);border:1px solid var(--line);
+  font-size:12px;line-height:1.4;white-space:nowrap;text-align:center;will-change:transform}
+.who b{font-family:var(--f-mono);font-weight:500}
+.who .h{color:var(--muted)}
+.who.hi{border-color:var(--scatter);color:#ffd2b5}
 kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px}
 
 .diag{position:absolute;right:16px;top:16px;padding:8px 12px;border-radius:8px;background:rgba(14,20,24,.92);border:1px solid var(--line);font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre}
@@ -190,6 +217,8 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
   /* the panel is too narrow for a switch beside the label: on = gold, like the other pressed buttons */
   .rail .camera .sw .knob{display:none}
   .rail .camera .sw[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
+  .prot{grid-template-columns:1fr}
+  .prot .tb{white-space:normal}
   .rail{padding:12px 14px;gap:10px}
   .rail h1{font-size:18px}
   .eyebrow,.keys{display:none}
@@ -220,7 +249,8 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
   .rail>header{order:0}
   .detail{order:1;border-top:0;padding-top:0}
   .parts{order:2;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line);padding-top:14px}
-  .foot{order:3}
+  .staffp{order:3}
+  .foot{order:4}
   .keys{display:none}
   .state{top:10px;font-size:13.5px}
   .dose{top:auto;bottom:10px;left:10px}
@@ -262,6 +292,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
     <section class="stage" id="stage">
       <canvas id="c" data-i18n-aria="canvas" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
       <div class="tags" id="tags"></div>
+      <div class="who" id="who" aria-hidden="true"></div>
       <div class="state" id="state" hidden></div>
       <div class="dose" id="dose" hidden>
         <span class="h" data-i18n="doseH">เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)</span>
@@ -293,7 +324,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
         <button class="tb" id="bHome" type="button" data-i18n="home">ภาพรวม</button>
         <button class="tb sw" id="bSpin" type="button" role="switch" aria-checked="false"><span class="knob"></span><span data-i18n="spin">หมุนรอบ</span></button>
         <button class="tb" id="bSound" type="button" role="switch" aria-checked="true" data-i18n-aria="sound" aria-label="เสียง"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="s-on" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="s-off" d="m16 9 6 6m0-6-6 6"/></svg></button>
-        <button class="tb" id="bFull" type="button" aria-pressed="false">เต็มจอ</button>
+        <button class="tb" id="bFull" type="button" aria-pressed="false" aria-label="เต็มจอ"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="f-on" d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/><path class="f-off" d="M9 4v5H4m11-5v5h5m0 6h-5v5M4 15h5v5"/></svg></button>
       </div>
     </div>
   </div>
@@ -313,6 +344,27 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
     </header>
     <ol class="parts" id="parts"></ol>
     <article class="detail" id="detail" aria-live="polite"></article>
+    <section class="staffp" aria-labelledby="staffH">
+      <h2 id="staffH" data-i18n="staffH">รังสีที่ตัวพยาบาล</h2>
+      <p class="muted" data-i18n="staffSub">ลากหุ่นบนภาพ หรือกดปุ่มด้านล่าง เพื่อย้ายที่ยืน</p>
+      <div class="dist"><span data-i18n="dist">ห่างจากจุดฉาย</span> <b id="distV"></b>
+        <span class="mv"><button class="act sm" id="bCloser" type="button" data-i18n="closer">เข้าใกล้</button><button class="act sm" id="bFarther" type="button" data-i18n="farther">ถอยห่าง</button><button class="act sm" id="bStaffHome" type="button" data-i18n="staffHome">ที่เดิม</button></span></div>
+      <p class="muted" data-i18n="unit">ค่าจำลอง · µGy ต่อ 1 นาทีที่ฉาย</p>
+      <ul class="bars" id="bars">
+        <li data-k="eye"><span data-i18n="eye">ตา</span><span class="bt"><i></i></span><span class="bv"></span></li>
+        <li data-k="neck"><span data-i18n="neck">คอ (ไทรอยด์)</span><span class="bt"><i></i></span><span class="bv"></span></li>
+        <li data-k="trunk"><span data-i18n="trunk">ลำตัว</span><span class="bt"><i></i></span><span class="bv"></span></li>
+      </ul>
+      <p class="muted" data-i18n="distNote">ถอยห่างออก 2 เท่า รังสีเหลือราว ¼</p>
+      <h3 data-i18n="protH">อุปกรณ์ป้องกัน</h3>
+      <div class="prot">
+        <button class="tb sw" type="button" role="switch" aria-checked="false" data-prot="apron"><span class="knob"></span><span data-i18n="apron">เสื้อตะกั่ว</span></button>
+        <button class="tb sw" type="button" role="switch" aria-checked="false" data-prot="collar"><span class="knob"></span><span data-i18n="collar">ปลอกคอกันไทรอยด์</span></button>
+        <button class="tb sw" type="button" role="switch" aria-checked="false" data-prot="glasses"><span class="knob"></span><span data-i18n="glasses">แว่นตะกั่ว</span></button>
+        <button class="tb sw" type="button" role="switch" aria-checked="false" data-prot="shield"><span class="knob"></span><span data-i18n="shield">ฉากกั้นตะกั่ว</span></button>
+      </div>
+      <p class="muted" data-i18n="protNote">ฉากกั้นตะกั่วช่วยได้เมื่อยืนอยู่หลังฉากเท่านั้น</p>
+    </section>
     <footer class="foot">
       <p class="keys" data-i18n="keys">ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี (กดค้าง) · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ</p>
       <p class="copy"><span data-i18n="copy">© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า</span> · <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">CC BY-NC 4.0</a></p>
@@ -413,7 +465,9 @@ const TEXT = {
       '<b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม',
       '<b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ',
       '<b>Pulsed</b> แล้วฉายนานเท่าเดิม เทียบเวลาและปริมาณรังสีกับ Continuous ที่มุมของภาพ',
-      'เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง'],
+      'เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง',
+      'ลาก<b>หุ่นพยาบาล</b>ให้ห่างจากผู้ป่วย ดูรังสีที่ตัวลดลง ถอยห่างออก 2 เท่า เหลือราว ¼',
+      'เปิด<b>อุปกรณ์ป้องกัน</b>ทีละชิ้น ดูว่าส่วนไหนของร่างกายได้รังสีน้อยลง'],
     doseH:'เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)',
     modeNote:'<b>Continuous</b> ฉายต่อเนื่องตลอดเวลาที่กดสวิตช์ <b>Pulsed</b> ฉายเป็นจังหวะสั้น ๆ (3 ครั้งต่อวินาที) ได้ปริมาณรังสีน้อยกว่า',
     toCont:'เปลี่ยนเป็น Continuous', toPulse:'เปลี่ยนเป็น Pulsed',
@@ -425,6 +479,12 @@ const TEXT = {
     underFire:'X-ray tube อยู่ใต้เตียง: รังสีฟุ้งกระจายส่วนใหญ่ย้อนลงไปทางใต้เตียง ห่างจากศีรษะของทีม',
     live:'ภาพสด', ref:'ภาพอ้างอิง', xray:'ฉายรังสี',
     fps:'ภาพต่อวินาที', reduced:'ลดการเคลื่อนไหว', reducedOn:'เปิด (กล้องจะกระโดด)', reducedOff:'ปิด', res:'ความละเอียด',
+    staffH:'รังสีที่ตัวพยาบาล', staffSub:'ลากหุ่นบนภาพ หรือกดปุ่มด้านล่าง เพื่อย้ายที่ยืน', dist:'ห่างจากจุดฉาย', m:'ม.',
+    closer:'เข้าใกล้', farther:'ถอยห่าง', staffHome:'ที่เดิม', unit:'ค่าจำลอง · µGy ต่อ 1 นาทีที่ฉาย',
+    eye:'ตา', neck:'คอ (ไทรอยด์)', trunk:'ลำตัว', perMin:'µGy/นาที', drag:'ลากเพื่อย้าย',
+    distNote:'ถอยห่างออก 2 เท่า รังสีเหลือราว ¼',
+    protH:'อุปกรณ์ป้องกัน', apron:'เสื้อตะกั่ว', collar:'ปลอกคอกันไทรอยด์', glasses:'แว่นตะกั่ว', shield:'ฉากกั้นตะกั่ว',
+    protNote:'ฉากกั้นตะกั่วช่วยได้เมื่อยืนอยู่หลังฉากเท่านั้น',
   },
   en:{
     title:'3D C-Arm · Self-guided',
@@ -449,7 +509,9 @@ const TEXT = {
       '<b>Invert</b>, then fire again: the tube is above the table and scatter goes to the team\'s heads and eyes',
       '<b>Lateral view</b>: keep the tube on the side opposite the team; the team stands on the detector side',
       '<b>Pulsed</b>, then fire for the same time: compare the time and dose with Continuous in the corner of the view',
-      'Select the <b>Collimator (2)</b> to narrow the beam'],
+      'Select the <b>Collimator (2)</b> to narrow the beam',
+      'Drag the <b>nurse</b> away from the patient and watch their dose drop: twice as far, about a quarter',
+      'Turn on the <b>protection</b> one item at a time and see which part of the body it protects'],
     doseH:'Fluoro time · dose (illustrative)',
     modeNote:'<b>Continuous</b> exposes for as long as the switch is pressed. <b>Pulsed</b> exposes in short pulses (3 per second) and gives a lower dose.',
     toCont:'Switch to Continuous', toPulse:'Switch to Pulsed',
@@ -461,6 +523,12 @@ const TEXT = {
     underFire:'X-ray tube under the table: most scatter goes back down under the table, away from the team\'s heads',
     live:'LIVE', ref:'REFERENCE', xray:'X-RAY',
     fps:'Frames per second', reduced:'Reduced motion', reducedOn:'on (camera jumps)', reducedOff:'off', res:'Resolution',
+    staffH:'Dose to the scrub nurse', staffSub:'Drag the figure on the model, or use the buttons below, to move them', dist:'From the beam', m:'m',
+    closer:'Closer', farther:'Farther', staffHome:'Reset', unit:'Illustrative · µGy per minute of fluoroscopy',
+    eye:'Eyes', neck:'Neck (thyroid)', trunk:'Trunk', perMin:'µGy/min', drag:'Drag to move',
+    distNote:'Twice as far: about a quarter of the dose',
+    protH:'Protection', apron:'Lead apron', collar:'Thyroid collar', glasses:'Lead glasses', shield:'Ceiling shield',
+    protNote:'The ceiling shield only helps when you stand behind it',
   },
 };
 const T = k => TEXT[LANG][k];
@@ -595,7 +663,7 @@ mesh(new THREE.SphereGeometry(0.1,24,16), M.skin, null, room).position.set(-0.98
 mesh(new THREE.BoxGeometry(0.3,0.05,0.34), M.plastic, null, room).position.set(-0.98,0.97,0);
 
 // a scrub nurse standing across the table (ghosted) — the person scatter reaches
-const ghost = new THREE.MeshStandardMaterial({color:0x9db3bd, transparent:true, opacity:0.26, depthWrite:false, roughness:0.8});
+const ghost = new THREE.MeshStandardMaterial({color:0x9db3bd, transparent:true, opacity:0.34, depthWrite:false, roughness:0.8});
 const staff = new THREE.Group(); staff.position.set(0.42,0,-0.78); room.add(staff);
 [[-0.08],[0.08]].forEach(([x])=>{ const l=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.055,0.85,12),ghost); l.position.set(x,0.43,0); staff.add(l); });
 const body = new THREE.Mesh(new THREE.CylinderGeometry(0.17,0.15,0.62,18),ghost); body.position.y=1.17; staff.add(body);
@@ -603,6 +671,32 @@ const head = new THREE.Mesh(new THREE.SphereGeometry(0.105,20,16),ghost); head.p
 const warnRing = new THREE.Mesh(new THREE.TorusGeometry(0.17,0.012,8,40),
   new THREE.MeshBasicMaterial({color:0xff8a3d, transparent:true, opacity:0}));
 warnRing.position.y=1.62; warnRing.rotation.x=Math.PI/2; staff.add(warnRing);
+const STAFF_HOME = staff.position.clone();
+// protection the nurse can put on (shown when switched on)
+const gearMat = new THREE.MeshStandardMaterial({color:0x34505e, roughness:0.7, transparent:true, opacity:0.92});
+const gear = {
+  apron:   new THREE.Mesh(new THREE.CylinderGeometry(0.188,0.178,0.66,18), gearMat),
+  collar:  new THREE.Mesh(new THREE.TorusGeometry(0.085,0.03,8,24), gearMat),
+  glasses: new THREE.Mesh(new THREE.TorusGeometry(0.108,0.016,6,32), new THREE.MeshStandardMaterial({color:0x10202a, roughness:0.2, metalness:0.5})),
+};
+gear.apron.position.y=1.12; gear.collar.position.y=1.5; gear.glasses.position.y=1.64;
+gear.collar.rotation.x=gear.glasses.rotation.x=Math.PI/2;
+for(const k in gear){ gear[k].visible=false; staff.add(gear[k]); }
+// a gold ring on the floor says "you can move me"; a larger invisible column is easier to grab than the thin figure
+const staffRing = new THREE.Mesh(new THREE.RingGeometry(0.26,0.3,40), new THREE.MeshBasicMaterial({color:0xf0b443, transparent:true, opacity:0.55, side:THREE.DoubleSide, depthWrite:false}));
+staffRing.rotation.x=-Math.PI/2; staffRing.position.y=0.006; staff.add(staffRing);
+const staffHit = new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,1.8,12), new THREE.MeshBasicMaterial({visible:false}));
+staffHit.position.y=0.9; staff.add(staffHit);
+// ceiling-suspended lead acrylic shield, fixed on the nurse's side of the table; it only helps someone standing behind it
+const SHIELD = {x0:-0.03, x1:0.87, y0:1.2, y1:1.95, z:-0.5};
+const shieldG = new THREE.Group(); shieldG.visible=false; scene.add(shieldG);
+const paneGeo = new THREE.BoxGeometry(SHIELD.x1-SHIELD.x0, SHIELD.y1-SHIELD.y0, 0.012);
+const pane = new THREE.Mesh(paneGeo, new THREE.MeshStandardMaterial({color:0x9fd3e6, transparent:true, opacity:0.22, roughness:0.1, metalness:0.1, depthWrite:false}));
+pane.position.set((SHIELD.x0+SHIELD.x1)/2, (SHIELD.y0+SHIELD.y1)/2, SHIELD.z); shieldG.add(pane);
+const paneEdge = new THREE.LineSegments(new THREE.EdgesGeometry(paneGeo), new THREE.LineBasicMaterial({color:0x6f8c99}));
+paneEdge.position.copy(pane.position); shieldG.add(paneEdge);
+const shieldArm = new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.85,10), M.metal);
+shieldArm.position.set(pane.position.x, SHIELD.y1+0.42, SHIELD.z); shieldG.add(shieldArm);
 
 /* ---------- C-arm: pivot holds the C, tube, collimator, detector, beam ---------- */
 const pivot = new THREE.Group(); pivot.position.set(0,CY,0); scene.add(pivot);
@@ -870,6 +964,8 @@ bSpin.onclick=()=>{ controls.autoRotate=!controls.autoRotate; bSpin.setAttribute
 document.getElementById('bHome').onclick=()=>select(null);
 // Fullscreen: hidden where the browser has none (iPhone Safari) or the frame doesn't allow it
 const bFull=document.getElementById('bFull');
+function labelFull(){ const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
+  bFull.setAttribute('aria-label',on?T('fullOff'):T('full')); bFull.title=bFull.getAttribute('aria-label'); }
 bFull.hidden=!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
 bFull.onclick=()=>{
   const el=document.getElementById('app');
@@ -880,7 +976,7 @@ bFull.onclick=()=>{
 };
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
-  bFull.setAttribute('aria-pressed',on); bFull.textContent=on?T('fullOff'):T('full');
+  bFull.setAttribute('aria-pressed',on); labelFull();
 }));
 // Sideways phones: the camera buttons move to the side panel so the machine card fits under the model.
 const toolbarEl=document.querySelector('.toolbar'), cameraEl=document.querySelector('.camera'), railHead=document.querySelector('.rail>header');
@@ -896,8 +992,7 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.innerHTML=T(el.dataset.i18n));
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',T(el.dataset.i18nAria)));
   bLang.textContent=T('lang'); bLang.setAttribute('aria-label',T('langAria')); bLang.lang=LANG==='en'?'th':'en';
-  const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
-  bFull.textContent=on?T('fullOff'):T('full');
+  labelFull();
   renderPartNames(); renderGuide();
   setFire(st.fire); setLat(st.lat); setMode(FL.pulsed); labelSound(); refTex.redraw();
   renderDetail();
@@ -938,6 +1033,87 @@ canvas.addEventListener('pointerup',e=>{
   const hit=ray.intersectObjects(pickables,false)[0];
   if(hit) select(sel===hit.object.userData.part?null:hit.object.userData.part);
 });
+
+/* ---------- the scrub nurse: where they stand, what they wear, what reaches them ---------- */
+// Illustrative model, right in its ratios: scatter at 1 m is about 1/1000 of the patient's entrance dose rate,
+// falls with the square of the distance, is stronger on the tube side, and grows with the beam area.
+const SCATTER_1M = 0.001;
+const PTS = {eye:1.6, neck:1.47, trunk:1.15};                      // heights on the figure (m)
+const TRANS = {eye:['glasses',0.3], neck:['collar',0.05], trunk:['apron',0.05]};   // fraction let through
+const prot = {apron:false, collar:false, glasses:false, shield:false};
+const rate = {eye:0, neck:0, trunk:0};                             // µGy per minute of fluoroscopy
+const srcW=new THREE.Vector3(), ptW=new THREE.Vector3(), dirW=new THREE.Vector3();
+function behindShield(a,b){
+  const z=SHIELD.z; if((a.z-z)*(b.z-z)>=0) return false;
+  const t=(z-a.z)/(b.z-a.z), x=a.x+t*(b.x-a.x), y=a.y+t*(b.y-a.y);
+  return x>=SHIELD.x0 && x<=SHIELD.x1 && y>=SHIELD.y0 && y<=SHIELD.y1;
+}
+function staffRates(){
+  srcW.set(0,1.05,0).addScaledVector(tubeDir,0.1+0.1*Math.abs(tubeDir.z));   // beam-entry skin, as for the scatter streaks
+  const base=(FL.pulsed?DOSE_RATE/4:DOSE_RATE)*60*1000*SCATTER_1M*st.beamScale*st.beamScale;
+  for(const k in PTS){
+    ptW.set(staff.position.x, PTS[k], staff.position.z);
+    dirW.subVectors(ptW,srcW); const d=Math.max(0.25,dirW.length()); dirW.divideScalar(d);
+    let v=base/(d*d)*(0.5+0.75*(1+dirW.dot(tubeDir)));            // 4x more on the tube side than the detector side
+    if(prot[TRANS[k][0]]) v*=TRANS[k][1];
+    if(prot.shield && behindShield(srcW,ptW)) v*=0.1;
+    rate[k]=v;
+  }
+}
+// keep the nurse on the floor, off the table, the C-arm base and the monitor cart
+function placeStaff(x,z){
+  const r=Math.hypot(x,z); if(r>3){ x*=3/r; z*=3/r; }
+  if(x>-1.35 && x<1.1 && Math.abs(z)<0.5) z=z<0?-0.5:0.5;
+  if(Math.abs(x)<0.5 && z>0.7 && z<2.4) x=x<0?-0.5:0.5;
+  const cx=x-2.05, cz=z-0.75, cr=Math.hypot(cx,cz); if(cr<0.6){ const k=0.6/(cr||1); x=2.05+cx*k; z=0.75+cz*k; }
+  staff.position.set(x,0,z);
+}
+function stepStaff(dr){
+  const x=staff.position.x, z=staff.position.z, r=Math.hypot(x,z)||1, nr=Math.max(0.5,r+dr);
+  placeStaff(x/r*nr, z/r*nr); staffMoved=true;
+}
+document.getElementById('bCloser').onclick=()=>stepStaff(-0.25);
+document.getElementById('bFarther').onclick=()=>stepStaff(0.25);
+document.getElementById('bStaffHome').onclick=()=>{ staff.position.copy(STAFF_HOME); };
+document.querySelectorAll('[data-prot]').forEach(b=>b.onclick=()=>{
+  const k=b.dataset.prot; prot[k]=!prot[k]; b.setAttribute('aria-checked',prot[k]);
+  if(k==='shield') shieldG.visible=prot[k]; else gear[k].visible=prot[k];
+});
+// drag the nurse: a press on the figure takes the pointer away from the orbit controls until it lets go
+const floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0), fp=new THREE.Vector3();
+let dragging=null, staffMoved=false;
+function rayAt(e){ const r=canvas.getBoundingClientRect();
+  ndc.set((e.clientX-r.left)/r.width*2-1, -(e.clientY-r.top)/r.height*2+1); ray.setFromCamera(ndc,camera); }
+canvas.addEventListener('pointerdown',e=>{
+  if(e.button) return; rayAt(e);
+  if(!ray.intersectObject(staffHit,false).length || !ray.ray.intersectPlane(floorPlane,fp)) return;
+  dragging={id:e.pointerId, ox:staff.position.x-fp.x, oz:staff.position.z-fp.z}; down=null;
+  controls.enabled=false; tw=null;
+  try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+  canvas.style.cursor='grabbing'; e.stopImmediatePropagation();
+},{capture:true});
+canvas.addEventListener('pointermove',e=>{
+  if(dragging && e.pointerId===dragging.id){ rayAt(e);
+    if(ray.ray.intersectPlane(floorPlane,fp)){ placeStaff(fp.x+dragging.ox, fp.z+dragging.oz); staffMoved=true; } return; }
+  if(e.pointerType==='mouse' && !e.buttons){ rayAt(e); canvas.style.cursor=ray.intersectObject(staffHit,false).length?'move':''; }
+});
+function endDrag(e){ if(!dragging || e.pointerId!==dragging.id) return; dragging=null; controls.enabled=true; canvas.style.cursor=''; }
+canvas.addEventListener('pointerup',endDrag); canvas.addEventListener('pointercancel',endDrag);
+
+const whoEl=document.getElementById('who'), distV=document.getElementById('distV');
+const barEls=[...document.querySelectorAll('#bars li')];
+const fmtR = v => v>=10 ? String(Math.round(v)) : v>=1 ? v.toFixed(1) : v.toFixed(2);
+const BAR_MAX = 60;
+let staffUiT=1, whoHtml='';
+function renderStaff(){
+  distV.textContent=`${Math.hypot(staff.position.x,staff.position.z).toFixed(2)} ${T('m')}`;
+  barEls.forEach(li=>{ const v=rate[li.dataset.k];
+    li.querySelector('i').style.width=Math.min(100,v/BAR_MAX*100)+'%';
+    li.querySelector('.bv').textContent=fmtR(v); li.classList.toggle('hi',v>20); });
+  const h=`${staffMoved?'':`<span class="h">${T('drag')}</span><br>`}<span class="h">${T('eye')}</span> <b>${fmtR(rate.eye)}</b> ${T('perMin')}`;
+  if(h!==whoHtml){ whoHtml=h; whoEl.innerHTML=h; }
+  whoEl.classList.toggle('hi',rate.eye>20);
+}
 
 /* camera fly */
 let tw=null;
@@ -990,6 +1166,7 @@ function frame(){
   pivot.rotation.set(orb,0,rot);
   pivot.updateMatrixWorld(true);
   tubeDir.copy(tubeG.getWorldPosition(tubeW)).sub(pivot.getWorldPosition(pivW)).normalize();
+  staffRates();
 
   // Pulsed: the beam and the tone are on for DUTY of each pulse; reduced motion keeps a steady, dimmer beam on screen.
   let gate=1;
@@ -1008,7 +1185,9 @@ function frame(){
   beam.scale.set(st.beamScale,1,st.beamScale);
   pedals[0].position.y += ((st.fire?0.05:0.066)-pedals[0].position.y)*Math.min(1,dt*12);
 
-  danger+=((st.fire?Math.max(0,tubeDir.y,-tubeDir.z):0)-danger)*Math.min(1,dt*4);
+  // warning ring on the nurse's head: their eye dose (at the continuous rate) while the beam is on
+  const eyeCont=rate.eye*(FL.pulsed?4:1);
+  danger+=((st.fire?Math.min(1,Math.max(0,(eyeCont-14)/20)):0)-danger)*Math.min(1,dt*4);
   warnRing.material.opacity=danger*(0.55+0.35*Math.sin(t*6));
   warnRing.scale.setScalar(1+0.08*Math.sin(t*6));
 
@@ -1056,6 +1235,13 @@ ${T('res')}  ${renderer.getPixelRatio().toFixed(2)}x  ${renderer.domElement.widt
     el.style.visibility=vis?'visible':'hidden';
     if(vis) el.style.transform=`translate(${(proj.x*0.5+0.5)*w-15}px,${(-proj.y*0.5+0.5)*h-15}px)`;
   }
+  staffUiT+=dt; if(staffUiT>0.15){ staffUiT=0; renderStaff(); }
+  proj.set(staff.position.x,1.86,staff.position.z).project(camera);
+  const wv=proj.z<1 && Math.abs(proj.x)<1.05 && Math.abs(proj.y)<1.05;
+  whoEl.style.visibility=wv?'visible':'hidden';
+  if(wv){ const bw=whoEl.offsetWidth, bh=whoEl.offsetHeight;   // kept inside the stage when the nurse is near an edge
+    const bx=Math.min(Math.max(4,(proj.x*0.5+0.5)*w-bw/2),w-bw-4), by=Math.max(4,(-proj.y*0.5+0.5)*h-bh-4);
+    whoEl.style.transform=`translate(${Math.round(bx)}px,${Math.round(by)}px)`; }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
