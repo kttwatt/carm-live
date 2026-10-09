@@ -162,24 +162,26 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
 }
 /* short landscape screens (phones turned sideways) */
 @media (max-height:560px) and (orientation:landscape){
-  .app{grid-template-columns:minmax(0,1fr) clamp(240px,34vw,340px)}
-  .toolbar{left:8px;right:8px;bottom:8px;gap:6px;flex-wrap:nowrap;align-items:flex-end;overflow-x:auto;scrollbar-width:none;pointer-events:auto}
-  .toolbar::-webkit-scrollbar{display:none}
-  /* more buttons off the right edge: fade it so the row reads as swipeable */
-  .toolbar.more{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
-  .grp{flex:none}
-  .machine{padding:4px}
-  .camera{flex-wrap:nowrap}
-  .tb{flex:none;padding:6px 10px;font-size:13px;white-space:nowrap}
-  .seg button{padding:6px 10px;font-size:13px}
-  .fire{padding:4px 14px 4px 12px}
+  .app{grid-template-columns:minmax(0,1fr) clamp(220px,30vw,320px)}
+  /* only the machine card stays under the model (the camera buttons move to the side panel, see placeCamera);
+     on the narrowest phones the card wraps to two rows rather than scrolling */
+  .toolbar{left:8px;right:8px;bottom:8px}
+  .machine{flex-wrap:wrap;padding:4px;gap:4px}
+  .tb{padding:6px 10px;font-size:13px;white-space:nowrap}
+  .seg button{padding:6px 8px;font-size:13px}
+  .fire{padding:4px 12px 4px 10px;gap:8px}
   .fire .ft{font-size:15px}
+  .rail .camera{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0}
+  .rail .camera .tb{padding:6px 4px;white-space:normal;text-align:center}
+  /* the panel is too narrow for a switch beside the label: on = gold, like the other pressed buttons */
+  .rail .camera .sw .knob{display:none}
+  .rail .camera .sw[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
   .rail{padding:12px 14px;gap:10px}
   .rail h1{font-size:18px}
   .eyebrow,.keys{display:none}
   .detail h2{font-size:18px}
   .state{top:8px;font-size:13px;padding:6px 12px}
-  .dose{top:auto;bottom:72px;left:8px;width:190px;padding:6px 10px}
+  .dose{top:auto;bottom:calc(var(--tbh,56px) + 16px);left:8px;width:190px;padding:6px 10px}
   .stage.has-dose .state{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 16px);width:auto;margin:0}
   .tag .t{display:none}
   .tag{padding:3px}
@@ -859,9 +861,13 @@ bFull.onclick=()=>{
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
   bFull.setAttribute('aria-pressed',on); bFull.textContent=on?T('fullOff'):T('full');
 }));
-const toolbarEl=document.querySelector('.toolbar');
-function markMore(){ toolbarEl.classList.toggle('more',toolbarEl.scrollLeft+toolbarEl.clientWidth<toolbarEl.scrollWidth-2); }
-toolbarEl.addEventListener('scroll',markMore,{passive:true}); addEventListener('resize',markMore);
+// Sideways phones: the camera buttons move to the side panel so the machine card fits under the model.
+const toolbarEl=document.querySelector('.toolbar'), cameraEl=document.querySelector('.camera'), railHead=document.querySelector('.rail>header');
+const sideMQ=matchMedia('(max-height:560px) and (orientation:landscape)');
+function placeCamera(){ if(sideMQ.matches) railHead.after(cameraEl); else toolbarEl.appendChild(cameraEl); }
+if(sideMQ.addEventListener) sideMQ.addEventListener('change',placeCamera); else sideMQ.addListener(placeCamera);
+placeCamera();
+if(window.ResizeObserver) new ResizeObserver(()=>stage.style.setProperty('--tbh',toolbarEl.offsetHeight+'px')).observe(toolbarEl);
 const bLang=document.getElementById('bLang');
 function applyLang(){
   document.documentElement.lang=LANG;
@@ -873,7 +879,7 @@ function applyLang(){
   bFull.textContent=on?T('fullOff'):T('full');
   renderPartNames();
   setFire(st.fire); setLat(st.lat); setMode(FL.pulsed); labelSound(); refTex.redraw();
-  renderDetail(); markMore();
+  renderDetail();
 }
 bLang.onclick=()=>{
   LANG = LANG==='en' ? 'th' : 'en'; window.LANG=LANG;
