@@ -97,6 +97,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .sw .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
 .sw[aria-checked="true"] .knob{background:var(--accent)}
 .sw[aria-checked="true"] .knob::after{transform:translateX(12px);background:var(--accent-ink)}
+/* sound: a speaker icon, with waves when on (gold) and a cross when off */
+#bSound .ico{width:20px;height:20px;flex:none}
+#bSound[aria-checked="true"]{border-color:var(--accent);color:var(--accent)}
+#bSound[aria-checked="true"] .s-off,#bSound[aria-checked="false"] .s-on{display:none}
 /* the tube above the table is not the standard position: orange like the scatter warning */
 #bFlip[aria-checked="true"]{border-color:var(--scatter);color:#ffd2b5}
 #bFlip[aria-checked="true"] .knob{background:var(--scatter)}
@@ -288,7 +292,7 @@ html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{disp
       <div class="grp camera" role="group" data-i18n-aria="gCamera" aria-label="มุมมอง">
         <button class="tb" id="bHome" type="button" data-i18n="home">ภาพรวม</button>
         <button class="tb sw" id="bSpin" type="button" role="switch" aria-checked="false"><span class="knob"></span><span data-i18n="spin">หมุนรอบ</span></button>
-        <button class="tb sw" id="bSound" type="button" role="switch" aria-checked="true"><span class="knob"></span><span data-i18n="sound">เสียง</span></button>
+        <button class="tb" id="bSound" type="button" role="switch" aria-checked="true" data-i18n-aria="sound" aria-label="เสียง"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="s-on" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="s-off" d="m16 9 6 6m0-6-6 6"/></svg></button>
         <button class="tb" id="bFull" type="button" aria-pressed="false">เต็มจอ</button>
       </div>
     </div>
@@ -817,7 +821,7 @@ const bCont=document.getElementById('bCont'), bPulse=document.getElementById('bP
 const doseEl=document.getElementById('dose'), dCont=document.getElementById('dCont'), dPulse=document.getElementById('dPulse');
 function setMode(p){ FL.pulsed=p; FL.ph=0; FL.n=-1;
   bCont.setAttribute('aria-pressed',!p); bPulse.setAttribute('aria-pressed',p); panelTex.redraw(st.fire); showDose(); }
-function labelSound(){ bSound.setAttribute('aria-checked',FL.sound); }
+function labelSound(){ bSound.setAttribute('aria-checked',FL.sound); bSound.title=T('sound'); }
 function setSound(v){ FL.sound=v; labelSound();
   try{ localStorage.setItem('carm-sound',v?'on':'off'); }catch(e){}
   if(v&&st.fire) ensureAudio(); if(!v) setTone(0); }
