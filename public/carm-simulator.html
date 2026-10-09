@@ -48,6 +48,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   padding:8px 16px;border-radius:10px;font-size:14px;text-align:center;text-wrap:balance;
   background:rgba(14,20,24,.88);border:1px solid var(--line)}
 .state.warn{border-color:var(--scatter);color:#ffd2b5}
+/* fluoro time and dose per mode; the status line moves into the space beside it */
+.dose{position:absolute;left:16px;top:16px;width:210px;padding:8px 12px;border-radius:10px;background:rgba(14,20,24,.88);border:1px solid var(--line);font-size:12.5px;line-height:1.5}
+.dose .h{display:block;color:var(--muted);font-size:11.5px}
+.dose p{margin:0;display:flex;justify-content:space-between;gap:8px}
+.dose .v{font-family:var(--f-mono);font-size:12px}
+.dose p.on{color:var(--accent)}
+.stage.has-dose .state{left:242px;right:16px;transform:none;max-width:none;width:fit-content;margin:0 auto}
 .state b{color:var(--scatter);font-weight:600}
 
 .toolbar{position:absolute;left:16px;right:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
@@ -111,7 +118,7 @@ kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--line);border
 .fail p{margin:0;max-width:34em}
 .fail-t{font-family:var(--f-display);font-weight:700;font-size:20px;color:var(--accent)}
 .fail-b{margin-top:6px;cursor:pointer;padding:9px 18px;border-radius:8px;background:none;border:1px solid var(--accent);color:var(--accent)}
-html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important}
+html.failed .toolbar,html.failed .tags,html.failed .state,html.failed .dose{display:none!important}
 
 /* tablet landscape and small laptops */
 @media (max-width:1180px){
@@ -131,6 +138,8 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
   .eyebrow,.keys{display:none}
   .detail h2{font-size:18px}
   .state{top:8px;font-size:13px;padding:6px 12px}
+  .dose{top:auto;bottom:56px;left:8px;width:190px;padding:6px 10px}
+  .stage.has-dose .state{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 16px);width:auto;margin:0}
   .tag .t{display:none}
   .tag{padding:3px}
 }
@@ -149,10 +158,12 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
   .foot{order:3}
   .keys{display:none}
   .state{top:10px;font-size:13.5px}
+  .dose{top:auto;bottom:10px;left:10px}
+  .stage.has-dose .state{left:50%;right:auto;transform:translateX(-50%);max-width:calc(100% - 32px);width:auto;margin:0}
 }
 @media (orientation:portrait) and (min-width:600px) and (max-width:1023px){
   .stage{height:min(58svh,760px)}
-  .toolbar{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media (max-width:599px){
   .tag .t{display:none}
@@ -181,6 +192,11 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
       <canvas id="c" data-i18n-aria="canvas" aria-label="แบบจำลองสามมิติของเครื่อง C-Arm ข้างเตียงผ่าตัด ลากเพื่อหมุนมุมมอง"></canvas>
       <div class="tags" id="tags"></div>
       <div class="state" id="state" hidden></div>
+      <div class="dose" id="dose" hidden>
+        <span class="h" data-i18n="doseH">เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)</span>
+        <p id="dCont" hidden><span>Continuous</span><span class="v"></span></p>
+        <p id="dPulse" hidden><span>Pulsed</span><span class="v"></span></p>
+      </div>
       <div class="diag" id="diag" hidden></div>
     <div class="fail" id="fail" role="alert" hidden>
       <p class="fail-t" data-i18n="failT">แสดงภาพสามมิติไม่ได้</p>
@@ -191,10 +207,12 @@ html.failed .toolbar,html.failed .tags,html.failed .state{display:none!important
     </section>
     <div class="toolbar" role="toolbar" data-i18n-aria="toolbar" aria-label="ควบคุมแบบจำลอง">
       <button class="tb fire" id="bFire" aria-pressed="false"><span class="dot"></span>ฉายรังสี</button>
+      <button class="tb" id="bMode" aria-pressed="false">Continuous</button>
       <button class="tb" id="bLat" aria-pressed="false">A-P view</button>
       <button class="tb" id="bFlip" aria-pressed="false">Invert</button>
       <button class="tb" id="bSpin" aria-pressed="false" data-i18n="spin">หมุนรอบ</button>
       <button class="tb" id="bHome" data-i18n="home">ภาพรวม</button>
+      <button class="tb" id="bSound" aria-pressed="true">เสียง: เปิด</button>
       <button class="tb" id="bFull" aria-pressed="false">เต็มจอ</button>
       <span class="hint" data-i18n="hint">ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด</span>
     </div>
@@ -298,7 +316,7 @@ const TEXT = {
     hint:'ลากเพื่อหมุน · ล้อเมาส์เพื่อซูม · คลิกชิ้นส่วนเพื่อดูรายละเอียด',
     back:'‹ หน้าแรก', lang:'EN', langAria:'Switch to English',
     eyebrow:'แบบจำลองสามมิติ · ทดลองใช้เอง', h1:'ส่วนประกอบของเครื่อง C-Arm',
-    keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> หมุนรอบ',
+    keys:'ปุ่มลัด: <kbd>←</kbd> <kbd>→</kbd> ชิ้นก่อน/ถัดไป · <kbd>1</kbd>–<kbd>7</kbd> เลือกชิ้น · <kbd>0</kbd> ภาพรวม · <kbd>X</kbd> ฉายรังสี · <kbd>F</kbd> กลับด้านหลอด · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> เปิด/ปิดเสียง · <kbd>R</kbd> หมุนรอบ',
     copy:'© 2569 Kittiwat · ใช้เพื่อการสอนได้ ต้องให้เครดิต ห้ามใช้ในทางการค้า',
     beamSize:'ขนาดลำรังสี',
     detectorNote:'ตำแหน่งปกติอยู่ด้านบนของ C Arm เหนือตัวผู้ป่วย ตรงข้ามกับหลอดเอกซเรย์',
@@ -310,7 +328,11 @@ const TEXT = {
     tries:['<b>ฉายรังสี</b> ดูลำรังสีและรังสีฟุ้งกระจาย เมื่อหลอดอยู่ใต้เตียง',
       '<b>Invert</b> แล้วฉายอีกครั้ง หลอดอยู่เหนือเตียง รังสีฟุ้งกระจายพุ่งไปที่ศีรษะและตาของทีม',
       '<b>Lateral view</b> หลอดควรอยู่ฝั่งตรงข้ามทีม ทีมยืนฝั่งตัวรับภาพ',
+      '<b>Pulsed</b> แล้วฉายนานเท่าเดิม เทียบเวลาและปริมาณรังสีกับ Continuous ที่มุมของภาพ',
       'เลือก <b>ตัวจำกัดลำรังสี (2)</b> เพื่อปรับขนาดลำรังสีให้แคบลง'],
+    soundOn:'เสียง: เปิด', soundOff:'เสียง: ปิด', doseH:'เวลาฉาย · ปริมาณรังสี (ค่าจำลอง)',
+    modeNote:'<b>Continuous</b> ฉายต่อเนื่องตลอดเวลาที่กดสวิตช์ <b>Pulsed</b> ฉายเป็นจังหวะสั้น ๆ (3 ครั้งต่อวินาที) ได้ปริมาณรังสีน้อยกว่า',
+    toCont:'เปลี่ยนเป็น Continuous', toPulse:'เปลี่ยนเป็น Pulsed',
     flipTeam:'หลอดฝั่งทีม', flipOver:'หลอดเหนือเตียง',
     latTeamFire:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม:</b> รังสีฟุ้งกระจายพุ่งเข้าหาทีมโดยตรง',
     latTeam:'<b>Lateral view · X-ray tube ฝั่งเดียวกับทีม</b> กดฉายรังสีเพื่อดูรังสีฟุ้งกระจาย',
@@ -331,7 +353,7 @@ const TEXT = {
     hint:'Drag to rotate · Scroll to zoom · Click a part for details',
     back:'‹ Home', lang:'ไทย', langAria:'เปลี่ยนเป็นภาษาไทย',
     eyebrow:'3D model · Self-guided', h1:'Parts of a C-Arm',
-    keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>R</kbd> auto-rotate',
+    keys:'Shortcuts: <kbd>←</kbd> <kbd>→</kbd> previous/next part · <kbd>1</kbd>–<kbd>7</kbd> select a part · <kbd>0</kbd> overview · <kbd>X</kbd> fire X-ray · <kbd>F</kbd> invert the tube · <kbd>L</kbd> A-P/Lateral view · <kbd>P</kbd> Continuous/Pulsed · <kbd>M</kbd> sound on/off · <kbd>R</kbd> auto-rotate',
     copy:'© 2026 Kittiwat · Free to use for teaching with credit; non-commercial',
     beamSize:'Beam size',
     detectorNote:'It normally sits at the top of the C-arm, above the patient, opposite the X-ray tube.',
@@ -343,7 +365,11 @@ const TEXT = {
     tries:['<b>Fire X-ray</b> to see the beam and the scatter with the tube under the table',
       '<b>Invert</b>, then fire again: the tube is above the table and scatter goes to the team\'s heads and eyes',
       '<b>Lateral view</b>: keep the tube on the side opposite the team; the team stands on the detector side',
+      '<b>Pulsed</b>, then fire for the same time: compare the time and dose with Continuous in the corner of the view',
       'Select the <b>Collimator (2)</b> to narrow the beam'],
+    soundOn:'Sound on', soundOff:'Sound off', doseH:'Fluoro time · dose (illustrative)',
+    modeNote:'<b>Continuous</b> exposes for as long as the switch is pressed. <b>Pulsed</b> exposes in short pulses (3 per second) and gives a lower dose.',
+    toCont:'Switch to Continuous', toPulse:'Switch to Pulsed',
     flipTeam:'tube on team side', flipOver:'tube above table',
     latTeamFire:'<b>Lateral view · X-ray tube on the team\'s side:</b> scatter goes straight at the team',
     latTeam:'<b>Lateral view · X-ray tube on the team\'s side</b> Fire X-ray to see the scatter',
@@ -415,6 +441,14 @@ function mesh(geo, mat, part, parent, shadow=true){
 }
 function anchor(id, parent, x,y,z){ const o=new THREE.Object3D(); o.position.set(x,y,z); parent.add(o); anchors[id]=o; }
 
+/* ---------- fluoroscopy mode and dose counter ---------- */
+// Pulsed: short exposures, PPS a second (3 or fewer keeps the beam under the flash-safety limit).
+// Dose numbers are illustrative: continuous at DOSE_RATE mGy/s, pulsed about a quarter of that.
+const PPS=3, DUTY=0.35, DOSE_RATE=0.3, DOSE_PULSE=DOSE_RATE/4/PPS;
+const FL={pulsed:false, sound:true, ph:0, n:-1, cont:{t:0,d:0}, pulse:{t:0,d:0}};
+try{ FL.sound = localStorage.getItem('carm-sound')!=='off'; }catch(e){}
+const fmtT = x => `${Math.floor(x/60)}:${String(Math.floor(x%60)).padStart(2,'0')}`;
+
 /* ---------- canvas textures ---------- */
 function canvasTex(w,h,draw){
   const c=document.createElement('canvas'); c.width=w; c.height=h;
@@ -422,7 +456,7 @@ function canvasTex(w,h,draw){
   t.redraw=(...a)=>{draw(c.getContext('2d'),w,h,...a); t.needsUpdate=true;};
   t.redraw(); return t;
 }
-function drawFluoro(g,w,h,label,withImplant,live){
+function drawFluoro(g,w,h,label,withImplant,live,rd){
   g.fillStyle='#030506'; g.fillRect(0,0,w,h);
   const cx=w/2, cy=h/2+6, r=h*0.44;
   g.save(); g.beginPath(); g.arc(cx,cy,r,0,Math.PI*2); g.clip();
@@ -440,8 +474,8 @@ function drawFluoro(g,w,h,label,withImplant,live){
   g.restore();
   g.fillStyle='#e7eef1'; g.font='600 22px Tahoma, sans-serif'; g.fillText(label,18,32);
   g.font='18px Consolas, monospace'; g.fillStyle='#b9c7cd';
-  g.fillText('0:42   71 kV   2.4 mA', 18, h-16);
-  g.textAlign='right'; g.fillText('12.6 mGy', w-18, h-16); g.textAlign='left';
+  g.fillText(`${fmtT(rd.t)}   71 kV   2.4 mA`, 18, h-16);
+  g.textAlign='right'; g.fillText(`${rd.d.toFixed(1)} mGy`, w-18, h-16); g.textAlign='left';
   if(live){ g.fillStyle='#f0b443'; g.beginPath(); g.arc(w-150,26,8,0,7); g.fill();
     g.font='600 20px Tahoma, sans-serif'; g.fillText(T('xray'), w-134, 33); }
 }
@@ -456,7 +490,7 @@ function drawPanel(g,w,h,on){
   g.fillStyle='#0d1417'; g.fillRect(0,0,w,h);
   g.fillStyle='#14303a'; g.fillRect(14,14,w*0.55,h-28);
   g.fillStyle='#8fe0f0'; g.font='22px Consolas, monospace';
-  g.fillText('71 kV', 30, 52); g.fillText('2.4 mA', 30, 84); g.fillText('PULSE 15', 30, 116);
+  g.fillText('71 kV', 30, 52); g.fillText('2.4 mA', 30, 84); g.fillText(FL.pulsed?`PULSE ${PPS}`:'CONT', 30, 116);
   const cols=['#4d6c7a','#4d6c7a','#e5484d','#4d6c7a'];
   cols.forEach((c,i)=>{ g.fillStyle=c; g.beginPath(); g.roundRect(w*0.64+(i%2)*56, 22+Math.floor(i/2)*56, 44, 40, 6); g.fill(); });
   g.fillStyle= on ? '#f0b443' : '#3a3220'; g.beginPath(); g.arc(w-30,h-26,10,0,7); g.fill();
@@ -545,8 +579,8 @@ mesh(new THREE.BoxGeometry(0.72,0.1,0.56), M.trim, 'monitor', cart).position.y=0
 mesh(new THREE.BoxGeometry(0.56,0.82,0.44), M.plastic, 'monitor', cart).position.y=0.6;
 mesh(new THREE.BoxGeometry(0.1,0.42,0.1), M.dark, 'monitor', cart).position.y=1.21;
 [[-0.3,0.3],[0.3,-0.3]].forEach(([x,ry])=>{ const w=mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16), M.dark, 'monitor', cart); w.rotation.z=Math.PI/2; w.position.set(x*1.05,0.05,0.2); });
-const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,T('live'),true,!!on));
-const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,T('ref'),false,false));
+const liveTex = canvasTex(512,384,(g,w,h,on)=>drawFluoro(g,w,h,T('live'),true,!!on,{t:FL.cont.t+FL.pulse.t,d:FL.cont.d+FL.pulse.d}));
+const refTex  = canvasTex(512,384,(g,w,h)=>drawFluoro(g,w,h,T('ref'),false,false,{t:42,d:12.6}));
 [[-0.3,0.14,liveTex],[0.3,-0.14,refTex]].forEach(([x,ry,tex])=>{
   const m=new THREE.Group(); m.position.set(x,1.6,0.02); m.rotation.y=ry; cart.add(m);
   mesh(new THREE.BoxGeometry(0.58,0.44,0.05), M.dark, 'monitor', m);
@@ -622,7 +656,9 @@ function extra(id){
   if(id==='carm') return `<button class="act" type="button" data-act="tilt">${st.tilt?T('tiltOn'):T('tiltOff')}</button>
     <p class="muted">${T('oarm')}</p>`;
   if(id==='monitor') return `<p class="muted">${T('monitorNote')}</p>`;
-  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?T('pedalOff'):T('pedalOn')}</button>`;
+  if(id==='switch') return `<button class="act" type="button" data-act="fire">${st.fire?T('pedalOff'):T('pedalOn')}</button>
+    <p class="muted">${T('modeNote')}</p>
+    <button class="act" type="button" data-act="mode">${FL.pulsed?T('toCont'):T('toPulse')}</button>`;
   return '';
 }
 function renderDetail(){
@@ -638,6 +674,7 @@ function renderDetail(){
     const a=b.dataset.act;
     if(a==='tilt'){ st.tilt = st.tilt?0:0.5; }
     if(a==='fire'){ setFire(!st.fire); }
+    if(a==='mode'){ setMode(!FL.pulsed); }
     renderDetail();
   });
   const r=document.getElementById('beamSize');
@@ -660,7 +697,40 @@ function select(id){
 
 const bFire=document.getElementById('bFire'), bFlip=document.getElementById('bFlip'), bSpin=document.getElementById('bSpin');
 function setFire(v){ st.fire=v; bFire.setAttribute('aria-pressed',v); bFire.lastChild.textContent=v?T('firing'):T('fire');
-  liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); }
+  if(v){ FL.ph=0; FL.n=-1; if(FL.sound) ensureAudio(); } else setTone(0);
+  liveTex.redraw(v); panelTex.redraw(v); cartLamp.material.color.set(v?0xf0b443:0x3a3220); updateState(); showDose(); }
+
+// Exposure tone: two steady oscillators behind one gain, opened on the first press (browsers need a tap first).
+let actx=null, toneGain=null, toneLevel=0;
+function ensureAudio(){
+  if(!actx){
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    try{
+      actx=new AC(); toneGain=actx.createGain(); toneGain.gain.value=0; toneGain.connect(actx.destination);
+      [[880,1],[1320,0.35]].forEach(([f,v])=>{ const o=actx.createOscillator(), g=actx.createGain();
+        o.type='sine'; o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(toneGain); o.start(); });
+    }catch(e){ actx=null; return; }
+  }
+  if(actx.state==='suspended') actx.resume().catch(()=>{});
+}
+function setTone(v){ if(!actx||v===toneLevel) return; toneLevel=v; toneGain.gain.setTargetAtTime(v, actx.currentTime, 0.004); }
+document.addEventListener('visibilitychange',()=>{ if(!actx) return;
+  if(document.hidden) actx.suspend().catch(()=>{}); else if(st.fire&&FL.sound) actx.resume().catch(()=>{}); });
+
+const bMode=document.getElementById('bMode'), bSound=document.getElementById('bSound');
+const doseEl=document.getElementById('dose'), dCont=document.getElementById('dCont'), dPulse=document.getElementById('dPulse');
+function setMode(p){ FL.pulsed=p; FL.ph=0; FL.n=-1;
+  bMode.setAttribute('aria-pressed',p); bMode.textContent=p?'Pulsed':'Continuous'; panelTex.redraw(st.fire); showDose(); }
+function labelSound(){ bSound.setAttribute('aria-pressed',FL.sound); bSound.textContent=FL.sound?T('soundOn'):T('soundOff'); }
+function setSound(v){ FL.sound=v; labelSound();
+  try{ localStorage.setItem('carm-sound',v?'on':'off'); }catch(e){}
+  if(v&&st.fire) ensureAudio(); if(!v) setTone(0); }
+function showDose(){
+  [[dCont,FL.cont,false],[dPulse,FL.pulse,true]].forEach(([el,m,p])=>{
+    el.hidden=!(m.t>0); el.lastChild.textContent=`${m.t.toFixed(1)} s · ${m.d.toFixed(2)} mGy`;
+    el.classList.toggle('on',st.fire&&FL.pulsed===p); });
+  const any=FL.cont.t>0||FL.pulse.t>0; doseEl.hidden=!any; stage.classList.toggle('has-dose',any);
+}
 function flipLabel(){ return st.lat ? T('flipTeam') : T('flipOver'); }
 function setFlip(v){ st.flip=v; bFlip.setAttribute('aria-pressed',v); bFlip.textContent=v?'Invert · '+flipLabel():'Invert'; updateState(); }
 // Lateral: the C orbits 90° so the beam crosses the table. Normal = tube on the base side, the team (far side) by the detector.
@@ -681,6 +751,8 @@ function updateState(){
   else stateEl.hidden=true;
 }
 bFire.onclick=()=>{ setFire(!st.fire); if(sel==='switch') renderDetail(); };
+bMode.onclick=()=>{ setMode(!FL.pulsed); if(sel==='switch') renderDetail(); };
+bSound.onclick=()=>setSound(!FL.sound);
 bFlip.onclick=()=>setFlip(!st.flip);
 const bLat=document.getElementById('bLat');
 bLat.onclick=()=>setLat(!st.lat);
@@ -710,7 +782,7 @@ function applyLang(){
   const on=!!(document.fullscreenElement||document.webkitFullscreenElement);
   bFull.textContent=on?T('fullOff'):T('full');
   renderPartNames();
-  setFire(st.fire); setLat(st.lat); refTex.redraw();
+  setFire(st.fire); setLat(st.lat); setMode(FL.pulsed); labelSound(); refTex.redraw();
   renderDetail();
 }
 bLang.onclick=()=>{
@@ -731,6 +803,8 @@ addEventListener('keydown',e=>{
   else if(e.key==='f'||e.key==='F') bFlip.click();
   else if(e.key==='l'||e.key==='L') bLat.click();
   else if(e.key==='r'||e.key==='R') bSpin.click();
+  else if(e.key==='p'||e.key==='P') bMode.click();
+  else if(e.key==='m'||e.key==='M') bSound.click();
   else if(e.key==='d'||e.key==='D') diagEl.hidden=!diagEl.hidden;
 });
 
@@ -782,7 +856,7 @@ resize();
 
 /* ---------- loop ---------- */
 const clock=new THREE.Clock(), black=new THREE.Color(0), accent=new THREE.Color(0xf0b443), proj=new THREE.Vector3();
-let beamA=0, danger=0, rot=0, orb=0;
+let beamA=0, danger=0, rot=0, orb=0, readoutT=0;
 const tubeW=new THREE.Vector3(), pivW=new THREE.Vector3();
 renderDetail();
 function frame(){
@@ -799,7 +873,19 @@ function frame(){
   pivot.updateMatrixWorld(true);
   tubeDir.copy(tubeG.getWorldPosition(tubeW)).sub(pivot.getWorldPosition(pivW)).normalize();
 
-  beamA+=((st.fire?1:0)-beamA)*Math.min(1,dt*8);
+  // Pulsed: the beam and the tone are on for DUTY of each pulse; reduced motion keeps a steady, dimmer beam on screen.
+  let gate=1;
+  if(st.fire){
+    // pulse phase runs on frame time (dt is capped), so a paused tab doesn't add a burst of pulses on return
+    const m=FL.pulsed?FL.pulse:FL.cont;
+    m.t+=dt; FL.ph+=dt;
+    if(FL.pulsed){ const n=Math.floor(FL.ph*PPS); while(FL.n<n){ FL.n++; m.d+=DOSE_PULSE; } gate=(FL.ph*PPS)%1<DUTY?1:0; }
+    else m.d+=DOSE_RATE*dt;
+    readoutT+=dt; if(readoutT>0.2){ readoutT=0; showDose(); liveTex.redraw(true); }
+  }
+  setTone(st.fire&&FL.sound?0.07*gate:0);
+  const shown = FL.pulsed&&REDUCED ? 0.55 : gate;
+  beamA+=((st.fire?shown:0)-beamA)*Math.min(1,dt*(FL.pulsed?30:8));
   beam.visible=beamA>0.01; beamMats[0].opacity=0.16*beamA; beamMats[1].opacity=0.3*beamA*(0.85+0.15*Math.sin(t*30));
   beam.scale.set(st.beamScale,1,st.beamScale);
   pedals[0].position.y += ((st.fire?0.05:0.066)-pedals[0].position.y)*Math.min(1,dt*12);
@@ -809,7 +895,8 @@ function frame(){
   warnRing.scale.setScalar(1+0.08*Math.sin(t*6));
 
   // scatter
-  let spawnBudget = st.fire ? Math.ceil(dt*(LITE?170:420)*st.beamScale) : 0;
+  const spawnK = !st.fire ? 0 : !FL.pulsed ? 1 : REDUCED ? DUTY : gate;
+  let spawnBudget = spawnK ? Math.ceil(dt*(LITE?170:420)*st.beamScale*spawnK) : 0;
   for(let i=0;i<NS;i++){
     const s=S[i];
     if(!s.alive && spawnBudget>0){ spawn(s); spawnBudget--; }
